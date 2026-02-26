@@ -20,11 +20,13 @@ import {
     SelectValueText,
     Field
 } from "@chakra-ui/react"
-import { LuUpload, LuImage, LuFileText, LuFolder, LuMessageSquare, LuInfo, LuSend, LuCircle } from "react-icons/lu"
+import { LuUpload, LuImage, LuFileText, LuFolder, LuMessageSquare, LuSend, LuCircle } from "react-icons/lu"
 import InsertComponent from "./InsertComponent"
-import { API_URL, categories } from "../../utils/const"
+import { categories } from "../../utils/const"
 import { useState } from "react"
-import axios from "axios"
+import Toast from "./Toast"
+import { usePostInfo } from "../../services/PostInfo"
+
 
 
 export default function FormComponent() {
@@ -35,39 +37,7 @@ export default function FormComponent() {
         descripcion: "",
     });
 
-    const [images, setImages] = useState<File[]>([]);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        console.log('Form data:', form);
-        console.log('Images:', images);
-
-        // Crear FormData para enviar imágenes y datos
-        const formData = new FormData();
-        formData.append('categoria', form.categoria);
-        formData.append('titulo', form.titulo);
-        formData.append('descripcion', form.descripcion);
-
-        // Agregar todas las imágenes
-        images.forEach((image, index) => {
-            formData.append('images', image);
-        });
-
-        const response = await axios.post(`${API_URL}/insertImagen`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        }
-
-        if (response.status === 200) {
-           <></>
-        } else {
-            alert("Error al subir imágenes");
-        }
-
-        )
-    }
+    const { handleSubmit, setImages, showAlert, alertConfig, setShowAlert } = usePostInfo(form, setForm);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -75,6 +45,14 @@ export default function FormComponent() {
 
     return (
         <ChakraProvider value={defaultSystem}>
+            {showAlert && (
+                <Toast
+                    title={alertConfig.title}
+                    description={alertConfig.description}
+                    type={alertConfig.type}
+                    onClose={() => setShowAlert(false)}
+                />
+            )}
             <form onSubmit={handleSubmit}>
                 <Container maxW="8xl" px={6} py={4}>
                     {/* Page Header */}
