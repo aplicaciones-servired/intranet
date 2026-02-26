@@ -10,3 +10,5 @@ export const categories = createListCollection({
         { label: "Otros", value: "otros" },
     ],
 })
+
+export const API_URL = import.meta.env.PUBLIC_URL_API;

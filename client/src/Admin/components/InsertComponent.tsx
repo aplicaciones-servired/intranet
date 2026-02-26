@@ -1,7 +1,11 @@
 import { Box, FileUpload, Float, Icon, Text, Flex } from "@chakra-ui/react"
 import { LuInfo, LuUpload, LuX } from "react-icons/lu"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Toast from "./Toast"
+
+interface InsertComponentProps {
+    onFilesChange?: (files: File[]) => void;
+}
 
 //Dropzone component
 const Dropzone = () => (
@@ -123,9 +127,9 @@ const Preview = ({ file }: { file: File }) => (
     </FileUpload.Item>
 )
 
-export default function InsertComponent() {
+export default function InsertComponent({ onFilesChange }: InsertComponentProps) {
     const [showAlert, setShowAlert] = useState(false)
-
+    
     const handleFileReject = (details: any) => {
         if (details.files && details.files.length > 0) {
             setShowAlert(true)
@@ -151,93 +155,100 @@ export default function InsertComponent() {
                 accept="image/png,image/jpeg,image/jpg"
                 onFileReject={handleFileReject}
             >
-            <FileUpload.HiddenInput />
-            <FileUpload.Context>
-                {({ acceptedFiles }) =>
-                    acceptedFiles.length > 0 ? (
-                        <Box>
-                            <Flex
-                                justifyContent="space-between"
-                                alignItems="center"
-                                mb={4}
-                                p={4}
-                                bg="blue.50"
-                                borderRadius="lg"
-                                border="1px solid"
-                                borderColor="blue.200"
-                            >
-                                <Flex alignItems="center" gap={2}>
-                                    <Box bg="blue.500" p={2} borderRadius="md">
-                                        <Text fontSize="md" fontWeight="bold" color="white">
-                                            {acceptedFiles.length}
-                                        </Text>
-                                    </Box>
-                                    <Box>
-                                        <Text fontSize="sm" fontWeight="bold" color="gray.800">
-                                            {acceptedFiles.length === 1 ? 'Imagen seleccionada' : 'Imágenes seleccionadas'}
-                                        </Text>
-                                        <Text fontSize="2xs" color="gray.600">
-                                            Listo para subir
-                                        </Text>
-                                    </Box>
-                                </Flex>
-                                <FileUpload.Trigger
-                                    px={3}
-                                    py={2}
-                                    bg="blue.500"
-                                    color="white"
+                <FileUpload.HiddenInput />
+                <FileUpload.Context>
+                    {({ acceptedFiles }) => {
+                        // Notificar al padre cuando cambien los archivos
+                        useEffect(() => {
+                            if (onFilesChange) {
+                                onFilesChange(acceptedFiles);
+                            }
+                        }, [acceptedFiles]);
+
+                        return acceptedFiles.length > 0 ? (
+                            <Box>
+                                <Flex
+                                    justifyContent="space-between"
+                                    alignItems="center"
+                                    mb={4}
+                                    p={4}
+                                    bg="blue.50"
                                     borderRadius="lg"
-                                    fontSize="xs"
-                                    fontWeight="bold"
-                                    cursor="pointer"
-                                    transition="all 0.2s"
-                                    shadow="md"
-                                    _hover={{
-                                        bg: "blue.600",
-                                        shadow: "lg",
-                                        transform: "scale(1.05)"
-                                    }}
+                                    border="1px solid"
+                                    borderColor="blue.200"
                                 >
-                                    + Agregar más
-                                </FileUpload.Trigger>
-                            </Flex>
-                            <FileUpload.ItemGroup
-                                display="grid"
-                                gridTemplateColumns="repeat(auto-fill, minmax(160px, 1fr))"
-                                gap={4}
-                            >
-                                {acceptedFiles.map(f => <Preview key={f.name} file={f} />)}
-                            </FileUpload.ItemGroup>
-                        </Box>
-                    ) : (
-                        <>
-                            <Dropzone />
-                            {/* Info Box */}
-                            <Box
-                                bg="blue.50"
-                                borderLeft="4px solid"
-                                borderColor="blue.500"
-                                p={4}
-                                borderRadius="lg"
-                                mt={4}
-                            >
-                                <Flex alignItems="flex-start" gap={3}>
-                                    <Icon fontSize="lg" color="blue.600" mt={0.5}><LuInfo /></Icon>
-                                    <Box>
-                                        <Text fontSize="xs" fontWeight="bold" color="blue.900" mb={1}>
-                                            Especificaciones técnicas
-                                        </Text>
-                                        <Text fontSize="xs" color="blue.900">
-                                            <strong>Formatos:</strong> PNG, JPG, JPEG • <strong>Tamaño máx:</strong> 5MB por archivo • <strong>Cantidad:</strong> Hasta 10 archivos simultáneos
-                                        </Text>
-                                    </Box>
+                                    <Flex alignItems="center" gap={2}>
+                                        <Box bg="blue.500" p={2} borderRadius="md">
+                                            <Text fontSize="md" fontWeight="bold" color="white">
+                                                {acceptedFiles.length}
+                                            </Text>
+                                        </Box>
+                                        <Box>
+                                            <Text fontSize="sm" fontWeight="bold" color="gray.800">
+                                                {acceptedFiles.length === 1 ? 'Imagen seleccionada' : 'Imágenes seleccionadas'}
+                                            </Text>
+                                            <Text fontSize="2xs" color="gray.600">
+                                                Listo para subir
+                                            </Text>
+                                        </Box>
+                                    </Flex>
+                                    <FileUpload.Trigger
+                                        px={3}
+                                        py={2}
+                                        bg="blue.500"
+                                        color="white"
+                                        borderRadius="lg"
+                                        fontSize="xs"
+                                        fontWeight="bold"
+                                        cursor="pointer"
+                                        transition="all 0.2s"
+                                        shadow="md"
+                                        _hover={{
+                                            bg: "blue.600",
+                                            shadow: "lg",
+                                            transform: "scale(1.05)"
+                                        }}
+                                    >
+                                        + Agregar más
+                                    </FileUpload.Trigger>
                                 </Flex>
+                                <FileUpload.ItemGroup
+                                    display="grid"
+                                    gridTemplateColumns="repeat(auto-fill, minmax(160px, 1fr))"
+                                    gap={4}
+                                >
+                                    {acceptedFiles.map(f => <Preview key={f.name} file={f} />)}
+                                </FileUpload.ItemGroup>
                             </Box>
-                        </>
-                    )
-                }
-            </FileUpload.Context>
-        </FileUpload.Root>
+                        ) : (
+                            <>
+                                <Dropzone />
+                                {/* Info Box */}
+                                <Box
+                                    bg="blue.50"
+                                    borderLeft="4px solid"
+                                    borderColor="blue.500"
+                                    p={4}
+                                    borderRadius="lg"
+                                    mt={4}
+                                >
+                                    <Flex alignItems="flex-start" gap={3}>
+                                        <Icon fontSize="lg" color="blue.600" mt={0.5}><LuInfo /></Icon>
+                                        <Box>
+                                            <Text fontSize="xs" fontWeight="bold" color="blue.900" mb={1}>
+                                                Especificaciones técnicas
+                                            </Text>
+                                            <Text fontSize="xs" color="blue.900">
+                                                <strong>Formatos:</strong> PNG, JPG, JPEG • <strong>Tamaño máx:</strong> 5MB por archivo • <strong>Cantidad:</strong> Hasta 10 archivos simultáneos
+                                            </Text>
+                                        </Box>
+                                    </Flex>
+                                </Box>
+                            </>
+                        );
+                    }}
+                </FileUpload.Context>
+            </FileUpload.Root>
         </>
     )
 }
