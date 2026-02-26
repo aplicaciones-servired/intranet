@@ -245,31 +245,6 @@ export default function FormComponent() {
                                         <Icon fontSize="xl" mr={2}><LuSend /></Icon>
                                         Subir Imágenes
                                     </Button>
-                                    <Button
-                                        size="lg"
-                                        px={8}
-                                        py={6}
-                                        bg="linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%)"
-                                        color="gray.700"
-                                        fontSize="md"
-                                        fontWeight="bold"
-                                        borderRadius="xl"
-                                        border="2px solid"
-                                        borderColor="gray.300"
-                                        shadow="md"
-                                        transition="all 0.3s"
-                                        _hover={{
-                                            transform: "scale(1.05)",
-                                            shadow: "lg",
-                                            bg: "linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%)"
-                                        }}
-                                        _active={{
-                                            transform: "scale(0.95)"
-                                        }}
-                                    >
-                                        <Icon fontSize="xl" mr={2}><LuCircle /></Icon>
-                                        Cancelar
-                                    </Button>
                                 </Flex>
                             </Box>
                         </GridItem>
