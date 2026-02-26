@@ -141,6 +141,7 @@ export default function FormComponent() {
                                             </Field.Label>
                                             <SelectRoot
                                                 collection={categories}
+                                                required
                                                 size="md"
                                                 width="100%"
                                                 name="categoria"
@@ -178,6 +179,7 @@ export default function FormComponent() {
                                             </Field.Label>
                                             <Input
                                                 name="titulo"
+                                                required
                                                 size="md"
                                                 placeholder="Ej: Reunión anual 2026"
                                                 borderWidth="2px"

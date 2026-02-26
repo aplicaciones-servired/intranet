@@ -23,7 +23,7 @@ export const usePostInfo = (
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (form.categoria === "" || form.titulo === "" || form.descripcion === "" || images.length === 0) {
+    if (form.categoria === "" || form.titulo === "" || images.length === 0) {
       setAlertConfig({
         title: "Error de validación",
         description: "Todos los campos son obligatorios y al menos una imagen debe ser seleccionada",
