@@ -1,0 +1,28 @@
+---
+import { fade } from "astro:transitions";
+import "../../styles/global.css";
+import { AdminHeader } from "../components/AdminHeader";
+import { SignOutButton } from "@clerk/astro/components";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="../../public/intranet.png" />
+    <link rel="icon" href="../../public/intranet.png" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Intranet</title>
+  </head>
+  <body class="w-full h-full bg-gray-100">
+    <div style="display: flex; min-height: 100vh;">
+      <div style="flex-shrink: 0; display: flex; flex-direction: column;">
+        <AdminHeader client:load />
+      </div>
+      <main class="flex-1 p-8 bg-slate-800">
+        <slot transition:animate={fade({ duration: "0.4s" })} />
+      </main>
+    </div>
+  </body>
+</html>

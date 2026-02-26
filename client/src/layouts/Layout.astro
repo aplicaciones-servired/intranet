@@ -1,0 +1,24 @@
+---
+import { fade } from "astro:transitions";
+import "../styles/global.css";
+import Header from "../components/astro/Header.astro";
+import { ClerkProviderWrapper } from "../components/ClerkProvider";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="../../public/intranet.png" />
+    <link rel="icon" href="../../public/intranet.png" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Intranet</title>
+    <Header />
+  </head>
+  <body class="w-full h-full">
+    <ClerkProviderWrapper client:load>
+      <slot transition:animate={fade({ duration: "0.4s" })} />
+    </ClerkProviderWrapper>
+  </body>
+</html>
