@@ -1,5 +1,7 @@
 import { Box, FileUpload, Float, Icon, Text, Flex } from "@chakra-ui/react"
 import { LuInfo, LuUpload, LuX } from "react-icons/lu"
+import { useState } from "react"
+import Toast from "./Toast"
 
 //Dropzone component
 const Dropzone = () => (
@@ -122,13 +124,33 @@ const Preview = ({ file }: { file: File }) => (
 )
 
 export default function InsertComponent() {
+    const [showAlert, setShowAlert] = useState(false)
+
+    const handleFileReject = (details: any) => {
+        if (details.files && details.files.length > 0) {
+            setShowAlert(true)
+            setTimeout(() => setShowAlert(false), 5000)
+        }
+    }
+
     return (
-        <FileUpload.Root
-            maxW="full"
-            alignItems="stretch"
-            maxFiles={10}
-            accept="image/png,image/jpeg,image/jpg"
-        >
+        <>
+            {/* Alerta de límite de archivos */}
+            {showAlert && (
+                <Toast
+                    title="Límite de archivos excedido"
+                    description="Solo puedes subir hasta 10 imágenes a la vez. Por favor, selecciona menos archivos."
+                    type="warning"
+                    onClose={() => setShowAlert(false)}
+                />
+            )}
+            <FileUpload.Root
+                maxW="full"
+                alignItems="stretch"
+                maxFiles={10}
+                accept="image/png,image/jpeg,image/jpg"
+                onFileReject={handleFileReject}
+            >
             <FileUpload.HiddenInput />
             <FileUpload.Context>
                 {({ acceptedFiles }) =>
@@ -216,5 +238,6 @@ export default function InsertComponent() {
                 }
             </FileUpload.Context>
         </FileUpload.Root>
+        </>
     )
 }

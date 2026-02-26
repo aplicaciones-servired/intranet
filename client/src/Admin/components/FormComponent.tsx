@@ -18,22 +18,12 @@ import {
     SelectContent,
     SelectItem,
     SelectValueText,
-    createListCollection,
     Field
 } from "@chakra-ui/react"
 import { LuUpload, LuImage, LuFileText, LuFolder, LuMessageSquare, LuInfo, LuSend, LuCircle } from "react-icons/lu"
 import InsertComponent from "./InsertComponent"
+import { categories } from "../../utils/const"
 
-const categories = createListCollection({
-    items: [
-        { label: "Comunicados Internos", value: "comunicados" },
-        { label: "Eventos Corporativos", value: "eventos" },
-        { label: "Productos y Servicios", value: "productos" },
-        { label: "Equipo y Colaboradores", value: "equipo" },
-        { label: "Instalaciones", value: "instalaciones" },
-        { label: "Otros", value: "otros" },
-    ],
-})
 
 export default function FormComponent() {
     return (
