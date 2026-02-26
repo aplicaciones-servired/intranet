@@ -10,12 +10,17 @@ export function AdminHeader() {
       <ChakraProvider value={defaultSystem}>
         <Flex 
           direction="column" 
+          position="fixed"
+          top={0}
+          left={0}
           w="240px" 
           h="100vh" 
           bg="#0f172a" 
           color="white" 
           p={4}
           borderRight="1px solid rgba(148, 163, 184, 0.1)"
+          overflowY="auto"
+          zIndex={10}
         >
           {/* Logo / Brand */}
           <Box mb={8} mt={2}>

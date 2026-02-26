@@ -15,21 +15,17 @@ import { AdminHeader } from "../components/AdminHeader";
     <title>Intranet - Panel de Administración</title>
   </head>
   <body class="w-full h-full bg-gray-50">
-    <div style="display: flex; min-height: 100vh;">
-      {/* Sidebar */}
-      <div style="flex-shrink: 0;">
-        <AdminHeader client:load />
-      </div>
-      
-      {/* Main Content Area */}
-      <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
-        {/* Top Bar */}
-        <div class="bg-white shadow-sm border-b border-gray-200"></div>
-        {/* Page Content */}
-        <main class="flex-1 overflow-auto p-8 bg-gray-50">
-          <slot transition:animate={fade({ duration: "0.4s" })} />
-        </main>
-      </div>
+    {/* Sidebar */}
+    <AdminHeader client:load />
+    
+    {/* Main Content Area */}
+    <div style="margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column;">
+      {/* Top Bar */}
+      <div class="bg-white shadow-sm border-b border-gray-200"></div>
+      {/* Page Content */}
+      <main class="flex-1 overflow-auto p-8 bg-gray-50">
+        <slot transition:animate={fade({ duration: "0.4s" })} />
+      </main>
     </div>
   </body>
 </html>
