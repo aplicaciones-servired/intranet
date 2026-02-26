@@ -14,10 +14,10 @@ import { ClerkProviderWrapper } from "../components/ClerkProvider";
     <link rel="icon" href="../../public/intranet.png" />
     <meta name="generator" content={Astro.generator} />
     <title>Intranet</title>
-    <Header />
   </head>
   <body class="w-full h-full">
     <ClerkProviderWrapper client:load>
+      <Header />
       <slot transition:animate={fade({ duration: "0.4s" })} />
     </ClerkProviderWrapper>
   </body>
