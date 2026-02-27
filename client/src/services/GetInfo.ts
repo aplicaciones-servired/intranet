@@ -18,7 +18,7 @@ export interface Categoria {
   activa: boolean;
 }
 
-export type EspacioTipo = "slider" | "destacada" | "grid" | "lista";
+export type EspacioTipo = "slider" | "destacada" | "grid" | "lista" | "carrusel" | "grande" | "noticias";
 
 export interface Espacio {
   id: number;

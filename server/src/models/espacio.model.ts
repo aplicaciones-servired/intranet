@@ -1,7 +1,7 @@
 import { DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize";
 import { info_db } from "../db/db_info";
 
-export type EspacioTipo = "slider" | "destacada" | "grid" | "lista";
+export type EspacioTipo = "slider" | "destacada" | "grid" | "lista" | "carrusel" | "grande" | "noticias";
 
 export class EspacioModel extends Model<
   InferAttributes<EspacioModel>,
@@ -33,7 +33,7 @@ EspacioModel.init(
       defaultValue: "",
     },
     tipo: {
-      type: DataTypes.ENUM("slider", "destacada", "grid", "lista"),
+      type: DataTypes.ENUM("slider", "destacada", "grid", "lista", "carrusel", "grande", "noticias"),
       allowNull: false,
       defaultValue: "grid",
     },

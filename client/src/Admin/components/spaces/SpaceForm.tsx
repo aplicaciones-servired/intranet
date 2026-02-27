@@ -6,17 +6,23 @@ import { LuCheck, LuX, LuMonitor } from "react-icons/lu";
 import type { Categoria, Espacio, EspacioTipo } from "../../../services/GetInfo";
 
 const TIPOS: { value: EspacioTipo; label: string; desc: string; color: string }[] = [
-  { value: "slider", label: "Slider / Banner", desc: "Carrusel de imágenes a pantalla completa", color: "blue" },
-  { value: "destacada", label: "Columna destacada", desc: "Listado lateral izquierdo con thumbnails", color: "orange" },
-  { value: "grid", label: "Grid de tarjetas", desc: "Mosaico de tarjetas con imagen y texto", color: "green" },
-  { value: "lista", label: "Lista horizontal", desc: "Tarjetas horizontales con resumen", color: "purple" },
+  { value: "slider",    label: "Slider / Banner",       desc: "Carrusel de imágenes a pantalla completa",       color: "blue"   },
+  { value: "destacada", label: "Columna destacada",      desc: "Listado lateral izquierdo con thumbnails",       color: "orange" },
+  { value: "grid",      label: "Grid de tarjetas",       desc: "Mosaico de tarjetas con imagen y texto",          color: "green"  },
+  { value: "lista",     label: "Lista de noticias",      desc: "Tarjetas horizontales con resumen",               color: "purple" },
+  { value: "carrusel",  label: "Carrusel horizontal",    desc: "Tira de tarjetas con scroll horizontal (Netflix)", color: "cyan"   },
+  { value: "grande",    label: "Tarjetas grandes",        desc: "2 tarjetas anchas por fila con descripción",      color: "teal"   },
+  { value: "noticias",  label: "Layout noticias",         desc: "1 nota hero grande + lista de notas laterales",   color: "red"    },
 ];
 
 const TIPO_COLORS: Record<EspacioTipo, string> = {
-  slider: "#3B82F6",
+  slider:    "#3B82F6",
   destacada: "#F59E0B",
-  grid: "#22C55E",
-  lista: "#A855F7",
+  grid:      "#22C55E",
+  lista:     "#A855F7",
+  carrusel:  "#06B6D4",
+  grande:    "#14B8A6",
+  noticias:  "#EF4444",
 };
 
 /* ── Mockup visual del layout de la intranet ── */
@@ -158,7 +164,7 @@ function LayoutPreview({ tipo, nombre, catLabel }: { tipo: EspacioTipo; nombre: 
               <>
                 <style>{`@keyframes spPulse {0%,100%{opacity:1}50%{opacity:.6}}`}</style>
                 <Box style={{ ...pulse, animation: "spPulse 1.8s ease-in-out infinite", height: "100%", minHeight: "56px" }}>
-                  <Box style={label}>{nombre || "Lista horizontal"}</Box>
+                  <Box style={label}>{nombre || "Lista de noticias"}</Box>
                   <VStack gap={1} p={1} align="stretch">
                     {[1, 2, 3].map((i) => (
                       <Flex key={i} gap={1} align="center" bg="#f3e8ff" borderRadius="sm" p={0.5}>
@@ -167,6 +173,46 @@ function LayoutPreview({ tipo, nombre, catLabel }: { tipo: EspacioTipo; nombre: 
                       </Flex>
                     ))}
                   </VStack>
+                </Box>
+              </>
+            )}
+            {tipo === "carrusel" && (
+              <>
+                <style>{`@keyframes spPulse {0%,100%{opacity:1}50%{opacity:.6}}`}</style>
+                <Box style={{ ...pulse, animation: "spPulse 1.8s ease-in-out infinite", height: "100%", minHeight: "56px" }}>
+                  <Box style={label}>{nombre || "Carrusel horizontal"}</Box>
+                  <Flex gap={1} p={1} overflow="hidden">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Box key={i} flexShrink={0} w="22px" bg="#cffafe" borderRadius="sm" h="36px" />
+                    ))}
+                  </Flex>
+                </Box>
+              </>
+            )}
+            {tipo === "grande" && (
+              <>
+                <style>{`@keyframes spPulse {0%,100%{opacity:1}50%{opacity:.6}}`}</style>
+                <Box style={{ ...pulse, animation: "spPulse 1.8s ease-in-out infinite", height: "100%", minHeight: "56px" }}>
+                  <Box style={label}>{nombre || "Tarjetas grandes"}</Box>
+                  <Grid templateColumns="repeat(2, 1fr)" gap={1} p={1}>
+                    {[1, 2].map((i) => (
+                      <Box key={i} bg="#99f6e4" borderRadius="sm" h="28px" />
+                    ))}
+                  </Grid>
+                </Box>
+              </>
+            )}
+            {tipo === "noticias" && (
+              <>
+                <style>{`@keyframes spPulse {0%,100%{opacity:1}50%{opacity:.6}}`}</style>
+                <Box style={{ ...pulse, animation: "spPulse 1.8s ease-in-out infinite", height: "100%", minHeight: "56px" }}>
+                  <Box style={label}>{nombre || "Layout noticias"}</Box>
+                  <Flex gap={1} p={1}>
+                    <Box w="55%" bg="#fecaca" borderRadius="sm" h="40px" flexShrink={0} />
+                    <VStack gap={1} flex={1} align="stretch">
+                      {[1, 2, 3].map((i) => <Box key={i} bg="#fee2e2" borderRadius="1px" h="10px" />)}
+                    </VStack>
+                  </Flex>
                 </Box>
               </>
             )}
