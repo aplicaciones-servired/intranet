@@ -15,6 +15,7 @@ export class ImagenesModels extends Model<
   declare categoria: string;
   declare titulo: string;
   declare descripcion?: string;
+  declare fecha_registro?: Date;
 }
 
 ImagenesModels.init(
@@ -39,6 +40,11 @@ ImagenesModels.init(
     descripcion: {
       type: DataTypes.STRING(600),
       allowNull: true,
+    },
+    fecha_registro: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {
