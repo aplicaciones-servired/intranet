@@ -20,12 +20,13 @@ import {
     SelectValueText,
     Field
 } from "@chakra-ui/react"
-import { LuUpload, LuImage, LuFileText, LuFolder, LuMessageSquare, LuSend, LuCircle } from "react-icons/lu"
+import { LuUpload, LuImage, LuFileText, LuFolder, LuMessageSquare, LuSend } from "react-icons/lu"
 import InsertComponent from "./InsertComponent"
-import { categories } from "../../utils/const"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Toast from "./Toast"
 import { usePostInfo } from "../../services/PostInfo"
+import { getCategorias, type Categoria } from "../../services/GetInfo"
+import { createListCollection } from "@chakra-ui/react"
 
 
 
@@ -35,6 +36,17 @@ export default function FormComponent() {
         categoria: "",
         titulo: "",
         descripcion: "",
+    });
+    const [categoriasApi, setCategoriasApi] = useState<Categoria[]>([]);
+
+    useEffect(() => {
+        getCategorias()
+            .then((data) => setCategoriasApi(data.filter((c) => c.activa)))
+            .catch(() => {});
+    }, []);
+
+    const categoriaCollection = createListCollection({
+        items: categoriasApi.map((c) => ({ label: c.label, value: c.value })),
     });
 
     const { handleSubmit, setImages, showAlert, alertConfig, setShowAlert } = usePostInfo(form, setForm);
@@ -140,19 +152,26 @@ export default function FormComponent() {
                                                 Categoría
                                             </Field.Label>
                                             <SelectRoot
-                                                collection={categories}
+                                                collection={categoriaCollection}
                                                 required
                                                 size="md"
                                                 width="100%"
                                                 name="categoria"
                                                 value={[form.categoria]}
                                                 onValueChange={(e) => setForm({ ...form, categoria: e.value[0] })}
+                                                disabled={categoriasApi.length === 0}
                                             >
                                                 <SelectTrigger>
-                                                    <SelectValueText placeholder="Selecciona una categoría" />
+                                                    <SelectValueText
+                                                        placeholder={
+                                                            categoriasApi.length === 0
+                                                                ? "Cargando categorías..."
+                                                                : "Selecciona una categoría"
+                                                        }
+                                                    />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {categories.items.map((category) => (
+                                                    {categoriaCollection.items.map((category) => (
                                                         <SelectItem key={category.value} item={category}>
                                                             {category.label}
                                                         </SelectItem>

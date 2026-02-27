@@ -1,6 +1,6 @@
 import { Flex, Link, Icon, ChakraProvider, defaultSystem, Text, Box } from "@chakra-ui/react";
 import { ClerkProvider, SignOutButton } from "@clerk/clerk-react";
-import { FiHome, FiLogOut, FiUpload, FiSettings } from "react-icons/fi";
+import { FiHome, FiLogOut, FiUpload } from "react-icons/fi";
 import { LuTag, LuLayoutDashboard } from "react-icons/lu";
 
 const PUBLISHABLE_KEY = import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -46,22 +46,6 @@ export function AdminHeader() {
             >
               <Icon as={FiUpload} fontSize="lg" mr={3} />
               <Text fontSize="sm" fontWeight="600">Subir Imágenes</Text>
-            </Link>
-            
-            <Link 
-              href="/admin/Config" 
-              display="flex" 
-              alignItems="center" 
-              p={3}
-              mb={2}
-              borderRadius="md"
-              color="white"
-              _hover={{ bg: "rgba(59, 130, 246, 0.1)", color: "#3b82f6" }}
-              transition="all 0.2s"
-              textDecoration="none"
-            >
-              <Icon as={FiSettings} fontSize="lg" mr={3} />
-              <Text fontSize="sm" fontWeight="400">Configurar secciones</Text>
             </Link>
 
             <Link 

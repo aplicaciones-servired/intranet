@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  Box, Flex, Text, Button, Icon, VStack, Spinner, Badge,
+  Box, Flex, Text, Button, Icon, VStack, Spinner, Badge, Container,
 } from "@chakra-ui/react";
 import { LuPlus, LuLayoutDashboard } from "react-icons/lu";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
@@ -120,7 +120,7 @@ function SpacesManagerInner() {
   };
 
   return (
-    <Box>
+    <Container maxW="3xl" px={6} py={4}>
       {/* Header */}
       <Flex align="center" justify="space-between" mb={6}>
         <Flex align="center" gap={3}>
@@ -231,7 +231,7 @@ function SpacesManagerInner() {
           onClose={() => setToast(null)}
         />
       )}
-    </Box>
+    </Container>
   );
 }
 
