@@ -1,4 +1,4 @@
-import { getImagenesController, imagenesController } from "../controllers/imagenes.Controllers";
+import { getImagenesController, imagenesController } from "../controllers/imagenes.Controller";
 import { Router } from "express";
 import { multer_minio } from "../Miderlware/miderlware_minio";
 
