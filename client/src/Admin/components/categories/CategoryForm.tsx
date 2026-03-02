@@ -1,7 +1,7 @@
 ﻿import { useState } from "react";
 import { Box, Flex, Text, Button, Input, Icon, VStack } from "@chakra-ui/react";
 import { LuCheck, LuX } from "react-icons/lu";
-import type { Categoria } from "../../../services/GetInfo";
+import type { Categoria } from "../../../services/GetInfo.service";
 
 interface Props {
   initial?: Partial<Categoria>;

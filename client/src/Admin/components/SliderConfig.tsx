@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from "react";
-import { getConfig, setConfig, getImagenes, type Imagen } from "../../services/GetInfo";
+import { getConfig, setConfig, getImagenes, type Imagen } from "../../services/GetInfo.service";
 import { categories } from "../../utils/const";
 import {
   Box,

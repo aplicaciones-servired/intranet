@@ -1,6 +1,6 @@
 import { Flex, Box, Text, Badge, Icon, Button } from "@chakra-ui/react";
 import { LuPencil, LuTrash2, LuEye, LuEyeOff } from "react-icons/lu";
-import type { Espacio, Categoria } from "../../../services/GetInfo";
+import type { Espacio, Categoria } from "../../../services/GetInfo.service";
 
 const TIPO_COLORS: Record<string, string> = {
   slider: "blue",

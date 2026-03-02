@@ -10,7 +10,7 @@ import {
   getEspacios, createEspacio, updateEspacio, deleteEspacio,
   getCategorias,
   type Espacio, type Categoria,
-} from "../../../services/GetInfo";
+} from "../../../services/GetInfo.service";
 import { SpaceForm } from "./SpaceForm";
 import { SpaceCard } from "./SpaceCard";
 import { ConfirmDialog } from "../shared/ConfirmDialog";

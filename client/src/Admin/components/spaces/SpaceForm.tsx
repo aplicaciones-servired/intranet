@@ -3,7 +3,7 @@ import {
   Box, Flex, Text, Button, Input, Textarea, Icon, Grid, VStack, Badge,
 } from "@chakra-ui/react";
 import { LuCheck, LuX, LuMonitor } from "react-icons/lu";
-import type { Categoria, Espacio, EspacioTipo } from "../../../services/GetInfo";
+import type { Categoria, Espacio, EspacioTipo } from "../../../services/GetInfo.service";
 
 const TIPOS: { value: EspacioTipo; label: string; desc: string; color: string }[] = [
   { value: "slider",    label: "Slider / Banner",       desc: "Carrusel de imágenes a pantalla completa",       color: "blue"   },

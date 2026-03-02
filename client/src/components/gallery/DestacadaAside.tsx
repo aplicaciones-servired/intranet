@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Imagen, Espacio, Categoria } from "../../services/GetInfo";
+import type { Imagen, Espacio, Categoria } from "../../services/GetInfo.service";
 import { isVideo } from "./utils";
 
 interface Props {

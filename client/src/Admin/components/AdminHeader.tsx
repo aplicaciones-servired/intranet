@@ -1,7 +1,7 @@
 import { Flex, Link, Icon, ChakraProvider, defaultSystem, Text, Box } from "@chakra-ui/react";
 import { ClerkProvider, SignOutButton } from "@clerk/clerk-react";
 import { FiHome, FiLogOut, FiUpload } from "react-icons/fi";
-import { LuTag, LuLayoutDashboard } from "react-icons/lu";
+import { LuTag, LuLayoutDashboard, LuFileText } from "react-icons/lu";
 
 const PUBLISHABLE_KEY = import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY;
 
@@ -77,6 +77,22 @@ export function AdminHeader() {
             >
               <Icon fontSize="lg" mr={3}><LuLayoutDashboard /></Icon>
               <Text fontSize="sm" fontWeight="400">Espacios</Text>
+            </Link>
+
+            <Link
+              href="/admin/Formularios"
+              display="flex"
+              alignItems="center"
+              p={3}
+              mb={2}
+              borderRadius="md"
+              color="white"
+              _hover={{ bg: "rgba(34, 197, 94, 0.1)", color: "#4ade80" }}
+              transition="all 0.2s"
+              textDecoration="none"
+            >
+              <Icon fontSize="lg" mr={3}><LuFileText /></Icon>
+              <Text fontSize="sm" fontWeight="400">Formularios</Text>
             </Link>
 
             <Link

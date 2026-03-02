@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   getImagenes, getConfig, getEspacios, getCategorias,
   type Imagen, type Espacio, type Categoria,
-} from "../services/GetInfo";
+} from "../services/GetInfo.service";
 import { categories } from "../utils/const";
 import { CategoryBar } from "./gallery/CategoryBar";
 import { Slider } from "./gallery/Slider";

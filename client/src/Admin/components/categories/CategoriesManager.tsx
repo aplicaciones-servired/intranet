@@ -7,7 +7,7 @@ import { LuPlus, LuTag } from "react-icons/lu";
 import {
   getCategorias, createCategoria, updateCategoria,
   deleteCategoria, type Categoria,
-} from "../../../services/GetInfo";
+} from "../../../services/GetInfo.service";
 import { CategoryRow } from "./CategoryRow";
 import { CategoryForm } from "./CategoryForm";
 import { ConfirmDialog } from "../shared/ConfirmDialog";

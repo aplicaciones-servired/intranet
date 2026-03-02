@@ -24,8 +24,8 @@ import { LuUpload, LuImage, LuFileText, LuFolder, LuMessageSquare, LuSend } from
 import InsertComponent from "./InsertComponent"
 import { useState, useEffect } from "react"
 import Toast from "./Toast"
-import { usePostInfo } from "../../services/PostInfo"
-import { getCategorias, type Categoria } from "../../services/GetInfo"
+import { usePostInfo } from "../../services/PostInfo.service"
+import { getCategorias, type Categoria } from "../../services/GetInfo.service"
 import { createListCollection } from "@chakra-ui/react"
 
 

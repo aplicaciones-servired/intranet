@@ -1,6 +1,6 @@
 import { Box, Flex, Text, Button, Icon, Badge } from "@chakra-ui/react";
 import { LuPencil, LuTrash2, LuGripVertical, LuEyeOff, LuEye } from "react-icons/lu";
-import type { Categoria } from "../../../services/GetInfo";
+import type { Categoria } from "../../../services/GetInfo.service";
 
 interface Props {
   categoria: Categoria;

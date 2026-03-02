@@ -5,9 +5,11 @@ import { intraRoutes } from './routes/insertImagen.routes';
 import { configRoutes } from './routes/config.routes';
 import { categoriaRoutes } from './routes/categoria.routes';
 import { espacioRoutes } from './routes/espacio.routes';
+import formularioRoutes from './routes/formulario.routes';
 import { ConfigModel } from './models/config.model';
 import { CategoriaModel } from './models/categoria.model';
 import { EspacioModel } from './models/espacio.model';
+import Formulario from './models/formulario.model';
 import { info_db } from './db/db_info';
 
 const app = express();
@@ -19,6 +21,7 @@ app.use(intraRoutes);
 app.use(configRoutes);
 app.use(categoriaRoutes);
 app.use(espacioRoutes);
+app.use(formularioRoutes);
 
 // Verificar conexión y sincronizar tablas
 info_db.authenticate()
@@ -28,6 +31,7 @@ info_db.authenticate()
       ConfigModel.sync({ alter: true }),
       CategoriaModel.sync({ alter: true }),
       EspacioModel.sync({ alter: true }),
+      Formulario.sync({ alter: true }),
     ]);
   })
   .then(() => console.log('✅ Tablas sincronizadas'))

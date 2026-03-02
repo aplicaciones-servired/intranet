@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import type { Imagen } from "../../services/GetInfo";
+import type { Imagen } from "../../services/GetInfo.service";
 import { isVideo, formatFecha } from "./utils";
 
 interface Props {
