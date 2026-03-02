@@ -18,7 +18,6 @@ import {
   createFormulario,
   updateFormulario,
   deleteFormulario,
-  toggleFormularioActivo,
   type Formulario,
 } from "../../../services/GetInfo.service";
 import { FormularioForm } from "./FormularioForm";
@@ -167,19 +166,30 @@ export default function FormulariosManager() {
 
   const handleToggleActivo = async (id: number) => {
     try {
-      const result = await toggleFormularioActivo(id);
-      // Actualizar solo el formulario modificado sin recargar todo
-      setFormularios((prev) => 
-        prev.map((f) => (f.id === id ? { ...f, activo: result.activo } : f))
-      );
+      const formulario = formularios.find(f => f.id === id);
+      if (!formulario) return;
+      
+      // Usar updateFormulario igual que CategoriesManager
+      const formData = new FormData();
+      formData.append("titulo", formulario.titulo);
+      formData.append("descripcion", formulario.descripcion || "");
+      formData.append("url", formulario.url);
+      formData.append("activo", (!formulario.activo).toString());
+      
+      const updated = await updateFormulario(id, formData);
+      setFormularios((prev) => prev.map((f) => (f.id === id ? updated : f)));
+      
       setToast({ 
         title: "Estado actualizado", 
-        description: `Formulario ${result.activo ? "activado" : "desactivado"} correctamente.`, 
+        description: `Formulario "${formulario.titulo}" ${!formulario.activo ? "activado" : "desactivado"}.`, 
         type: "success" 
       });
-    } catch (error) {
-      console.error("Error en toggle:", error);
-      setToast({ title: "Error al actualizar", description: "No se pudo cambiar el estado del formulario.", type: "error" });
+    } catch (error: any) {
+      setToast({ 
+        title: "Error al actualizar", 
+        description: "No se pudo cambiar el estado del formulario.", 
+        type: "error" 
+      });
     }
   };
 

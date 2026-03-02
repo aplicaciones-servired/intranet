@@ -216,14 +216,25 @@ export function ImagenesGallery() {
                         onOpen={setModalItem}
                       />
                     );
-                    if (tipo === "carrusel") return (
-                      <CarruselSection
-                        key={isEspacio ? (item as Espacio).id : catValue}
-                        label={label}
-                        items={items}
-                        onOpen={setModalItem}
-                      />
-                    );
+                    if (tipo === "carrusel") {
+                      // Mostrar solo los 10 items más recientes
+                      const recentItems = items
+                        .sort((a, b) => {
+                          const dateA = a.fecha_registro ? new Date(a.fecha_registro).getTime() : 0;
+                          const dateB = b.fecha_registro ? new Date(b.fecha_registro).getTime() : 0;
+                          return dateB - dateA;
+                        })
+                        .slice(0, 10);
+                      
+                      return (
+                        <CarruselSection
+                          key={isEspacio ? (item as Espacio).id : catValue}
+                          label={label}
+                          items={recentItems}
+                          onOpen={setModalItem}
+                        />
+                      );
+                    }
                     if (tipo === "grande") return (
                       <GrandeSection
                         key={isEspacio ? (item as Espacio).id : catValue}
