@@ -29,18 +29,36 @@ function FormularioModal({ formulario, onClose }: { formulario: Formulario; onCl
         onClick={(e) => e.stopPropagation()}
       >
         {/* Imagen */}
-        <div className="w-full bg-black flex items-center justify-center relative overflow-auto" style={{ maxHeight: "60vh" }}>
-          <img
-            src={formulario.imagen}
-            alt={formulario.titulo}
-            className="object-contain transition-transform duration-300 ease-out"
-            style={{ 
-              maxHeight: "60vh",
-              transform: `scale(${zoom})`,
-              cursor: zoom > 1 ? 'zoom-out' : 'zoom-in'
+        <div 
+          className="w-full bg-black flex items-center justify-center relative overflow-auto" 
+          style={{ 
+            maxHeight: "60vh",
+            overscrollBehavior: 'contain'
+          }}
+        >
+          <div
+            style={{
+              width: zoom === 1 ? "auto" : `${zoom * 100}%`,
+              height: zoom === 1 ? "auto" : `${zoom * 100}%`,
+              display: "flex",
+              alignItems: zoom === 1 ? "center" : "flex-start",
+              justifyContent: "center"
             }}
-            onClick={handleImageClick}
-          />
+          >
+            <img
+              src={formulario.imagen}
+              alt={formulario.titulo}
+              className="object-contain transition-transform duration-300 ease-out"
+              style={{ 
+                maxHeight: "60vh",
+                maxWidth: "100%",
+                transform: `scale(${zoom})`,
+                transformOrigin: 'center',
+                cursor: zoom > 1 ? 'zoom-out' : 'zoom-in'
+              }}
+              onClick={handleImageClick}
+            />
+          </div>
           <button
             onClick={onClose}
             className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white rounded-full w-9 h-9 flex items-center justify-center transition-colors"

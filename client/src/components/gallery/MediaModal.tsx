@@ -39,21 +39,39 @@ export function MediaModal({ item, catLabel, onClose }: Props) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Media */}
-        <div className="w-full bg-black flex items-center justify-center relative overflow-auto" style={{ maxHeight: "65vh" }}>
+        <div 
+          className="w-full bg-black flex items-center justify-center relative overflow-auto" 
+          style={{ 
+            maxHeight: "65vh",
+            overscrollBehavior: 'contain'
+          }}
+        >
           {video ? (
             <video src={item.poster} controls autoPlay className="w-full" style={{ maxHeight: "65vh" }} />
           ) : (
-            <img 
-              src={item.poster} 
-              alt={item.titulo} 
-              className="object-contain transition-transform duration-300 ease-out cursor-zoom-in" 
-              style={{ 
-                maxHeight: "65vh", 
-                transform: `scale(${zoom})`,
-                cursor: zoom > 1 ? 'zoom-out' : 'zoom-in'
+            <div
+              style={{
+                width: zoom === 1 ? "auto" : `${zoom * 100}%`,
+                height: zoom === 1 ? "auto" : `${zoom * 100}%`,
+                display: "flex",
+                alignItems: zoom === 1 ? "center" : "flex-start",
+                justifyContent: "center"
               }}
-              onClick={handleImageClick}
-            />
+            >
+              <img 
+                src={item.poster} 
+                alt={item.titulo} 
+                className="object-contain transition-transform duration-300 ease-out cursor-zoom-in" 
+                style={{ 
+                  maxHeight: "65vh",
+                  maxWidth: "100%",
+                  transform: `scale(${zoom})`,
+                  transformOrigin: 'center',
+                  cursor: zoom > 1 ? 'zoom-out' : 'zoom-in'
+                }}
+                onClick={handleImageClick}
+              />
+            </div>
           )}
           <button
             onClick={onClose}
