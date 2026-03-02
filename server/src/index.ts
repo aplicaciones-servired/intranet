@@ -6,6 +6,8 @@ import { configRoutes } from './routes/config.routes';
 import { categoriaRoutes } from './routes/categoria.routes';
 import { espacioRoutes } from './routes/espacio.routes';
 import formularioRoutes from './routes/formulario.routes';
+import cartaLaboralRoutes from './routes/carta_laboral.routes';
+import CartaLaboral from './models/carta_laboral.model';
 import { ConfigModel } from './models/config.model';
 import { CategoriaModel } from './models/categoria.model';
 import { EspacioModel } from './models/espacio.model';
@@ -22,6 +24,7 @@ app.use(configRoutes);
 app.use(categoriaRoutes);
 app.use(espacioRoutes);
 app.use(formularioRoutes);
+app.use(cartaLaboralRoutes);
 
 // Verificar conexión y sincronizar tablas
 info_db.authenticate()
@@ -32,6 +35,7 @@ info_db.authenticate()
       CategoriaModel.sync({ alter: true }),
       EspacioModel.sync({ alter: true }),
       Formulario.sync({ alter: true }),
+      CartaLaboral.sync({ alter: true }),
     ]);
   })
   .then(() => console.log('✅ Tablas sincronizadas'))

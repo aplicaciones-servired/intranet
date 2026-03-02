@@ -22,6 +22,8 @@
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "mysql2": "^3.18.1",
+    "nodemailer": "^8.0.1",
+    "pdfkit": "^0.17.2",
     "sequelize": "^6.37.7",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
@@ -29,6 +31,8 @@
     "xpress": "^2.4.6"
   },
   "devDependencies": {
+    "@types/nodemailer": "^7.0.11",
+    "@types/pdfkit": "^0.17.5",
     "cross-env": "^10.1.0"
   }
 }
