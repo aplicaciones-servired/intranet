@@ -8,13 +8,10 @@ import { SignInButton } from "@clerk/astro/components";
   <div
     class="max-w-7xl flex flex-wrap items-center justify-between mx-auto p-4"
   >
-    <a
-      href="/"
-      class="flex items-center space-x-3 rtl:space-x-reverse"
-    >
+    <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
       <span
         class="self-center text-xl text-heading font-semibold whitespace-nowrap"
-        >Intranet Corporativa</span
+        >Intranet Coorporativa</span
       >
     </a>
     <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
@@ -60,7 +57,15 @@ import { SignInButton } from "@clerk/astro/components";
       >
         <li>
           <a
+            href="/"
+            class="block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary md:hover:bg-transparent md:border-0 md:hover:text-fg-brand md:p-0 md:dark:hover:bg-transparent"
+            >Home</a
+          >
+        </li>
+        <li>
+          <a
             href="http://10.98.98.30:8443/HomePage.do"
+            target="_blank"
             class="block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary md:hover:bg-transparent md:border-0 md:hover:text-fg-brand md:p-0 md:dark:hover:bg-transparent"
             >Mesa de Ayuda</a
           >
@@ -68,6 +73,7 @@ import { SignInButton } from "@clerk/astro/components";
         <li>
           <a
             href="http://172.20.1.115:8080/share/page/"
+            target="_blank"
             class="block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary md:hover:bg-transparent md:border-0 md:hover:text-fg-brand md:p-0 md:dark:hover:bg-transparent"
             >Alfresco</a
           >
