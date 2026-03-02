@@ -40,7 +40,7 @@ export function Slider({ items, onOpen, titulo }: Props) {
       )}
       <div
         className="relative w-full overflow-hidden bg-gray-900 group"
-        style={{ height: "380px" }}
+        style={{ height: "520px" }}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
@@ -73,25 +73,25 @@ export function Slider({ items, onOpen, titulo }: Props) {
         )}
 
         {/* Texto */}
-        <div className="absolute bottom-14 left-8 right-16 text-white pointer-events-none">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-[10px] uppercase tracking-widest bg-white/20 backdrop-blur-sm text-white/90 px-2.5 py-0.5 rounded-full border border-white/20">
+        <div className="absolute bottom-16 left-10 right-20 text-white pointer-events-none">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xs uppercase tracking-widest bg-white/20 backdrop-blur-sm text-white/90 px-3 py-1 rounded-full border border-white/20">
               {item.categoria}
             </span>
-            <span className="text-white/50 text-xs">{current + 1} / {items.length}</span>
+            <span className="text-white/50 text-sm">{current + 1} / {items.length}</span>
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold drop-shadow-lg leading-tight line-clamp-2">
+          <h2 className="text-3xl md:text-4xl font-bold drop-shadow-lg leading-tight line-clamp-2">
             {item.titulo}
           </h2>
           {item.descripcion && (
-            <p className="text-sm text-white/75 mt-1.5 line-clamp-1 drop-shadow">{item.descripcion}</p>
+            <p className="text-base text-white/75 mt-2 line-clamp-2 drop-shadow">{item.descripcion}</p>
           )}
         </div>
 
         {/* Flecha izquierda */}
         <button
           onClick={(e) => { e.stopPropagation(); prev(); startTimer(); }}
-          className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/65 backdrop-blur-sm text-white rounded-full w-9 h-9 flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100 z-10 shadow"
+          className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/65 backdrop-blur-sm text-white rounded-full w-11 h-11 flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100 z-10 shadow"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -101,7 +101,7 @@ export function Slider({ items, onOpen, titulo }: Props) {
         {/* Flecha derecha */}
         <button
           onClick={(e) => { e.stopPropagation(); next(); startTimer(); }}
-          className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#005a9c]/80 hover:bg-[#005a9c] backdrop-blur-sm text-white rounded-full w-9 h-9 flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100 z-10 shadow"
+          className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#005a9c]/80 hover:bg-[#005a9c] backdrop-blur-sm text-white rounded-full w-11 h-11 flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100 z-10 shadow"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />

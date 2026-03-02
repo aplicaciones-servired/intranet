@@ -39,7 +39,7 @@ export function DestacadaAside({ espacio, catMeta, items, onOpen }: Props) {
               className="group flex gap-2.5 cursor-pointer hover:bg-blue-50/70 rounded-lg p-1.5 transition-colors duration-150"
             >
               {/* Thumbnail */}
-              <div className="relative shrink-0 rounded-lg overflow-hidden bg-gray-100" style={{ width: "64px", height: "48px" }}>
+              <div className="relative shrink-0 rounded-lg overflow-hidden bg-gray-100" style={{ width: "80px", height: "60px" }}>
                 {video ? (
                   <>
                     <video src={item.poster} className="w-full h-full object-cover" muted preload="metadata" />
@@ -60,7 +60,7 @@ export function DestacadaAside({ espacio, catMeta, items, onOpen }: Props) {
               </div>
 
               {/* Texto */}
-              <p className="text-xs font-medium text-gray-700 leading-snug line-clamp-2 group-hover:text-[#005a9c] transition-colors pt-0.5 flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-700 leading-snug line-clamp-2 group-hover:text-[#005a9c] transition-colors pt-0.5 flex-1 min-w-0">
                 {item.titulo}
               </p>
             </div>

@@ -31,7 +31,7 @@ export function GridSection({ label, items, onOpen }: Props) {
               onClick={() => onOpen(item)}
               className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-250"
             >
-              <div className="relative overflow-hidden" style={{ height: "140px" }}>
+              <div className="relative overflow-hidden" style={{ height: "190px" }}>
                 {video ? (
                   <>
                     <video
@@ -59,12 +59,12 @@ export function GridSection({ label, items, onOpen }: Props) {
                 <div className="absolute inset-0 bg-[#005a9c]/0 group-hover:bg-[#005a9c]/10 transition-colors duration-250" />
               </div>
 
-              <div className="p-3">
+              <div className="p-4">
                 <h4 className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug group-hover:text-[#005a9c] transition-colors">
                   {item.titulo}
                 </h4>
                 {item.fecha_registro && (
-                  <p className="text-[11px] text-gray-400 mt-1.5 flex items-center gap-1">
+                  <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
                     <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>

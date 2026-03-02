@@ -58,9 +58,9 @@ export function CarruselSection({ label, items, onOpen }: Props) {
             <article
               key={item.id}
               onClick={() => onOpen(item)}
-              className="group shrink-0 w-52 bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+              className="group shrink-0 w-64 bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
             >
-              <div className="relative overflow-hidden" style={{ height: "120px" }}>
+              <div className="relative overflow-hidden" style={{ height: "160px" }}>
                 {video ? (
                   <>
                     <video src={item.poster} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400" muted preload="metadata" />
@@ -76,12 +76,12 @@ export function CarruselSection({ label, items, onOpen }: Props) {
                   <img src={item.poster} alt={item.titulo} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400" loading="lazy" />
                 )}
               </div>
-              <div className="p-2.5">
-                <h4 className="text-xs font-semibold text-gray-800 line-clamp-2 leading-snug group-hover:text-[#06b6d4] transition-colors">
+              <div className="p-3">
+                <h4 className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug group-hover:text-[#06b6d4] transition-colors">
                   {item.titulo}
                 </h4>
                 {item.fecha_registro && (
-                  <p className="text-[10px] text-gray-400 mt-1">{formatFecha(item.fecha_registro)}</p>
+                  <p className="text-xs text-gray-400 mt-1.5">{formatFecha(item.fecha_registro)}</p>
                 )}
               </div>
             </article>

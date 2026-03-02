@@ -51,7 +51,7 @@ export function NoticiasSection({ label, catLabel, items, onOpen }: Props) {
               </>
             )}
             {/* Pill de categoría */}
-            <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wide bg-[#ef4444] text-white px-2.5 py-0.5 rounded-full shadow">
+            <span className="absolute top-3 left-3 text-xs font-bold uppercase tracking-wide bg-[#ef4444] text-white px-2.5 py-0.5 rounded-full shadow">
               {catLabel}
             </span>
           </div>
@@ -64,7 +64,7 @@ export function NoticiasSection({ label, catLabel, items, onOpen }: Props) {
               <p className="text-sm text-gray-500 mt-2 line-clamp-2 leading-relaxed">{hero.descripcion}</p>
             )}
             {hero.fecha_registro && (
-              <p className="text-[11px] text-gray-400 mt-3 flex items-center gap-1">
+              <p className="text-xs text-gray-400 mt-3 flex items-center gap-1">
                 <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -86,7 +86,7 @@ export function NoticiasSection({ label, catLabel, items, onOpen }: Props) {
                   className="group flex gap-3 bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 p-2.5"
                 >
                   {/* Thumbnail */}
-                  <div className="relative shrink-0 w-20 h-16 rounded-lg overflow-hidden bg-gray-100">
+                  <div className="relative shrink-0 w-24 h-20 rounded-lg overflow-hidden bg-gray-100">
                     {video ? (
                       <>
                         <video src={item.poster} className="w-full h-full object-cover" muted preload="metadata" />
@@ -103,11 +103,11 @@ export function NoticiasSection({ label, catLabel, items, onOpen }: Props) {
 
                   {/* Texto */}
                   <div className="flex flex-col justify-center min-w-0">
-                    <h4 className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug group-hover:text-[#dc2626] transition-colors">
+                    <h4 className="text-base font-semibold text-gray-800 line-clamp-2 leading-snug group-hover:text-[#dc2626] transition-colors">
                       {item.titulo}
                     </h4>
                     {item.fecha_registro && (
-                      <p className="text-[10px] text-gray-400 mt-1">{formatFecha(item.fecha_registro)}</p>
+                      <p className="text-xs text-gray-400 mt-1.5">{formatFecha(item.fecha_registro)}</p>
                     )}
                   </div>
                 </article>
