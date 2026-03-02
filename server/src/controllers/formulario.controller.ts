@@ -131,30 +131,21 @@ export const deleteFormulario = async (req: Request, res: Response) => {
 export const toggleFormularioActivo = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    console.log("🔄 Toggle formulario ID:", id);
 
     const formulario = await Formulario.findByPk(Number(id));
 
     if (!formulario) {
-      console.log("❌ Formulario no encontrado:", id);
       return res.status(404).json({ error: "Formulario no encontrado" });
     }
 
-    console.log("📊 Estado actual:", formulario.activo);
-    const nuevoEstado = !formulario.activo;
-    
-    // Actualizar directamente el campo
-    formulario.activo = nuevoEstado;
+    formulario.activo = !formulario.activo;
     await formulario.save();
-    
-    console.log("✅ Nuevo estado:", formulario.activo);
 
     res.json({
-      message: `Formulario ${nuevoEstado ? "activado" : "desactivado"} exitosamente`,
+      message: `Formulario ${formulario.activo ? "activado" : "desactivado"} exitosamente`,
       formulario,
     });
   } catch (error: any) {
-    console.error("❌ Error en toggle:", error);
     res.status(500).json({ error: error.message });
   }
 };

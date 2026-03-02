@@ -8,6 +8,7 @@ const isProtectedRoute = createRouteMatcher([
 // Define las rutas públicas (opcional, para mayor claridad)
 const isPublicRoute = createRouteMatcher([
   "/",
+  "/formularios(.*)",
   "/sign-in(.*)",
   "/sign-up(.*)",
 ]);
