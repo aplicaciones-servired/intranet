@@ -3,11 +3,21 @@ import { getFormulariosActivos, type Formulario } from "../services/GetInfo.serv
 import { API_URL } from "../utils/const";
 
 function FormularioModal({ formulario, onClose }: { formulario: Formulario; onClose: () => void }) {
+  const [zoom, setZoom] = useState(1);
+  const zoomLevels = [1, 1.5, 2, 3];
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const currentIndex = zoomLevels.indexOf(zoom);
+    const nextIndex = (currentIndex + 1) % zoomLevels.length;
+    setZoom(zoomLevels[nextIndex]);
+  };
 
   return (
     <div
@@ -19,12 +29,17 @@ function FormularioModal({ formulario, onClose }: { formulario: Formulario; onCl
         onClick={(e) => e.stopPropagation()}
       >
         {/* Imagen */}
-        <div className="w-full bg-black flex items-center justify-center relative" style={{ maxHeight: "60vh" }}>
+        <div className="w-full bg-black flex items-center justify-center relative overflow-auto" style={{ maxHeight: "60vh" }}>
           <img
             src={formulario.imagen}
             alt={formulario.titulo}
-            className="w-full object-contain"
-            style={{ maxHeight: "60vh" }}
+            className="object-contain transition-transform duration-300 ease-out"
+            style={{ 
+              maxHeight: "60vh",
+              transform: `scale(${zoom})`,
+              cursor: zoom > 1 ? 'zoom-out' : 'zoom-in'
+            }}
+            onClick={handleImageClick}
           />
           <button
             onClick={onClose}
@@ -34,6 +49,13 @@ function FormularioModal({ formulario, onClose }: { formulario: Formulario; onCl
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
+          
+          {/* Indicador de zoom */}
+          {zoom > 1 && (
+            <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2.5 py-1 rounded-full font-medium">
+              {zoom}x
+            </div>
+          )}
         </div>
 
         {/* Info */}

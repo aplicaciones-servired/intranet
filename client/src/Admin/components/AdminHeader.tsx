@@ -95,20 +95,6 @@ export function AdminHeader() {
               <Text fontSize="sm" fontWeight="400">Formularios</Text>
             </Link>
 
-            <Link
-              href="/admin"
-              display="flex"
-              alignItems="center"
-              p={3}
-              borderRadius="md"
-              color="white"
-              _hover={{ bg: "rgba(59, 130, 246, 0.1)", color: "#3b82f6" }}
-              transition="all 0.2s"
-              textDecoration="none"
-            >
-              <Icon as={FiHome} fontSize="lg" mr={3} />
-              <Text fontSize="sm" fontWeight="400">Dashboard</Text>
-            </Link>
           </Box>
 
           {/* Footer / Logout */}

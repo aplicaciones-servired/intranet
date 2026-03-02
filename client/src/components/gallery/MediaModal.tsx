@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { Imagen } from "../../services/GetInfo.service";
 import { isVideo, formatFecha } from "./utils";
 
@@ -10,6 +10,8 @@ interface Props {
 
 export function MediaModal({ item, catLabel, onClose }: Props) {
   const video = isVideo(item.poster);
+  const [zoom, setZoom] = useState(1);
+  const zoomLevels = [1, 1.5, 2, 3];
 
   // Cerrar con Escape
   useEffect(() => {
@@ -17,6 +19,15 @@ export function MediaModal({ item, catLabel, onClose }: Props) {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!video) {
+      const currentIndex = zoomLevels.indexOf(zoom);
+      const nextIndex = (currentIndex + 1) % zoomLevels.length;
+      setZoom(zoomLevels[nextIndex]);
+    }
+  };
 
   return (
     <div
@@ -28,11 +39,21 @@ export function MediaModal({ item, catLabel, onClose }: Props) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Media */}
-        <div className="w-full bg-black flex items-center justify-center relative" style={{ maxHeight: "65vh" }}>
+        <div className="w-full bg-black flex items-center justify-center relative overflow-auto" style={{ maxHeight: "65vh" }}>
           {video ? (
             <video src={item.poster} controls autoPlay className="w-full" style={{ maxHeight: "65vh" }} />
           ) : (
-            <img src={item.poster} alt={item.titulo} className="w-full object-contain" style={{ maxHeight: "65vh" }} />
+            <img 
+              src={item.poster} 
+              alt={item.titulo} 
+              className="object-contain transition-transform duration-300 ease-out cursor-zoom-in" 
+              style={{ 
+                maxHeight: "65vh", 
+                transform: `scale(${zoom})`,
+                cursor: zoom > 1 ? 'zoom-out' : 'zoom-in'
+              }}
+              onClick={handleImageClick}
+            />
           )}
           <button
             onClick={onClose}
@@ -42,6 +63,13 @@ export function MediaModal({ item, catLabel, onClose }: Props) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
+          
+          {/* Indicador de zoom */}
+          {!video && zoom > 1 && (
+            <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2.5 py-1 rounded-full font-medium">
+              {zoom}x
+            </div>
+          )}
         </div>
 
         {/* Info */}
