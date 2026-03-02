@@ -6,6 +6,7 @@ import {
 import { categories } from "../utils/const";
 import { CategoryBar } from "./gallery/CategoryBar";
 import { Slider } from "./gallery/Slider";
+import { SearchBar } from "./gallery/SearchBar";
 import { GridSection } from "./gallery/GridSection";
 import { ListSection } from "./gallery/ListSection";
 import { DestacadaAside } from "./gallery/DestacadaAside";
@@ -56,6 +57,7 @@ export function ImagenesGallery() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalItem, setModalItem] = useState<Imagen | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -85,7 +87,20 @@ export function ImagenesGallery() {
 
   const CATEGORIAS = dinamicCats.length > 0 ? dinamicCats : STATIC_CATS;
 
-  const porCategoria = (cat: string) => imagenes.filter((i) => i.categoria === cat);
+  // Función para filtrar imágenes según búsqueda
+  const filtrarImagenes = (imgs: Imagen[]) => {
+    if (!searchQuery.trim()) return imgs;
+    const query = searchQuery.toLowerCase();
+    return imgs.filter((img) => 
+      img.titulo.toLowerCase().includes(query) || 
+      (img.descripcion && img.descripcion.toLowerCase().includes(query))
+    );
+  };
+
+  // Aplicar filtro de búsqueda a todas las imágenes
+  const imagenesFiltradas = filtrarImagenes(imagenes);
+
+  const porCategoria = (cat: string) => imagenesFiltradas.filter((i) => i.categoria === cat);
 
   // Slider principal: primer espacio tipo slider, con su categoría activa (o lo que el usuario clica)
   const sliderItems = porCategoria(sliderCat).length
@@ -127,11 +142,36 @@ export function ImagenesGallery() {
         </div>
       )}
 
+      {/* Barra de búsqueda */}
+      {!loading && !error && imagenes.length > 0 && (
+        <SearchBar 
+          onSearch={setSearchQuery} 
+          totalResults={imagenesFiltradas.length}
+          placeholder="Buscar por título o descripción..."
+        />
+      )}
+
       {/* Secciones */}
       {!loading && !error && (
         <div className="max-w-7xl mx-auto px-4 py-10">
           {imagenes.length === 0 ? (
             <EmptyState />
+          ) : imagenesFiltradas.length === 0 && searchQuery ? (
+            <div className="flex flex-col items-center justify-center py-32 text-gray-400">
+              <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-5">
+                <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <p className="text-lg font-semibold text-gray-500">No se encontraron resultados</p>
+              <p className="text-sm mt-1">Intenta con otros términos de búsqueda</p>
+              <button
+                onClick={() => setSearchQuery("")}
+                className="mt-4 px-4 py-2 bg-[#005a9c] hover:bg-[#004080] text-white rounded-full text-sm font-medium transition-colors"
+              >
+                Limpiar búsqueda
+              </button>
+            </div>
           ) : (
             <div className="flex flex-col lg:flex-row gap-8">
 

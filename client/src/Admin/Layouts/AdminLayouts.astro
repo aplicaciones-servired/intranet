@@ -2,6 +2,14 @@
 import { fade } from "astro:transitions";
 import "../../styles/global.css";
 import { AdminHeader } from "../components/AdminHeader";
+
+// Verificar autenticación a nivel de layout
+const { userId } = Astro.locals.auth();
+
+// Si no hay usuario autenticado, redirigir (el middleware también lo hace, esto es una capa extra)
+if (!userId) {
+  return Astro.redirect("/sign-in");
+}
 ---
 
 <!doctype html>
