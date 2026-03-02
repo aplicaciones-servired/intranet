@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Imagen } from "../../services/GetInfo";
 import { isVideo, formatFecha } from "./utils";
 
@@ -6,13 +7,19 @@ interface Props {
   catLabel: string;
   items: Imagen[];
   onOpen: (i: Imagen) => void;
+  initialItems?: number;
 }
 
-export function GrandeSection({ label, catLabel, items, onOpen }: Props) {
+export function GrandeSection({ label, catLabel, items, onOpen, initialItems = 4 }: Props) {
+  const [showAll, setShowAll] = useState(false);
+  
   if (!items.length) return null;
 
+  const displayItems = showAll ? items : items.slice(0, initialItems);
+  const hasMore = items.length > initialItems;
+
   return (
-    <section className="col-span-full">
+    <section className="col-span-full flex flex-col gap-4">
       {/* Encabezado */}
       <div className="flex items-center gap-4 mb-6">
         <div className="h-px flex-1 bg-linear-to-r from-transparent to-[#14b8a6]/20" />
@@ -25,7 +32,7 @@ export function GrandeSection({ label, catLabel, items, onOpen }: Props) {
 
       {/* Grid 2 columnas: tarjetas grandes */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {items.map((item) => {
+        {displayItems.map((item) => {
           const video = isVideo(item.poster);
           return (
             <article
@@ -76,6 +83,32 @@ export function GrandeSection({ label, catLabel, items, onOpen }: Props) {
           );
         })}
       </div>
+
+      {/* Botón Ver más / Ver menos */}
+      {hasMore && (
+        <div className="flex justify-center mt-2">
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="group flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-[#14b8a6] text-[#0f766e] hover:text-white border-2 border-[#14b8a6] rounded-full font-medium text-sm transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            {showAll ? (
+              <>
+                <span>Ver menos</span>
+                <svg className="w-4 h-4 transform group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+                </svg>
+              </>
+            ) : (
+              <>
+                <span>Ver más ({items.length - initialItems} restantes)</span>
+                <svg className="w-4 h-4 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                </svg>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </section>
   );
 }

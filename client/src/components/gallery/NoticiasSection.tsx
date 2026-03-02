@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Imagen } from "../../services/GetInfo";
 import { isVideo, formatFecha } from "./utils";
 
@@ -6,16 +7,21 @@ interface Props {
   catLabel: string;
   items: Imagen[];
   onOpen: (i: Imagen) => void;
+  initialItems?: number;
 }
 
-export function NoticiasSection({ label, catLabel, items, onOpen }: Props) {
+export function NoticiasSection({ label, catLabel, items, onOpen, initialItems = 5 }: Props) {
+  const [showAll, setShowAll] = useState(false);
+  
   if (!items.length) return null;
 
   const [hero, ...resto] = items;
+  const displayResto = showAll ? resto : resto.slice(0, initialItems - 1);
+  const hasMore = resto.length > (initialItems - 1);
   const heroVideo = isVideo(hero.poster);
 
   return (
-    <section className="col-span-full">
+    <section className="col-span-full flex flex-col gap-4">
       {/* Encabezado */}
       <div className="flex items-center gap-3 mb-5">
         <div className="w-1 h-6 bg-[#ef4444] rounded-full shrink-0" />
@@ -77,7 +83,7 @@ export function NoticiasSection({ label, catLabel, items, onOpen }: Props) {
         {/* Lista de noticias secundarias (2/5) */}
         {resto.length > 0 && (
           <div className="lg:col-span-2 flex flex-col gap-3">
-            {resto.map((item) => {
+            {displayResto.map((item) => {
               const video = isVideo(item.poster);
               return (
                 <article
@@ -116,6 +122,32 @@ export function NoticiasSection({ label, catLabel, items, onOpen }: Props) {
           </div>
         )}
       </div>
+
+      {/* Botón Ver más / Ver menos */}
+      {hasMore && (
+        <div className="flex justify-center mt-2">
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="group flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-[#ef4444] text-[#dc2626] hover:text-white border-2 border-[#ef4444] rounded-full font-medium text-sm transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            {showAll ? (
+              <>
+                <span>Ver menos</span>
+                <svg className="w-4 h-4 transform group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+                </svg>
+              </>
+            ) : (
+              <>
+                <span>Ver más ({resto.length - (initialItems - 1)} restantes)</span>
+                <svg className="w-4 h-4 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                </svg>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </section>
   );
 }

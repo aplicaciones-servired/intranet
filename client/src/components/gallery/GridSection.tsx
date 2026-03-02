@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Imagen } from "../../services/GetInfo";
 import { isVideo, formatFecha } from "./utils";
 
@@ -5,13 +6,19 @@ interface Props {
   label: string;
   items: Imagen[];
   onOpen: (i: Imagen) => void;
+  initialItems?: number;
 }
 
-export function GridSection({ label, items, onOpen }: Props) {
+export function GridSection({ label, items, onOpen, initialItems = 6 }: Props) {
+  const [showAll, setShowAll] = useState(false);
+  
   if (!items.length) return null;
 
+  const displayItems = showAll ? items : items.slice(0, initialItems);
+  const hasMore = items.length > initialItems;
+
   return (
-    <section className="col-span-full">
+    <section className="col-span-full flex flex-col gap-4">
       {/* Encabezado decorativo */}
       <div className="flex items-center gap-4 mb-6">
         <div className="h-px flex-1 bg-linear-to-r from-transparent to-[#005a9c]/20" />
@@ -23,7 +30,7 @@ export function GridSection({ label, items, onOpen }: Props) {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-        {items.map((item) => {
+        {displayItems.map((item) => {
           const video = isVideo(item.poster);
           return (
             <article
@@ -76,6 +83,32 @@ export function GridSection({ label, items, onOpen }: Props) {
           );
         })}
       </div>
+
+      {/* Botón Ver más / Ver menos */}
+      {hasMore && (
+        <div className="flex justify-center mt-2">
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="group flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-[#005a9c] text-[#005a9c] hover:text-white border-2 border-[#005a9c] rounded-full font-medium text-sm transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            {showAll ? (
+              <>
+                <span>Ver menos</span>
+                <svg className="w-4 h-4 transform group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+                </svg>
+              </>
+            ) : (
+              <>
+                <span>Ver más ({items.length - initialItems} restantes)</span>
+                <svg className="w-4 h-4 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                </svg>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </section>
   );
 }

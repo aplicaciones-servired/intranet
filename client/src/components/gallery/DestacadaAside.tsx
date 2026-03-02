@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Imagen, Espacio, Categoria } from "../../services/GetInfo";
 import { isVideo } from "./utils";
 
@@ -6,13 +7,20 @@ interface Props {
   catMeta?: Categoria;
   items: Imagen[];
   onOpen: (i: Imagen) => void;
+  initialItems?: number;
 }
 
-export function DestacadaAside({ espacio, catMeta, items, onOpen }: Props) {
+export function DestacadaAside({ espacio, catMeta, items, onOpen, initialItems = 5 }: Props) {
+  const [showAll, setShowAll] = useState(false);
+  
   if (!items.length) return null;
 
+  const displayItems = showAll ? items : items.slice(0, initialItems);
+  const hasMore = items.length > initialItems;
+
   return (
-    <aside className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+    <div className="flex flex-col gap-3">
+      <aside className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
       {/* Header */}
       <div
         className="px-4 py-3 flex items-center gap-2"
@@ -30,7 +38,7 @@ export function DestacadaAside({ espacio, catMeta, items, onOpen }: Props) {
 
       {/* Items */}
       <div className="p-3 flex flex-col gap-2.5">
-        {items.map((item) => {
+        {displayItems.map((item) => {
           const video = isVideo(item.poster);
           return (
             <div
@@ -68,5 +76,30 @@ export function DestacadaAside({ espacio, catMeta, items, onOpen }: Props) {
         })}
       </div>
     </aside>
+
+    {/* Botón Ver más / Ver menos */}
+    {hasMore && (
+      <button
+        onClick={() => setShowAll(!showAll)}
+        className="group flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-[#005a9c] text-[#005a9c] hover:text-white border border-[#005a9c] rounded-lg font-medium text-xs transition-all duration-200 shadow-sm hover:shadow-md"
+      >
+        {showAll ? (
+          <>
+            <span>Ver menos</span>
+            <svg className="w-3.5 h-3.5 transform group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+            </svg>
+          </>
+        ) : (
+          <>
+            <span>Ver más ({items.length - initialItems})</span>
+            <svg className="w-3.5 h-3.5 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+            </svg>
+          </>
+        )}
+      </button>
+    )}
+  </div>
   );
 }
