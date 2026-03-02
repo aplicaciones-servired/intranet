@@ -23,13 +23,12 @@ interface Formulario {
 
 interface Props {
   formulario: Formulario;
-  apiUrl: string;
   onToggle: (id: number) => void;
   onEdit: (formulario: Formulario) => void;
   onDelete: (id: number) => void;
 }
 
-export function FormularioCard({ formulario, apiUrl, onToggle, onEdit, onDelete }: Props) {
+export function FormularioCard({ formulario, onToggle, onEdit, onDelete }: Props) {
   return (
     <Box
       bg="white"
@@ -43,7 +42,7 @@ export function FormularioCard({ formulario, apiUrl, onToggle, onEdit, onDelete 
     >
       <Box position="relative" h="200px" overflow="hidden">
         <Image
-          src={`${formulario.imagen}`}
+          src={formulario.imagen}
           alt={formulario.titulo}
           w="full"
           h="full"

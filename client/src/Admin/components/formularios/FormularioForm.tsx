@@ -1,17 +1,15 @@
 import {
   Box,
-  Heading,
   Button,
   Input,
   Textarea,
   VStack,
-  HStack,
+  Flex,
   Icon,
   Text,
-  Field,
   Image,
 } from "@chakra-ui/react";
-import { LuUpload, LuX } from "react-icons/lu";
+import { LuUpload, LuX, LuCheck } from "react-icons/lu";
 
 interface Props {
   form: {
@@ -49,38 +47,43 @@ export function FormularioForm({
     <Box
       bg="white"
       borderRadius="xl"
-      shadow="lg"
+      shadow="sm"
       border="1px solid"
       borderColor="gray.200"
       p={6}
       mb={6}
     >
-      <Heading size="md" mb={4} color="gray.800">
-        {editingId ? "Editar Formulario" : "Nuevo Formulario"}
-      </Heading>
       <form onSubmit={onSubmit}>
         <VStack gap={4} alignItems="stretch">
           {/* Imagen */}
-          <Field.Root required={!editingId}>
-            <Field.Label>Imagen del formulario</Field.Label>
+          <Box>
+            <Text fontSize="xs" color="gray.500" mb={2} fontWeight="medium">
+              Imagen del formulario {!editingId && "*"}
+            </Text>
             <Box>
               {imagePreview ? (
-                <Box position="relative" w="full" maxW="300px">
+                <Box position="relative" w="full" maxW="280px">
                   <Image
                     src={imagePreview}
                     alt="Preview"
                     borderRadius="lg"
                     w="full"
-                    h="200px"
+                    h="160px"
                     objectFit="cover"
+                    border="1px solid"
+                    borderColor="gray.200"
                   />
                   <Button
                     position="absolute"
                     top={2}
                     right={2}
-                    size="sm"
-                    colorScheme="red"
+                    size="xs"
+                    bg="white"
+                    color="red.600"
+                    shadow="md"
+                    borderRadius="lg"
                     onClick={() => onImageChange(null)}
+                    _hover={{ bg: "red.50" }}
                   >
                     <Icon><LuX /></Icon>
                   </Button>
@@ -92,17 +95,19 @@ export function FormularioForm({
                   flexDirection="column"
                   alignItems="center"
                   justifyContent="center"
-                  p={8}
+                  p={6}
                   border="2px dashed"
                   borderColor="gray.300"
                   borderRadius="lg"
                   cursor="pointer"
                   transition="all 0.2s"
-                  _hover={{ borderColor: "blue.500", bg: "blue.50" }}
+                  bg="gray.50"
+                  maxW="280px"
+                  _hover={{ borderColor: "#005a9c", bg: "blue.50" }}
                 >
-                  <Icon fontSize="3xl" color="gray.400" mb={2}><LuUpload /></Icon>
-                  <Text fontSize="sm" color="gray.600" textAlign="center">
-                    Haz clic para seleccionar una imagen
+                  <Icon fontSize="2xl" color="gray.400" mb={2}><LuUpload /></Icon>
+                  <Text fontSize="xs" color="gray.600" textAlign="center" fontWeight="medium">
+                    Subir imagen
                   </Text>
                   <Text fontSize="xs" color="gray.400" mt={1}>
                     PNG, JPG • Máx. 5MB
@@ -112,49 +117,74 @@ export function FormularioForm({
                     accept="image/*"
                     onChange={handleImageSelect}
                     style={{ display: "none" }}
+                    required={!editingId}
                   />
                 </Box>
               )}
             </Box>
-          </Field.Root>
+          </Box>
 
-          <Field.Root required>
-            <Field.Label>Título</Field.Label>
+          <Box>
+            <Text fontSize="xs" color="gray.500" mb={1.5} fontWeight="medium">Título *</Text>
             <Input
               value={form.titulo}
               onChange={(e) => onFormChange("titulo", e.target.value)}
               placeholder="Ej: Encuesta de Satisfacción 2026"
+              size="sm"
+              borderRadius="lg"
+              required
             />
-          </Field.Root>
+          </Box>
 
-          <Field.Root>
-            <Field.Label>Descripción</Field.Label>
+          <Box>
+            <Text fontSize="xs" color="gray.500" mb={1.5} fontWeight="medium">Descripción</Text>
             <Textarea
               value={form.descripcion}
               onChange={(e) => onFormChange("descripcion", e.target.value)}
               placeholder="Descripción breve del formulario..."
               rows={3}
+              size="sm"
+              borderRadius="lg"
             />
-          </Field.Root>
+            <Text fontSize="xs" color="gray.400" mt={1}>
+              Opcional. Se mostrará en la tarjeta del formulario.
+            </Text>
+          </Box>
 
-          <Field.Root required>
-            <Field.Label>URL del Google Form</Field.Label>
+          <Box>
+            <Text fontSize="xs" color="gray.500" mb={1.5} fontWeight="medium">URL del Google Form *</Text>
             <Input
               value={form.url}
               onChange={(e) => onFormChange("url", e.target.value)}
               placeholder="https://forms.gle/..."
               type="url"
+              size="sm"
+              borderRadius="lg"
+              fontFamily="mono"
+              required
             />
-          </Field.Root>
+            <Text fontSize="xs" color="gray.400" mt={1}>
+              Pega aquí el enlace completo del formulario de Google.
+            </Text>
+          </Box>
 
-          <HStack gap={3} justifyContent="flex-end" mt={2}>
-            <Button variant="outline" onClick={onCancel}>
-              Cancelar
+          <Flex gap={3} justifyContent="flex-end" pt={2}>
+            <Button variant="outline" size="sm" borderRadius="lg" onClick={onCancel} type="button">
+              <Icon mr={1}><LuX /></Icon> Cancelar
             </Button>
-            <Button type="submit" bg="blue.500" color="white" _hover={{ bg: "blue.600" }}>
-              {editingId ? "Actualizar" : "Crear"}
+            <Button
+              type="submit"
+              size="sm"
+              borderRadius="lg"
+              bg="linear-gradient(135deg, #005a9c 0%, #003d6b 100%)"
+              color="white"
+              shadow="md"
+              _hover={{ transform: "translateY(-1px)", shadow: "lg" }}
+            >
+              <Icon mr={1}><LuCheck /></Icon>
+              {editingId ? "Guardar cambios" : "Crear formulario"}
             </Button>
-          </HStack>
+          </Flex>
         </VStack>
       </form>
     </Box>

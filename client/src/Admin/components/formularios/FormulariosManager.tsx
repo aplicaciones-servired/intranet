@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import {
   Box,
-  Heading,
   Button,
-  VStack,
   Icon,
   Text,
   Flex,
+  Container,
+  Spinner,
   ChakraProvider,
   defaultSystem,
 } from "@chakra-ui/react";
-import { LuPlus, LuFileText, LuEyeOff } from "react-icons/lu";
+import { LuPlus, LuFileText } from "react-icons/lu";
 import Toast from "../Toast";
 import { ConfirmDialog } from "../shared/ConfirmDialog";
 import {
@@ -21,57 +21,53 @@ import {
   toggleFormularioActivo,
   type Formulario,
 } from "../../../services/GetInfo.service";
-import { API_URL } from "../../../utils/const";
 import { FormularioForm } from "./FormularioForm";
 import { FormularioCard } from "./FormularioCard";
+
+type Mode = "list" | "create" | "edit";
 
 export default function FormulariosManager() {
   const [formularios, setFormularios] = useState<Formulario[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertConfig, setAlertConfig] = useState({
-    title: "",
-    description: "",
-    type: "success" as "success" | "error" | "warning",
-  });
-  const [confirmDialog, setConfirmDialog] = useState({
-    show: false,
-    title: "",
-    description: "",
-    onConfirm: () => {},
-  });
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [mode, setMode] = useState<Mode>("list");
+  const [editing, setEditing] = useState<Formulario | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<Formulario | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [toast, setToast] = useState<{ title: string; description: string; type: "success" | "error" | "warning" } | null>(null);
 
   const [form, setForm] = useState({
     titulo: "",
     descripcion: "",
     url: "",
   });
-
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
+  // Auto-hide toast
   useEffect(() => {
-    loadData();
-  }, []);
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 3500);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const loadData = async () => {
+    setLoading(true);
+    setLoadError(null);
     try {
-      const formData = await getFormularios();
-      setFormularios(formData);
-      setLoading(false);
-    } catch (error) {
-      showToast("Error", "No se pudieron cargar los datos", "error");
+      const data = await getFormularios();
+      setFormularios(data);
+    } catch {
+      setLoadError("No se pudo conectar con el servidor. Verifica que el backend esté corriendo.");
+    } finally {
       setLoading(false);
     }
   };
 
-  const showToast = (title: string, description: string, type: "success" | "error" | "warning") => {
-    setAlertConfig({ title, description, type });
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 5000);
-  };
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const handleFormChange = (field: string, value: string) => {
     setForm({ ...form, [field]: value });
@@ -80,11 +76,11 @@ export default function FormulariosManager() {
   const handleImageChange = (file: File | null) => {
     if (file) {
       if (!file.type.startsWith("image/")) {
-        showToast("Error", "Solo se permiten imágenes", "warning");
+        setToast({ title: "Error", description: "Solo se permiten imágenes", type: "warning" });
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        showToast("Error", "La imagen no debe superar 5MB", "warning");
+        setToast({ title: "Error", description: "La imagen no debe superar 5MB", type: "warning" });
         return;
       }
       setSelectedImage(file);
@@ -99,12 +95,12 @@ export default function FormulariosManager() {
     e.preventDefault();
 
     if (!form.titulo || !form.url) {
-      showToast("Error", "Título y URL son obligatorios", "warning");
+      setToast({ title: "Error", description: "Título y URL son obligatorios", type: "warning" });
       return;
     }
 
-    if (!editingId && !selectedImage) {
-      showToast("Error", "La imagen es obligatoria", "warning");
+    if (!editing && !selectedImage) {
+      setToast({ title: "Error", description: "La imagen es obligatoria", type: "warning" });
       return;
     }
 
@@ -112,10 +108,11 @@ export default function FormulariosManager() {
     try {
       new URL(form.url);
     } catch {
-      showToast("Error", "La URL no es válida", "warning");
+      setToast({ title: "Error", description: "La URL no es válida", type: "warning" });
       return;
     }
 
+    setSaving(true);
     try {
       const formData = new FormData();
       formData.append("titulo", form.titulo);
@@ -125,18 +122,20 @@ export default function FormulariosManager() {
         formData.append("imagen", selectedImage);
       }
 
-      if (editingId) {
-        await updateFormulario(editingId, formData);
-        showToast("Éxito", "Formulario actualizado correctamente", "success");
+      if (editing) {
+        await updateFormulario(editing.id, formData);
+        setToast({ title: "Formulario actualizado", description: "Los cambios se guardaron correctamente.", type: "success" });
       } else {
         await createFormulario(formData);
-        showToast("Éxito", "Formulario creado correctamente", "success");
+        setToast({ title: "Formulario creado", description: "El nuevo formulario está disponible.", type: "success" });
       }
 
       resetForm();
       await loadData();
     } catch (error: any) {
-      showToast("Error", error.response?.data?.error || "Error al guardar", "error");
+      setToast({ title: "Error al guardar", description: error.response?.data?.error || "No se pudo guardar el formulario.", type: "error" });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -146,36 +145,41 @@ export default function FormulariosManager() {
       descripcion: formulario.descripcion || "",
       url: formulario.url,
     });
-    setImagePreview(`${API_URL}/${formulario.imagen}`);
-    setEditingId(formulario.id);
-    setShowForm(true);
+    setImagePreview(formulario.imagen);
+    setEditing(formulario);
+    setMode("edit");
   };
 
-  const handleDelete = (id: number) => {
-    setConfirmDialog({
-      show: true,
-      title: "Eliminar formulario",
-      description: "¿Estás seguro de que deseas eliminar este formulario? Esta acción no se puede deshacer.",
-      onConfirm: async () => {
-        try {
-          await deleteFormulario(id);
-          showToast("Éxito", "Formulario eliminado correctamente", "success");
-          await loadData();
-        } catch (error) {
-          showToast("Error", "No se pudo eliminar el formulario", "error");
-        }
-        setConfirmDialog({ ...confirmDialog, show: false });
-      },
-    });
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    try {
+      await deleteFormulario(confirmDelete.id);
+      await loadData();
+      setConfirmDelete(null);
+      setToast({ title: "Formulario eliminado", description: "El formulario fue eliminado correctamente.", type: "success" });
+    } catch {
+      setToast({ title: "Error al eliminar", description: "No se pudo eliminar el formulario.", type: "error" });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleToggleActivo = async (id: number) => {
     try {
-      await toggleFormularioActivo(id);
-      showToast("Éxito", "Estado actualizado correctamente", "success");
-      await loadData();
+      const result = await toggleFormularioActivo(id);
+      // Actualizar solo el formulario modificado sin recargar todo
+      setFormularios((prev) => 
+        prev.map((f) => (f.id === id ? { ...f, activo: result.activo } : f))
+      );
+      setToast({ 
+        title: "Estado actualizado", 
+        description: `Formulario ${result.activo ? "activado" : "desactivado"} correctamente.`, 
+        type: "success" 
+      });
     } catch (error) {
-      showToast("Error", "No se pudo actualizar el estado", "error");
+      console.error("Error en toggle:", error);
+      setToast({ title: "Error al actualizar", description: "No se pudo cambiar el estado del formulario.", type: "error" });
     }
   };
 
@@ -183,66 +187,112 @@ export default function FormulariosManager() {
     setForm({ titulo: "", descripcion: "", url: "" });
     setSelectedImage(null);
     setImagePreview(null);
-    setEditingId(null);
-    setShowForm(false);
+    setEditing(null);
+    setMode("list");
   };
 
   if (loading) {
     return (
       <ChakraProvider value={defaultSystem}>
-        <Flex justify="center" align="center" h="400px">
-          <Text fontSize="lg" color="gray.600">Cargando formularios...</Text>
-        </Flex>
+        <Container maxW="5xl" px={6} py={4}>
+          <Flex justify="center" align="center" h="400px" direction="column" gap={4}>
+            <Spinner size="xl" color="blue.500" />
+            <Text fontSize="md" color="gray.600">Cargando formularios...</Text>
+          </Flex>
+        </Container>
+      </ChakraProvider>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <ChakraProvider value={defaultSystem}>
+        <Container maxW="5xl" px={6} py={4}>
+          <Box
+            bg="red.50"
+            border="1px solid"
+            borderColor="red.200"
+            borderRadius="xl"
+            p={6}
+            textAlign="center"
+          >
+            <Icon fontSize="3xl" color="red.500" mb={3}><LuFileText /></Icon>
+            <Text fontSize="lg" fontWeight="bold" color="red.700" mb={2}>
+              Error de conexión
+            </Text>
+            <Text color="red.600" fontSize="sm" mb={4}>
+              {loadError}
+            </Text>
+            <Button onClick={loadData} colorScheme="red" size="sm">
+              Reintentar
+            </Button>
+          </Box>
+        </Container>
       </ChakraProvider>
     );
   }
 
   return (
     <ChakraProvider value={defaultSystem}>
-      <Box>
-        {showAlert && (
+      <Container maxW="5xl" px={6} py={4}>
+        {toast && (
           <Toast
-            title={alertConfig.title}
-            description={alertConfig.description}
-            type={alertConfig.type}
-            onClose={() => setShowAlert(false)}
+            title={toast.title}
+            description={toast.description}
+            type={toast.type}
+            onClose={() => setToast(null)}
           />
         )}
 
-        {confirmDialog.show && (
+        {confirmDelete && (
           <ConfirmDialog
-            title={confirmDialog.title}
-            description={confirmDialog.description}
-            onConfirm={confirmDialog.onConfirm}
-            onCancel={() => setConfirmDialog({ ...confirmDialog, show: false })}
+            title="Eliminar formulario"
+            description={`¿Estás seguro de que deseas eliminar "${confirmDelete.titulo}"? Esta acción no se puede deshacer.`}
+            onConfirm={handleDelete}
+            onCancel={() => setConfirmDelete(null)}
+            loading={deleting}
           />
         )}
 
         {/* Header */}
-        <Flex justifyContent="space-between" alignItems="center" mb={6}>
-          <Box>
-            <Heading size="xl" color="gray.900">Formularios y Encuestas</Heading>
-            <Text color="gray.600" fontSize="sm" mt={1}>
+        <Flex justifyContent="center" alignItems="center" gap={4} mb={8} direction={{ base: "column", md: "row" }}>
+          <Box textAlign={{ base: "center", md: "left" }} flex={1}>
+            <Flex align="center" gap={3} justify={{ base: "center", md: "flex-start" }} mb={2}>
+              <Box
+                bg="linear-gradient(135deg, #005a9c 0%, #003d6b 100%)"
+                p={2.5}
+                borderRadius="lg"
+                display="inline-flex"
+              >
+                <Icon fontSize="xl" color="white"><LuFileText /></Icon>
+              </Box>
+              <Text fontSize="2xl" fontWeight="bold" color="gray.900">
+                Formularios y Encuestas
+              </Text>
+            </Flex>
+            <Text color="gray.600" fontSize="sm">
               Gestiona los enlaces a Google Forms que verán los usuarios
             </Text>
           </Box>
           <Button
-            onClick={() => setShowForm(!showForm)}
-            bg={showForm ? "red.500" : "blue.500"}
+            onClick={() => mode === "list" ? setMode("create") : resetForm()}
+            size="sm"
+            borderRadius="lg"
+            bg={mode === "list" ? "linear-gradient(135deg, #005a9c 0%, #003d6b 100%)" : "gray.500"}
             color="white"
-            _hover={{ bg: showForm ? "red.600" : "blue.600" }}
-            size="md"
+            shadow="md"
+            _hover={{ transform: "translateY(-1px)", shadow: "lg" }}
           >
-            <Icon fontSize="lg" mr={2}>{showForm ? <LuEyeOff /> : <LuPlus />}</Icon>
-            {showForm ? "Cancelar" : "Nuevo Formulario"}
+            <Icon mr={2}><LuPlus /></Icon>
+            {mode === "list" ? "Nuevo Formulario" : "Cancelar"}
           </Button>
         </Flex>
 
         {/* Formulario de creación/edición */}
-        {showForm && (
+        {(mode === "create" || mode === "edit") && (
           <FormularioForm
             form={form}
-            editingId={editingId}
+            editingId={editing?.id || null}
             selectedImage={selectedImage}
             imagePreview={imagePreview}
             onFormChange={handleFormChange}
@@ -253,40 +303,54 @@ export default function FormulariosManager() {
         )}
 
         {/* Lista de formularios */}
-        <Box>
-          {formularios.length === 0 ? (
-            <Box
-              bg="white"
-              borderRadius="xl"
-              p={8}
-              textAlign="center"
-              border="2px dashed"
-              borderColor="gray.300"
-            >
-              <Icon fontSize="4xl" color="gray.400" mb={3}><LuFileText /></Icon>
-              <Text fontSize="lg" fontWeight="bold" color="gray.700" mb={2}>
-                No hay formularios
-              </Text>
-              <Text color="gray.500" fontSize="sm">
-                Crea tu primer formulario haciendo clic en "Nuevo Formulario"
-              </Text>
-            </Box>
-          ) : (
-            <Box display="grid" gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={6}>
-              {formularios.map((formulario) => (
-                <FormularioCard
-                  key={formulario.id}
-                  formulario={formulario}
-                  apiUrl={API_URL}
-                  onToggle={handleToggleActivo}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              ))}
-            </Box>
-          )}
-        </Box>
-      </Box>
+        {mode === "list" && (
+          <Box>
+            {formularios.length === 0 ? (
+              <Box
+                bg="white"
+                borderRadius="xl"
+                p={12}
+                textAlign="center"
+                border="2px dashed"
+                borderColor="gray.300"
+              >
+                <Icon fontSize="5xl" color="gray.400" mb={4}><LuFileText /></Icon>
+                <Text fontSize="xl" fontWeight="bold" color="gray.700" mb={2}>
+                  No hay formularios
+                </Text>
+                <Text color="gray.500" fontSize="sm" mb={4}>
+                  Crea tu primer formulario haciendo clic en "Nuevo Formulario"
+                </Text>
+                <Button
+                  onClick={() => setMode("create")}
+                  size="sm"
+                  bg="linear-gradient(135deg, #005a9c 0%, #003d6b 100%)"
+                  color="white"
+                  borderRadius="lg"
+                >
+                  <Icon mr={2}><LuPlus /></Icon>
+                  Crear primer formulario
+                </Button>
+              </Box>
+            ) : (
+              <Box display="grid" gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={6}>
+                {formularios.map((formulario) => (
+                  <FormularioCard
+                    key={formulario.id}
+                    formulario={formulario}
+                    onToggle={handleToggleActivo}
+                    onEdit={handleEdit}
+                    onDelete={(id) => {
+                      const form = formularios.find(f => f.id === id);
+                      if (form) setConfirmDelete(form);
+                    }}
+                  />
+                ))}
+              </Box>
+            )}
+          </Box>
+        )}
+      </Container>
     </ChakraProvider>
   );
 }

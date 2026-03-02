@@ -2,10 +2,77 @@ import { useState, useEffect } from "react";
 import { getFormulariosActivos, type Formulario } from "../services/GetInfo.service";
 import { API_URL } from "../utils/const";
 
+function FormularioModal({ formulario, onClose }: { formulario: Formulario; onClose: () => void }) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl overflow-hidden max-w-3xl w-full shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Imagen */}
+        <div className="w-full bg-black flex items-center justify-center relative" style={{ maxHeight: "60vh" }}>
+          <img
+            src={formulario.imagen}
+            alt={formulario.titulo}
+            className="w-full object-contain"
+            style={{ maxHeight: "60vh" }}
+          />
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white rounded-full w-9 h-9 flex items-center justify-center transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Info */}
+        <div className="p-6">
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">{formulario.titulo}</h3>
+          {formulario.descripcion && (
+            <p className="text-gray-600 mb-4">{formulario.descripcion}</p>
+          )}
+          {formulario.fecha_registro && (
+            <p className="text-xs text-gray-400 mb-4">
+              Publicado: {new Date(formulario.fecha_registro).toLocaleDateString("es-ES", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          )}
+          <a
+            href={formulario.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center w-full gap-2 px-5 py-3 bg-linear-to-r from-[#005a9c] to-[#003d6b] hover:from-[#004080] hover:to-[#00295a] text-white rounded-xl font-medium transition-all shadow-lg hover:shadow-xl"
+          >
+            Completar formulario
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function FormulariosPublicos() {
   const [formularios, setFormularios] = useState<Formulario[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedFormulario, setSelectedFormulario] = useState<Formulario | null>(null);
 
   useEffect(() => {
     loadData();
@@ -42,7 +109,7 @@ export default function FormulariosPublicos() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f2f4f7] py-16 px-4">
+    <div className="min-h-screen bg-[#f2f4f7] py-16 px-4 mt-20">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -122,13 +189,24 @@ export default function FormulariosPublicos() {
                 className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 group"
               >
                 {/* Imagen */}
-                <div className="relative h-48 overflow-hidden">
+                <div
+                  className="relative h-48 overflow-hidden cursor-pointer"
+                  onClick={() => setSelectedFormulario(formulario)}
+                >
                   <img
-                    src={`${formulario.imagen}`}
+                    src={formulario.imagen}
                     alt={formulario.titulo}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent"></div>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3">
+                      <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="p-6">
@@ -171,6 +249,14 @@ export default function FormulariosPublicos() {
               </div>
             ))}
           </div>
+        )}
+
+        {/* Modal */}
+        {selectedFormulario && (
+          <FormularioModal
+            formulario={selectedFormulario}
+            onClose={() => setSelectedFormulario(null)}
+          />
         )}
       </div>
     </div>
