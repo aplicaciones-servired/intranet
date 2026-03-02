@@ -14,6 +14,7 @@ export const usePostInfo = (
 ) => {
   const [images, setImages] = useState<File[]>([]);
   const [showAlert, setShowAlert] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
   const [alertConfig, setAlertConfig] = useState({
     title: "",
     description: "",
@@ -66,6 +67,7 @@ export const usePostInfo = (
         });
 
         setImages([]);
+        setResetKey((prev) => prev + 1);
       }
     } catch (error: any) {
       setAlertConfig({
@@ -78,5 +80,5 @@ export const usePostInfo = (
     }
   };
 
-  return { handleSubmit, setImages, showAlert, alertConfig, setShowAlert };
+  return { handleSubmit, setImages, showAlert, alertConfig, setShowAlert, resetKey };
 };

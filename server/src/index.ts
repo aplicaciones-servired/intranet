@@ -35,7 +35,12 @@ info_db.authenticate()
     console.error('❌ Error conectando a MySQL:', err.message);
   });
 
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
-});
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || 'localhost';
 
+app.listen(PORT, HOST as string, () => {
+  console.log(`🚀 Server is running on http://${HOST}:${PORT}`);
+  if (HOST === '0.0.0.0') {
+    console.log('📡 Servidor accesible desde la red local');
+  }
+});

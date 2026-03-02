@@ -49,7 +49,7 @@ export default function FormComponent() {
         items: categoriasApi.map((c) => ({ label: c.label, value: c.value })),
     });
 
-    const { handleSubmit, setImages, showAlert, alertConfig, setShowAlert } = usePostInfo(form, setForm);
+    const { handleSubmit, setImages, showAlert, alertConfig, setShowAlert, resetKey } = usePostInfo(form, setForm);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -114,7 +114,7 @@ export default function FormComponent() {
                                     <Heading size="lg" color="gray.900">Seleccionar Imágenes</Heading>
                                 </Flex>
 
-                                <InsertComponent onFilesChange={setImages} />
+                                <InsertComponent key={resetKey} onFilesChange={setImages} />
                             </Box>
                         </GridItem>
 
