@@ -74,7 +74,7 @@ export async function enviarNotificacionAdmin({
           </table>
           ${adminUrl ? `
           <div style="text-align: center; margin-bottom: 20px;">
-            <a href="${adminUrl}/admin/CartasLaborales"
+            <a href="${adminUrl}"
               style="display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #005a9c 0%, #003d6b 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
               Ir al panel de administración →
             </a>
@@ -88,6 +88,55 @@ export async function enviarNotificacionAdmin({
         </div>
         <div style="background: #f9fafb; padding: 14px; border-radius: 0 0 8px 8px; border: 1px solid #e5e7eb; border-top: none; text-align: center;">
           <p style="color: #9ca3af; font-size: 11px; margin: 0;">Sistema Intranet — Notificación automática</p>
+        </div>
+      </div>
+    `,
+  });
+}
+
+interface OpcionesRechazo {
+  para: string;
+  nombreDestinatario: string;
+  empresa: string;
+  motivo?: string;
+}
+
+export async function enviarRechazoCartaLaboral({
+  para,
+  nombreDestinatario,
+  empresa,
+  motivo,
+}: OpcionesRechazo): Promise<void> {
+  await transporter.sendMail({
+    from: `"${empresa}" <${process.env.EMAIL_USER}>`,
+    to: para,
+    subject: `Solicitud de carta laboral — ${empresa}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #005a9c 0%, #003d6b 100%); padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 22px;">${empresa}</h1>
+          <p style="color: rgba(255,255,255,0.85); margin: 6px 0 0; font-size: 13px;">Recursos Humanos</p>
+        </div>
+        <div style="background: #ffffff; padding: 28px; border: 1px solid #e5e7eb; border-top: none;">
+          <p style="color: #374151; font-size: 15px; margin: 0 0 16px;">Estimado(a) <strong>${nombreDestinatario}</strong>,</p>
+          <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0 0 20px;">
+            Luego de revisar su solicitud de <strong>Carta Laboral</strong>, lamentamos informarle que no fue posible procesarla en este momento.
+          </p>
+          ${motivo ? `
+          <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 16px; margin-bottom: 20px;">
+            <p style="color: #991b1b; font-size: 13px; font-weight: 600; margin: 0 0 6px;">Motivo:</p>
+            <p style="color: #7f1d1d; font-size: 14px; margin: 0;">${motivo}</p>
+          </div>
+          ` : ""}
+          <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0 0 20px;">
+            Si tiene dudas o desea mayor información, comuníquese directamente con el área de Recursos Humanos.
+          </p>
+          <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+            Este mensaje fue generado automáticamente por el sistema de intranet corporativa.
+          </p>
+        </div>
+        <div style="background: #f9fafb; padding: 14px; border-radius: 0 0 8px 8px; border: 1px solid #e5e7eb; border-top: none; text-align: center;">
+          <p style="color: #9ca3af; font-size: 11px; margin: 0;">${empresa} — Sistema Intranet</p>
         </div>
       </div>
     `,

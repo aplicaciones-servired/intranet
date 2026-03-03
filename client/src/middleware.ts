@@ -9,6 +9,7 @@ const isProtectedRoute = createRouteMatcher([
 const isPublicRoute = createRouteMatcher([
   "/",
   "/formularios(.*)",
+  "/carta-laboral(.*)",
   "/sign-in(.*)",
   "/sign-up(.*)",
 ]);
@@ -16,14 +17,15 @@ const isPublicRoute = createRouteMatcher([
 export const onRequest = clerkMiddleware((auth, context) => {
   const { userId, redirectToSignIn } = auth();
   const { url } = context;
-  
+
   // Si la ruta es protegida y el usuario no está autenticado
   if (isProtectedRoute(context.request) && !userId) {
-    return redirectToSignIn();
+    return redirectToSignIn({ returnBackUrl: url.pathname });
   }
 
-  // Si el usuario está autenticado y trata de acceder a sign-in/sign-up, redirigir al home
-  if (userId && (url.pathname === "/sign-in" || url.pathname === "/sign-up")) {
-    return context.redirect("/");
+  // Si el usuario está autenticado y trata de acceder a sign-in, redirigir al redirect_url o al admin
+  if (userId && url.pathname === "/sign-in") {
+    const redirectUrl = url.searchParams.get("redirect_url") ?? "/admin/Home";
+    return context.redirect(redirectUrl);
   }
 });

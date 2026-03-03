@@ -11,7 +11,7 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
 
-  integrations: [react(), clerk({ localization: esES })],
+  integrations: [react(), clerk({ localization: esES, signInUrl: '/sign-in', signUpUrl: '/sign-in' })],
   adapter: node({ mode: "standalone" }),
   output: "server",
 });

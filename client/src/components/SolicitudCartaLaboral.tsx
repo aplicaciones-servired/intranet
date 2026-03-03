@@ -179,7 +179,7 @@ export default function SolicitudCartaLaboral() {
                     key={op}
                     type="button"
                     onClick={() => handleChange("empresa", op)}
-                    className={`py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all ${
+                    className={`cursor-pointer py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all ${
                       form.empresa === op
                         ? "border-[#005a9c] bg-[#005a9c]/5 text-[#005a9c]"
                         : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"

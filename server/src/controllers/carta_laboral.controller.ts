@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import CartaLaboral from "../models/carta_laboral.model";
 import { generarCartaPDF } from "../utils/generarCartaPDF";
-import { enviarCartaLaboral, enviarNotificacionAdmin } from "../utils/enviarCorreo";
+import { enviarCartaLaboral, enviarNotificacionAdmin, enviarRechazoCartaLaboral } from "../utils/enviarCorreo";
 
 // Obtener todas las solicitudes (admin)
 export const getCartasLaborales = async (_req: Request, res: Response) => {
@@ -137,6 +137,17 @@ export const rechazarCartaLaboral = async (req: Request, res: Response) => {
       estado: "rechazado",
       observaciones: observaciones || "",
       fecha_aprobacion: new Date(),
+    });
+
+    // Notificar al solicitante del rechazo
+    const datos = carta.dataValues as typeof carta.dataValues;
+    enviarRechazoCartaLaboral({
+      para: String(datos.correo ?? ""),
+      nombreDestinatario: String(datos.nombre_completo ?? ""),
+      empresa: String(datos.empresa ?? ""),
+      motivo: observaciones || undefined,
+    }).catch((err: any) => {
+      console.error("❌ Error enviando correo de rechazo:", err?.message || err);
     });
 
     res.json({ message: "Carta laboral rechazada", carta });
