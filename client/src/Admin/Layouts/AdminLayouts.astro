@@ -2,6 +2,7 @@
 import { fade } from "astro:transitions";
 import "../../styles/global.css";
 import { AdminHeader } from "../components/AdminHeader";
+import { InactivityGuard } from "../components/InactivityGuard";
 
 // Verificar autenticación a nivel de layout
 const { userId } = Astro.locals.auth();
@@ -23,6 +24,8 @@ if (!userId) {
     <title>Intranet - Panel de Administración</title>
   </head>
   <body class="w-full h-full bg-gray-50">
+    {/* Guard de inactividad: cierra sesión tras 10 min sin actividad */}
+    <InactivityGuard client:load />
     {/* Sidebar */}
     <AdminHeader client:load />
     

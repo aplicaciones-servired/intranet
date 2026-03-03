@@ -16,7 +16,27 @@ import { info_db } from './db/db_info';
 
 const app = express();
 
-app.use(cors());
+// CORS: solo se permiten los orígenes definidos en ALLOWED_ORIGINS
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Permitir peticiones sin origin (ej. Postman, llamadas server-side)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      console.warn(`🚫 CORS bloqueado: ${origin}`);
+      return callback(new Error(`Origen no permitido por CORS: ${origin}`));
+    },
+    credentials: true,
+  })
+);
+
 app.use(log('dev'))
 app.use(express.json());
 app.use(intraRoutes);

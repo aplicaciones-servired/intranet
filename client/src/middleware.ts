@@ -24,7 +24,8 @@ export const onRequest = clerkMiddleware((auth, context) => {
   }
 
   // Si el usuario está autenticado y trata de acceder a sign-in, redirigir al redirect_url o al admin
-  if (userId && url.pathname === "/sign-in") {
+  // IMPORTANTE: no redirigir si hay __clerk_handshake, ese es el proceso interno de verificación de Clerk
+  if (userId && url.pathname === "/sign-in" && !url.searchParams.has("__clerk_handshake")) {
     const redirectUrl = url.searchParams.get("redirect_url") ?? "/admin/Home";
     return context.redirect(redirectUrl);
   }
