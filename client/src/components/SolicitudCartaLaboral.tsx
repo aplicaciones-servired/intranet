@@ -215,7 +215,7 @@ export default function SolicitudCartaLaboral() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-[#005a9c] to-[#003d6b] hover:from-[#004080] hover:to-[#00295a] disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-base transition-all shadow-lg hover:shadow-xl"
+              className="cursor-pointer w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-[#005a9c] to-[#003d6b] hover:from-[#004080] hover:to-[#00295a] disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-base transition-all shadow-lg hover:shadow-xl"
             >
               {loading ? (
                 <>
@@ -224,7 +224,7 @@ export default function SolicitudCartaLaboral() {
                 </>
               ) : (
                 <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
                   Enviar solicitud
