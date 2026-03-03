@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import CartaLaboral from "../models/carta_laboral.model";
 import { generarCartaPDF } from "../utils/generarCartaPDF";
-import { enviarCartaLaboral } from "../utils/enviarCorreo";
+import { enviarCartaLaboral, enviarNotificacionAdmin } from "../utils/enviarCorreo";
 
 // Obtener todas las solicitudes (admin)
 export const getCartasLaborales = async (_req: Request, res: Response) => {
@@ -37,6 +37,18 @@ export const createCartaLaboral = async (req: Request, res: Response) => {
       cargo,
       empresa,
       estado: "pendiente",
+    });
+
+    // Notificar al administrador en segundo plano (sin bloquear la respuesta)
+    enviarNotificacionAdmin({
+      nombre_completo,
+      cedula,
+      correo,
+      cargo,
+      empresa,
+      fecha_solicitud: new Date(),
+    }).catch((err) => {
+      console.error("❌ Error enviando notificación al admin:", err?.message || err);
     });
 
     res.status(201).json({
