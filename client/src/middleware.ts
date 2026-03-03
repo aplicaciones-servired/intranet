@@ -5,14 +5,13 @@ const isProtectedRoute = createRouteMatcher([
   "/admin(.*)",
 ]);
 
-// Define las rutas públicas (opcional, para mayor claridad)
-const isPublicRoute = createRouteMatcher([
-  "/",
-  "/formularios(.*)",
-  "/carta-laboral(.*)",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-]);
+// Solo permite redirigir a rutas internas (previene open redirect)
+function safeInternalUrl(raw: string | null, fallback = "/admin/Home"): string {
+  if (!raw) return fallback;
+  // Debe empezar con / y NO con // (que sería //evil.com)
+  if (raw.startsWith("/") && !raw.startsWith("//")) return raw;
+  return fallback;
+}
 
 export const onRequest = clerkMiddleware((auth, context) => {
   const { userId, redirectToSignIn } = auth();
@@ -26,7 +25,7 @@ export const onRequest = clerkMiddleware((auth, context) => {
   // Si el usuario está autenticado y trata de acceder a sign-in, redirigir al redirect_url o al admin
   // IMPORTANTE: no redirigir si hay __clerk_handshake, ese es el proceso interno de verificación de Clerk
   if (userId && url.pathname === "/sign-in" && !url.searchParams.has("__clerk_handshake")) {
-    const redirectUrl = url.searchParams.get("redirect_url") ?? "/admin/Home";
+    const redirectUrl = safeInternalUrl(url.searchParams.get("redirect_url"));
     return context.redirect(redirectUrl);
   }
 });

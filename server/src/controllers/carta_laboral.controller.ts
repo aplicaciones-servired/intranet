@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import CartaLaboral from "../models/carta_laboral.model";
 import { generarCartaPDF } from "../utils/generarCartaPDF";
 import { enviarCartaLaboral, enviarNotificacionAdmin, enviarRechazoCartaLaboral } from "../utils/enviarCorreo";
+import { handleServerError } from "../utils/errorHandler";
 
 // Obtener todas las solicitudes (admin)
 export const getCartasLaborales = async (_req: Request, res: Response) => {
@@ -10,8 +11,8 @@ export const getCartasLaborales = async (_req: Request, res: Response) => {
       order: [["fecha_solicitud", "DESC"]],
     });
     res.json(cartas);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    handleServerError(res, error, "getCartasLaborales");
   }
 };
 
@@ -55,8 +56,8 @@ export const createCartaLaboral = async (req: Request, res: Response) => {
       message: "Solicitud de carta laboral enviada exitosamente",
       carta: nuevaCarta,
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    handleServerError(res, error, "createCartaLaboral");
   }
 };
 
@@ -117,8 +118,8 @@ export const aprobarCartaLaboral = async (req: Request, res: Response) => {
       emailEnviado,
       carta,
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    handleServerError(res, error, "aprobarCartaLaboral");
   }
 };
 
@@ -151,8 +152,8 @@ export const rechazarCartaLaboral = async (req: Request, res: Response) => {
     });
 
     res.json({ message: "Carta laboral rechazada", carta });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    handleServerError(res, error, "rechazarCartaLaboral");
   }
 };
 
@@ -166,7 +167,7 @@ export const deleteCartaLaboral = async (req: Request, res: Response) => {
     }
     await carta.destroy();
     res.json({ message: "Solicitud eliminada" });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    handleServerError(res, error, "deleteCartaLaboral");
   }
 };

@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 
-const INACTIVITY_LIMIT = 1 * 60 * 1000; // 10 minutos
-const WARNING_BEFORE = 60 * 1000; // advertencia 1 minuto antes
-
+const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutos
+const WARNING_BEFORE = 60 * 1000;        // advertencia 1 minuto antes
 
 export function InactivityGuard() {
-  const signOut = (cb?: () => void) => window.Clerk?.signOut(cb);
+  const signOut = (cb?: () => void) => (window.Clerk as any)?.signOut(cb);
   const [showWarning, setShowWarning] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(60);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Ref para evitar stale closure en los event listeners
+  const showWarningRef = useRef(false);
 
   const clearAllTimers = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -33,11 +34,12 @@ export function InactivityGuard() {
   };
 
   const resetTimer = () => {
-    if (showWarning) return; // no resetear si ya está la advertencia activa
+    if (showWarningRef.current) return; // usa ref, no state (evita stale closure)
     clearAllTimers();
 
     // Advertencia 1 minuto antes del cierre
     warningTimerRef.current = setTimeout(() => {
+      showWarningRef.current = true;
       setShowWarning(true);
       startCountdown();
     }, INACTIVITY_LIMIT - WARNING_BEFORE);
@@ -49,6 +51,7 @@ export function InactivityGuard() {
   };
 
   const continuar = () => {
+    showWarningRef.current = false;
     setShowWarning(false);
     clearAllTimers();
     resetTimer();

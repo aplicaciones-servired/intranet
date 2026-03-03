@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Formulario from "../models/formulario.model";
 import { insertFileToMinio } from "../utils/insertMinio";
+import { handleServerError } from "../utils/errorHandler";
 
 // Obtener todos los formularios
 export const getFormularios = async (req: Request, res: Response) => {
@@ -9,8 +10,8 @@ export const getFormularios = async (req: Request, res: Response) => {
       order: [["fecha_registro", "DESC"]],
     });
     res.json(formularios);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    handleServerError(res, error, "getFormularios");
   }
 };
 
@@ -22,8 +23,8 @@ export const getFormulariosActivos = async (req: Request, res: Response) => {
       order: [["fecha_registro", "DESC"]],
     });
     res.json(formularios);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    handleServerError(res, error, "getFormulariosActivos");
   }
 };
 
@@ -63,8 +64,8 @@ export const createFormulario = async (req: any, res: Response) => {
       message: "Formulario creado exitosamente",
       formulario: nuevoFormulario,
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    handleServerError(res, error, "createFormulario");
   }
 };
 
@@ -103,8 +104,8 @@ export const updateFormulario = async (req: any, res: Response) => {
       message: "Formulario actualizado exitosamente",
       formulario,
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    handleServerError(res, error, "updateFormulario");
   }
 };
 
@@ -122,8 +123,8 @@ export const deleteFormulario = async (req: Request, res: Response) => {
     await formulario.destroy();
 
     res.json({ message: "Formulario eliminado exitosamente" });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    handleServerError(res, error, "deleteFormulario");
   }
 };
 
@@ -145,7 +146,7 @@ export const toggleFormularioActivo = async (req: Request, res: Response) => {
       message: `Formulario ${formulario.activo ? "activado" : "desactivado"} exitosamente`,
       formulario,
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    handleServerError(res, error, "toggleFormularioActivo");
   }
 };

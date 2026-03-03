@@ -52,7 +52,7 @@ export function FormularioCard({ formulario, onToggle, onEdit, onDelete }: Props
           position="absolute"
           top={3}
           right={3}
-          colorPalette={formulario.activo ? "green" : "gray"}
+          colorPalette={formulario.activo ? "green" : "red"}
           size="lg"
           variant="solid"
         >
@@ -87,11 +87,13 @@ export function FormularioCard({ formulario, onToggle, onEdit, onDelete }: Props
           <Button
             size="sm"
             variant="outline"
-            colorScheme={formulario.activo ? "gray" : "green"}
+            bgColor={formulario.activo ? "red.500" : "green.500"}
+            color={formulario.activo ? "white" : "gray.800"}
             onClick={() => onToggle(formulario.id)}
             flex={1}
           >
             <Icon>
+              {}
               {formulario.activo ? <LuToggleRight /> : <LuToggleLeft />}
             </Icon>
             {formulario.activo ? "Desactivar" : "Activar"}
