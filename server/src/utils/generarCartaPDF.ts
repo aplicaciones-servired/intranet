@@ -27,12 +27,12 @@ const DATOS_EMPRESA: Record<string, {
     razon: "GRUPO EMPRESARIAL MULTIRED S.A.S",
     nit: "805.014.543-9",
     ciudad: "Yumbo",
-    imagen: path.join(__dirname, "../../public/multired.jpeg"),
+    imagen: path.join(__dirname, "../../public/multired.png"),
     pbx: "PBX: 685 1919",
     direccion: "Carrera 34 No. 16 - 55",
     municipio: "Yumbo, Valle del cauca",
     correo: "correspondencia@grupomultired.com.co",
-    firmante: "GERALDINE CRUZ TOVAR",
+    firmante: "hola",
     cargoFirmante: "ASISTENTE DE GESTIÓN HUMANA",
   },
   Servired: {
@@ -44,7 +44,7 @@ const DATOS_EMPRESA: Record<string, {
     direccion: "Carrera 10 No. 12 - 25",
     municipio: "Jamundí, Valle del cauca",
     correo: "correspondencia@gruposervired.com.co",
-    firmante: "GERALDINE CRUZ TOVAR",
+    firmante: "hola",
     cargoFirmante: "ASISTENTE DE GESTIÓN HUMANA",
   },
 };
@@ -86,27 +86,22 @@ export function generarCartaPDF(datos: DatosCartaLaboral): Promise<Buffer> {
     const contentW = pageW - margin * 2;
 
     const { dia, mes, anio, diaLetras } = fechaTexto(datos.fecha_aprobacion);
-    const { dia: diaIng, mes: mesIng, anio: anioIng } = fechaTexto(datos.fecha_ingreso);
+    const { dia: diaIng, mes: mesIng, anio: anioIng, diaLetras: diaLetrasIng } = fechaTexto(datos.fecha_ingreso);
 
     // ── PIE DE PÁGINA (se dibuja primero con coordenadas absolutas para no afectar el flujo) ──
     const footerLines = [empresa.pbx, empresa.direccion, empresa.municipio, empresa.correo];
     const footerFontSize = 9;
     const footerLineH = 13;
-    const footerTotalH = footerLines.length * footerLineH + 6; // +6 por la línea
+    const footerTotalH = footerLines.length * footerLineH;
     const footerY = pageH - margin - footerTotalH;
     const footerW = 230;
     const footerX = pageW - margin - footerW;
 
-    doc
-      .moveTo(footerX, footerY)
-      .lineTo(pageW - margin, footerY)
-      .strokeColor("#cc0000")
-      .lineWidth(0.8)
-      .stroke();
-
-    doc.fillColor("#cc0000").fontSize(footerFontSize).font("Helvetica");
+    doc.fontSize(footerFontSize).font("Helvetica");
     footerLines.forEach((line, i) => {
-      doc.text(line, footerX, footerY + 6 + i * footerLineH, {
+      const isCorreo = line === empresa.correo;
+      doc.fillColor(isCorreo ? "#cc0000" : "#1a1a1a");
+      doc.text(line, footerX, footerY + i * footerLineH, {
         width: footerW,
         align: "right",
         lineBreak: false,
@@ -114,16 +109,16 @@ export function generarCartaPDF(datos: DatosCartaLaboral): Promise<Buffer> {
     });
 
     // ── LOGO (esquina superior derecha, coordenadas absolutas) ──
-    const logoW = 130;
+    const logoW = 180;
     const logoX = pageW - margin - logoW;
-    const logoY = margin - 15;
+    const logoY = margin - 20;
     try {
-      doc.image(empresa.imagen, logoX, logoY, { width: logoW, fit: [logoW, 60] });
+      doc.image(empresa.imagen, logoX, logoY, { width: logoW, fit: [logoW, 90] });
     } catch (_) { /* continúa sin imagen si no existe */ }
 
     // ── REINICIAR CURSOR AL INICIO DEL CONTENIDO ──
     doc.fillColor("#1a1a1a");
-    doc.y = margin + 50;
+    doc.y = margin + 90;
 
     // ── ENCABEZADO: RAZÓN SOCIAL + NIT ──
     doc
@@ -151,7 +146,8 @@ export function generarCartaPDF(datos: DatosCartaLaboral): Promise<Buffer> {
     const nombreUpper = (datos.nombre_completo ?? "").toUpperCase();
     const cargoUpper  = (datos.cargo ?? "").toUpperCase();
     const sueldoUpper = (datos.sueldo ?? "").toUpperCase();
-    const fechaIngreso = `${String(diaIng).padStart(2, "0")}/${mesIng.charAt(0).toUpperCase() + mesIng.slice(1)} de ${anioIng}`;
+    const diaLetrasIngCap = diaLetrasIng.charAt(0).toUpperCase() + diaLetrasIng.slice(1);
+    const fechaIngreso = `${diaLetrasIngCap} (${diaIng}) de ${mesIng.toUpperCase()} de ${anioIng}`;
 
     const c = { continued: true } as const;
     const end = { align: "justify" as const, lineGap: 4 };
