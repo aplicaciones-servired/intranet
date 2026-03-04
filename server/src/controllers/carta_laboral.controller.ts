@@ -65,10 +65,13 @@ export const createCartaLaboral = async (req: Request, res: Response) => {
 export const aprobarCartaLaboral = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { sueldo, observaciones } = req.body;
+    const { sueldo, observaciones, fecha_ingreso } = req.body;
 
     if (!sueldo) {
       return res.status(400).json({ error: "El sueldo es obligatorio para aprobar" });
+    }
+    if (!fecha_ingreso) {
+      return res.status(400).json({ error: "La fecha de ingreso es obligatoria para aprobar" });
     }
 
     const carta = await CartaLaboral.findByPk(Number(id));
@@ -78,11 +81,14 @@ export const aprobarCartaLaboral = async (req: Request, res: Response) => {
 
     const fechaAprobacion = new Date();
 
+    const fechaIngresoDate = new Date(fecha_ingreso);
+
     await carta.update({
       sueldo,
       observaciones: observaciones || "",
       estado: "aprobado",
       fecha_aprobacion: fechaAprobacion,
+      fecha_ingreso: fechaIngresoDate,
     });
 
     // Generar PDF y enviar por correo
@@ -96,6 +102,7 @@ export const aprobarCartaLaboral = async (req: Request, res: Response) => {
         cargo: String(datos.cargo ?? ""),
         empresa: (datos.empresa as "Multired" | "Servired") ?? "Servired",
         sueldo,
+        fecha_ingreso: fechaIngresoDate,
         fecha_aprobacion: fechaAprobacion,
       });
 

@@ -15,7 +15,7 @@ import type { CartaLaboral } from "../../../services/carta_laboral.service";
 
 interface Props {
   carta: CartaLaboral;
-  onConfirm: (sueldo: string, observaciones: string) => Promise<void>;
+  onConfirm: (sueldo: string, observaciones: string, fechaIngreso: string) => Promise<void>;
   onCancel: () => void;
   submitting: boolean;
 }
@@ -23,6 +23,7 @@ interface Props {
 export function ModalAprobar({ carta, onConfirm, onCancel, submitting }: Props) {
   const [sueldo, setSueldo] = useState(carta.sueldo || "");
   const [observaciones, setObservaciones] = useState(carta.observaciones || "");
+  const [fechaIngreso, setFechaIngreso] = useState(carta.fecha_ingreso ? carta.fecha_ingreso.slice(0, 10) : "");
 
   return (
     <Box position="fixed" inset={0} zIndex={50} display="flex" alignItems="center" justifyContent="center" p={4} bg="blackAlpha.600" backdropFilter="blur(4px)">
@@ -34,6 +35,17 @@ export function ModalAprobar({ carta, onConfirm, onCancel, submitting }: Props) 
           </Box>
           <Box p={6}>
             <VStack gap={4} align="stretch">
+              <Box>
+                <Text fontSize="sm" fontWeight="medium" color="gray.700" mb={1.5}>
+                  Fecha de ingreso <Text as="span" color="red.500">*</Text>
+                </Text>
+                <input
+                  type="date"
+                  value={fechaIngreso}
+                  onChange={(e) => setFechaIngreso(e.target.value)}
+                  style={{ width: "100%", padding: "12px 16px", border: "2px solid #e5e7eb", borderRadius: "12px", outline: "none", fontSize: "14px", boxSizing: "border-box" }}
+                />
+              </Box>
               <Box>
                 <Text fontSize="sm" fontWeight="medium" color="gray.700" mb={1.5}>
                   Salario mensual <Text as="span" color="red.500">*</Text>
@@ -68,8 +80,8 @@ export function ModalAprobar({ carta, onConfirm, onCancel, submitting }: Props) 
               <Button
                 flex={1} bg="green.500" color="white" borderRadius="xl"
                 _hover={{ bg: "green.600" }}
-                disabled={submitting || !sueldo.trim()}
-                onClick={() => onConfirm(sueldo, observaciones)}
+                disabled={submitting || !sueldo.trim() || !fechaIngreso}
+                onClick={() => onConfirm(sueldo, observaciones, fechaIngreso)}
                 loading={submitting}
               >
                 <Icon mr={2}><LuCheck /></Icon>Aprobar y enviar

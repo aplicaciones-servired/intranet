@@ -65,11 +65,11 @@ export default function CartasLaboralesManager() {
 
   useEffect(() => { loadData(); }, []);
 
-  const handleAprobar = async (sueldo: string, observaciones: string) => {
+  const handleAprobar = async (sueldo: string, observaciones: string, fechaIngreso: string) => {
     if (!selectedCarta) return;
     setSubmitting(true);
     try {
-      const res: any = await aprobarCartaLaboral(selectedCarta.id, { sueldo: sueldo.trim(), observaciones });
+      const res: any = await aprobarCartaLaboral(selectedCarta.id, { sueldo: sueldo.trim(), observaciones, fecha_ingreso: fechaIngreso });
       const enviado = res?.emailEnviado ?? true;
       setToast({
         title: "Carta aprobada",

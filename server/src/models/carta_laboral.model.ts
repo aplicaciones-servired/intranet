@@ -15,6 +15,7 @@ interface CartaLaboralAttributes {
   estado: EstadoCarta;
   fecha_solicitud?: Date;
   fecha_aprobacion?: Date;
+  fecha_ingreso?: Date;
 }
 
 class CartaLaboral extends Model<CartaLaboralAttributes> implements CartaLaboralAttributes {
@@ -29,6 +30,7 @@ class CartaLaboral extends Model<CartaLaboralAttributes> implements CartaLaboral
   declare estado: EstadoCarta;
   declare fecha_solicitud: Date;
   declare fecha_aprobacion: Date | undefined;
+  declare fecha_ingreso: Date | undefined;
 }
 
 CartaLaboral.init(
@@ -75,6 +77,10 @@ CartaLaboral.init(
       defaultValue: DataTypes.NOW,
     },
     fecha_aprobacion: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    fecha_ingreso: {
       type: DataTypes.DATE,
       allowNull: true,
     },

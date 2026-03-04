@@ -20,6 +20,7 @@ export interface CartaLaboral {
   estado: EstadoCarta;
   fecha_solicitud?: string;
   fecha_aprobacion?: string;
+  fecha_ingreso?: string;
 }
 
 export const getCartasLaborales = async (): Promise<CartaLaboral[]> => {
@@ -41,7 +42,7 @@ export const createCartaLaboral = async (data: {
 
 export const aprobarCartaLaboral = async (
   id: number,
-  data: { sueldo: string; observaciones?: string }
+  data: { sueldo: string; observaciones?: string; fecha_ingreso: string }
 ): Promise<CartaLaboral> => {
   const response = await adminAxios.patch(`${API_URL}/cartas-laborales/${id}/aprobar`, data);
   return response.data.carta as CartaLaboral;
