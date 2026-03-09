@@ -133,7 +133,7 @@ export function AdminHeader() {
 
           {/* Footer / Logout */}
           <Box mt="auto" pt={4} borderTop="1px solid rgba(148, 163, 184, 0.1)">
-            <SignOutButton>
+            <SignOutButton redirectUrl="/">
               <Link
                 display="flex"
                 alignItems="center"

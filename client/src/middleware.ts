@@ -1,4 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/astro/server";
+import { sequence } from "astro:middleware";
+import type { MiddlewareHandler } from "astro";
 
 // Define las rutas que requieren autenticación
 const isProtectedRoute = createRouteMatcher([
@@ -13,7 +15,7 @@ function safeInternalUrl(raw: string | null, fallback = "/admin/Home"): string {
   return fallback;
 }
 
-export const onRequest = clerkMiddleware((auth, context) => {
+const clerkHandler = clerkMiddleware((auth, context) => {
   const { userId, redirectToSignIn } = auth();
   const { url } = context;
 
@@ -29,3 +31,16 @@ export const onRequest = clerkMiddleware((auth, context) => {
     return context.redirect(redirectUrl);
   }
 });
+
+// Evita que el navegador cachee las páginas de /admin (deshabilita bfcache)
+// Así, al presionar "atrás" tras cerrar sesión, el servidor siempre verifica la autenticación
+const noCacheForAdmin: MiddlewareHandler = async (context, next) => {
+  const response = await next();
+  if (context.url.pathname.startsWith("/admin")) {
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    response.headers.set("Pragma", "no-cache");
+  }
+  return response;
+};
+
+export const onRequest = sequence(noCacheForAdmin, clerkHandler);
