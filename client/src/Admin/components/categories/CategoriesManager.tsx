@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import {
   Box, Flex, Text, Button, Icon, Spinner,
-  VStack, Heading, Container, ChakraProvider, defaultSystem,
+  VStack, Heading, Container, ChakraProvider, defaultSystem, Input,
 } from "@chakra-ui/react";
-import { LuPlus, LuTag } from "react-icons/lu";
+import { LuPlus, LuTag, LuSearch } from "react-icons/lu";
 import {
   getCategorias, createCategoria, updateCategoria,
   deleteCategoria, type Categoria,
@@ -25,6 +25,7 @@ export function CategoriesManager() {
   const [confirmDelete, setConfirmDelete] = useState<Categoria | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState<{ title: string; description: string; type: "success" | "error" | "warning" | "info" } | null>(null);
+  const [searchNombre, setSearchNombre] = useState("");
 
   useEffect(() => {
     if (!toast) return;
@@ -92,6 +93,10 @@ export function CategoriesManager() {
       setToast({ title: "Error al actualizar", description: "No se pudo cambiar el estado de la categoría.", type: "error" });
     }
   };
+
+  const categoriasFiltradas = categorias.filter((c) =>
+    c.label.toLowerCase().includes(searchNombre.toLowerCase())
+  );
 
   return (
     <ChakraProvider value={defaultSystem}>
@@ -166,22 +171,47 @@ export function CategoriesManager() {
               </Box>
             ) : (
               <>
+                {/* Búsqueda por nombre */}
+                <Flex mb={3} align="center" gap={2} bg="white" p={3} borderRadius="xl"
+                  border="1px solid" borderColor="gray.100" shadow="sm">
+                  <Icon color="gray.400"><LuSearch /></Icon>
+                  <Input
+                    placeholder="Buscar categoría por nombre..."
+                    value={searchNombre}
+                    onChange={(e) => setSearchNombre(e.target.value)}
+                    size="sm"
+                    border="none"
+                    _focus={{ outline: "none", boxShadow: "none" }}
+                    flex={1}
+                  />
+                  {searchNombre && (
+                    <Button size="xs" variant="ghost" onClick={() => setSearchNombre("")} color="gray.400" px={1}>✕</Button>
+                  )}
+                </Flex>
                 <Flex px={2} mb={1}>
                   <Text fontSize="xs" color="gray.400" fontWeight="medium">
-                    {categorias.length} categoría{categorias.length !== 1 ? "s" : ""}
+                    {categoriasFiltradas.length} de {categorias.length} categoría{categorias.length !== 1 ? "s" : ""}
                     {" · "}
-                    {categorias.filter((c) => c.activa).length} activa{categorias.filter((c) => c.activa).length !== 1 ? "s" : ""}
+                    {categoriasFiltradas.filter((c) => c.activa).length} activa{categoriasFiltradas.filter((c) => c.activa).length !== 1 ? "s" : ""}
                   </Text>
                 </Flex>
-                {categorias.map((cat) => (
-                  <CategoryRow
-                    key={cat.id}
-                    categoria={cat}
-                    onEdit={() => { setEditing(cat); setMode("edit"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    onDelete={() => setConfirmDelete(cat)}
-                    onToggleActiva={() => handleToggleActiva(cat)}
-                  />
-                ))}
+                {categoriasFiltradas.length === 0 ? (
+                  <Box textAlign="center" py={10} bg="white" borderRadius="2xl"
+                    border="2px dashed" borderColor="gray.200">
+                    <Text fontSize="2xl" mb={2}>🔍</Text>
+                    <Text fontWeight="semibold" color="gray.500">Sin resultados para "{searchNombre}"</Text>
+                  </Box>
+                ) : (
+                  categoriasFiltradas.map((cat) => (
+                    <CategoryRow
+                      key={cat.id}
+                      categoria={cat}
+                      onEdit={() => { setEditing(cat); setMode("edit"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                      onDelete={() => setConfirmDelete(cat)}
+                      onToggleActiva={() => handleToggleActiva(cat)}
+                    />
+                  ))
+                )}
               </>
             )}
           </VStack>

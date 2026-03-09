@@ -9,8 +9,9 @@ import {
   Spinner,
   ChakraProvider,
   defaultSystem,
+  Input,
 } from "@chakra-ui/react";
-import { LuPlus, LuFileText } from "react-icons/lu";
+import { LuPlus, LuFileText, LuSearch } from "react-icons/lu";
 import Toast from "../Toast";
 import { ConfirmDialog } from "../shared/ConfirmDialog";
 import {
@@ -35,6 +36,8 @@ export default function FormulariosManager() {
   const [confirmDelete, setConfirmDelete] = useState<Formulario | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState<{ title: string; description: string; type: "success" | "error" | "warning" } | null>(null);
+  const [searchNombre, setSearchNombre] = useState("");
+  const [fechaFiltro, setFechaFiltro] = useState("");
 
   const [form, setForm] = useState({
     titulo: "",
@@ -201,6 +204,12 @@ export default function FormulariosManager() {
     setMode("list");
   };
 
+  const formulariosFiltrados = formularios.filter((f) => {
+    const matchNombre = f.titulo.toLowerCase().includes(searchNombre.toLowerCase());
+    const matchFecha = !fechaFiltro || (f.fecha_registro && f.fecha_registro.startsWith(fechaFiltro));
+    return matchNombre && matchFecha;
+  });
+
   if (loading) {
     return (
       <ChakraProvider value={defaultSystem}>
@@ -343,20 +352,64 @@ export default function FormulariosManager() {
                 </Button>
               </Box>
             ) : (
-              <Box display="grid" gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={6}>
-                {formularios.map((formulario) => (
-                  <FormularioCard
-                    key={formulario.id}
-                    formulario={formulario}
-                    onToggle={handleToggleActivo}
-                    onEdit={handleEdit}
-                    onDelete={(id) => {
-                      const form = formularios.find(f => f.id === id);
-                      if (form) setConfirmDelete(form);
-                    }}
-                  />
-                ))}
-              </Box>
+              <>
+                {/* Filtros de búsqueda */}
+                <Flex gap={3} mb={5} align="center" wrap="wrap">
+                  <Flex flex={1} minW="200px" align="center" gap={2} bg="white" p={3} borderRadius="xl"
+                    border="1px solid" borderColor="gray.100" shadow="sm">
+                    <Icon color="gray.400"><LuSearch /></Icon>
+                    <Input
+                      placeholder="Buscar por nombre..."
+                      value={searchNombre}
+                      onChange={(e) => setSearchNombre(e.target.value)}
+                      size="sm"
+                      border="none"
+                      _focus={{ outline: "none", boxShadow: "none" }}
+                    />
+                    {searchNombre && (
+                      <Button size="xs" variant="ghost" onClick={() => setSearchNombre("")} color="gray.400" px={1}>✕</Button>
+                    )}
+                  </Flex>
+                  <Flex align="center" gap={2} bg="white" p={3} borderRadius="xl"
+                    border="1px solid" borderColor="gray.100" shadow="sm">
+                    <Text fontSize="xs" color="gray.500" whiteSpace="nowrap">Fecha:</Text>
+                    <Input
+                      type="date"
+                      value={fechaFiltro}
+                      onChange={(e) => setFechaFiltro(e.target.value)}
+                      size="sm"
+                      border="none"
+                      _focus={{ outline: "none", boxShadow: "none" }}
+                    />
+                    {fechaFiltro && (
+                      <Button size="xs" variant="ghost" onClick={() => setFechaFiltro("")} color="gray.400" px={1}>✕</Button>
+                    )}
+                  </Flex>
+                </Flex>
+                {formulariosFiltrados.length === 0 ? (
+                  <Box bg="white" borderRadius="xl" p={10} textAlign="center"
+                    border="2px dashed" borderColor="gray.200">
+                    <Text fontSize="2xl" mb={2}>🔍</Text>
+                    <Text fontWeight="bold" color="gray.600">Sin resultados</Text>
+                    <Text fontSize="sm" color="gray.400" mt={1}>Ningún formulario coincide con los filtros aplicados.</Text>
+                  </Box>
+                ) : (
+                  <Box display="grid" gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={6}>
+                    {formulariosFiltrados.map((formulario) => (
+                      <FormularioCard
+                        key={formulario.id}
+                        formulario={formulario}
+                        onToggle={handleToggleActivo}
+                        onEdit={handleEdit}
+                        onDelete={(id) => {
+                          const form = formularios.find(f => f.id === id);
+                          if (form) setConfirmDelete(form);
+                        }}
+                      />
+                    ))}
+                  </Box>
+                )}
+              </>
             )}
           </Box>
         )}

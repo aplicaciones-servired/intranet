@@ -10,8 +10,9 @@ import {
   ChakraProvider,
   defaultSystem,
   VStack,
+  Input,
 } from "@chakra-ui/react";
-import { LuClipboardList } from "react-icons/lu";
+import { LuClipboardList, LuSearch } from "react-icons/lu";
 import Toast from "../Toast";
 import { ConfirmDialog } from "../shared/ConfirmDialog";
 import {
@@ -43,6 +44,8 @@ export default function CartasLaboralesManager() {
   const [deleting, setDeleting] = useState(false);
 
   const [filtro, setFiltro] = useState<EstadoCarta | "todos">("todos");
+  const [searchNombre, setSearchNombre] = useState("");
+  const [fechaFiltro, setFechaFiltro] = useState("");
 
   useEffect(() => {
     if (!toast) return;
@@ -117,7 +120,17 @@ export default function CartasLaboralesManager() {
     }
   };
 
-  const cartasFiltradas = filtro === "todos" ? cartas : cartas.filter((c) => c.estado === filtro);
+  const cartasFiltradas = cartas
+    .filter((c) => filtro === "todos" || c.estado === filtro)
+    .filter((c) =>
+      !searchNombre ||
+      c.nombre_completo.toLowerCase().includes(searchNombre.toLowerCase()) ||
+      c.cedula.toLowerCase().includes(searchNombre.toLowerCase()) ||
+      c.cargo.toLowerCase().includes(searchNombre.toLowerCase())
+    )
+    .filter((c) =>
+      !fechaFiltro || (c.fecha_solicitud && c.fecha_solicitud.startsWith(fechaFiltro))
+    );
   const counts = {
     todos: cartas.length,
     pendiente: cartas.filter((c) => c.estado === "pendiente").length,
@@ -186,11 +199,45 @@ export default function CartasLaboralesManager() {
 
         <CartasFiltros filtro={filtro} counts={counts} onChange={setFiltro} />
 
+        {/* Filtros de búsqueda */}
+        <Flex gap={3} mb={5} mt={4} align="center" wrap="wrap">
+          <Flex flex={1} minW="200px" align="center" gap={2} bg="white" p={3} borderRadius="xl"
+            border="1px solid" borderColor="gray.100" shadow="sm">
+            <Icon color="gray.400"><LuSearch /></Icon>
+            <Input
+              placeholder="Buscar por nombre, cédula o cargo..."
+              value={searchNombre}
+              onChange={(e) => setSearchNombre(e.target.value)}
+              size="sm"
+              border="none"
+              _focus={{ outline: "none", boxShadow: "none" }}
+            />
+            {searchNombre && (
+              <Button size="xs" variant="ghost" onClick={() => setSearchNombre("")} color="gray.400" px={1}>✕</Button>
+            )}
+          </Flex>
+          <Flex align="center" gap={2} bg="white" p={3} borderRadius="xl"
+            border="1px solid" borderColor="gray.100" shadow="sm">
+            <Text fontSize="xs" color="gray.500" whiteSpace="nowrap">Fecha solicitud:</Text>
+            <Input
+              type="date"
+              value={fechaFiltro}
+              onChange={(e) => setFechaFiltro(e.target.value)}
+              size="sm"
+              border="none"
+              _focus={{ outline: "none", boxShadow: "none" }}
+            />
+            {fechaFiltro && (
+              <Button size="xs" variant="ghost" onClick={() => setFechaFiltro("")} color="gray.400" px={1}>✕</Button>
+            )}
+          </Flex>
+        </Flex>
+
         {cartasFiltradas.length === 0 ? (
           <Box bg="white" borderRadius="xl" p={12} textAlign="center" border="2px dashed" borderColor="gray.300">
             <Icon fontSize="5xl" color="gray.300" mb={4}><LuClipboardList /></Icon>
             <Text fontSize="xl" fontWeight="bold" color="gray.600" mb={2}>
-              No hay solicitudes{filtro !== "todos" ? ` con estado "${filtro}"` : ""}
+              No hay solicitudes{filtro !== "todos" ? ` con estado "${filtro}"` : ""}{searchNombre ? ` para "${searchNombre}"` : ""}
             </Text>
             <Text color="gray.400" fontSize="sm">Las solicitudes enviadas desde el portal apareceran aqui</Text>
           </Box>

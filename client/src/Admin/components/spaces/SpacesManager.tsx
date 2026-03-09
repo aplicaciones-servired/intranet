@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import {
-  Box, Flex, Text, Button, Icon, VStack, Spinner, Badge, Container,
+  Box, Flex, Text, Button, Icon, VStack, Spinner, Badge, Container, Input,
 } from "@chakra-ui/react";
-import { LuPlus, LuLayoutDashboard } from "react-icons/lu";
+import { LuPlus, LuLayoutDashboard, LuSearch } from "react-icons/lu";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import Toast from "../Toast";
 
@@ -28,6 +28,7 @@ function SpacesManagerInner() {
   const [confirmDelete, setConfirmDelete] = useState<Espacio | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState<{ title: string; description: string; type: "success" | "error" | "warning" | "info" } | null>(null);
+  const [searchNombre, setSearchNombre] = useState("");
 
   useEffect(() => {
     if (!toast) return;
@@ -119,6 +120,10 @@ function SpacesManagerInner() {
     setEditing(null);
   };
 
+  const espaciosFiltrados = espacios.filter((e) =>
+    e.nombre.toLowerCase().includes(searchNombre.toLowerCase())
+  );
+
   return (
     <Container maxW="3xl" px={6} py={4}>
       {/* Header */}
@@ -197,18 +202,48 @@ function SpacesManagerInner() {
           </Text>
         </Box>
       ) : (
-        <VStack gap={3} align="stretch">
-          {espacios.map((esp) => (
-            <SpaceCard
-              key={esp.id}
-              espacio={esp}
-              categorias={categorias}
-              onEdit={handleEdit}
-              onDelete={setConfirmDelete}
-              onToggleVisible={handleToggleVisible}
+        <>
+          {/* Búsqueda por nombre */}
+          <Flex mb={3} align="center" gap={2} bg="white" p={3} borderRadius="xl"
+            border="1px solid" borderColor="gray.100" shadow="sm">
+            <Icon color="gray.400"><LuSearch /></Icon>
+            <Input
+              placeholder="Buscar espacio por nombre..."
+              value={searchNombre}
+              onChange={(e) => setSearchNombre(e.target.value)}
+              size="sm"
+              border="none"
+              _focus={{ outline: "none", boxShadow: "none" }}
+              flex={1}
             />
-          ))}
-        </VStack>
+            {searchNombre && (
+              <Button size="xs" variant="ghost" onClick={() => setSearchNombre("")} color="gray.400" px={1}>✕</Button>
+            )}
+          </Flex>
+          <Text fontSize="xs" color="gray.400" fontWeight="medium" mb={2} px={1}>
+            {espaciosFiltrados.length} de {espacios.length} espacio{espacios.length !== 1 ? "s" : ""}
+          </Text>
+          {espaciosFiltrados.length === 0 ? (
+            <Box bg="white" borderRadius="2xl" p={10} textAlign="center"
+              border="2px dashed" borderColor="gray.200">
+              <Text fontSize="2xl" mb={2}>🔍</Text>
+              <Text fontWeight="semibold" color="gray.500">Sin resultados para "{searchNombre}"</Text>
+            </Box>
+          ) : (
+            <VStack gap={3} align="stretch">
+              {espaciosFiltrados.map((esp) => (
+                <SpaceCard
+                  key={esp.id}
+                  espacio={esp}
+                  categorias={categorias}
+                  onEdit={handleEdit}
+                  onDelete={setConfirmDelete}
+                  onToggleVisible={handleToggleVisible}
+                />
+              ))}
+            </VStack>
+          )}
+        </>
       )}
 
       {/* Confirm delete */}
