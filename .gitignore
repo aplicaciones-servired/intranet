@@ -1,0 +1,17 @@
+# Archivos ignorados por Git
+
+# Documentación interna
+DESPLIEGUE.md
+MIDDLEWARE_Y_BUSQUEDA.md
+
+# Variables de entorno
+.env
+*.env
+server/.env
+client/.env
+
+# Dependencias
+node_modules/
+
+# Builds
+dist/

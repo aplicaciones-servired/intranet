@@ -29,6 +29,23 @@ export function AdminHeader() {
             <Text fontSize="xs" color="gray.400">Información Corporativa</Text>
           </Box>
 
+          <Link
+            href="/"
+            display="flex"
+            alignItems="center"
+            p={3}
+            mb={2}
+            borderRadius="md"
+            color="white"
+            _hover={{ bg: "rgba(59, 130, 246, 0.1)", color: "#60a5fa" }}
+            transition="all 0.2s"
+            textDecoration="none"
+          >
+            <Icon fontSize="lg" mr={3}><FiHome /></Icon>
+            <Text fontSize="sm" fontWeight="400">ir al inicio</Text>
+          </Link>
+
+
           {/* Main Navigation */}
           <Box flex={1}>
             <Link
@@ -110,6 +127,7 @@ export function AdminHeader() {
               <Icon fontSize="lg" mr={3}><LuClipboardList /></Icon>
               <Text fontSize="sm" fontWeight="400">Cartas Laborales</Text>
             </Link>
+
 
           </Box>
 
