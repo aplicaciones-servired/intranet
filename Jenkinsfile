@@ -46,7 +46,6 @@ pipeline {
       steps {
         script {
           sh 'cd ./client && npm install --legacy-peer-deps'
-          sh 'cd ./client && npm run build'
         }
       }
     }
