@@ -11,13 +11,14 @@ interface Props {
 }
 
 export function NoticiasSection({ label, catLabel, items, onOpen, initialItems = 5 }: Props) {
-  const [showAll, setShowAll] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(initialItems);
   
   if (!items.length) return null;
 
   const [hero, ...resto] = items;
-  const displayResto = showAll ? resto : resto.slice(0, initialItems - 1);
-  const hasMore = resto.length > (initialItems - 1);
+  const displayResto = resto.slice(0, visibleCount - 1);
+  const hasMore = (visibleCount - 1) < resto.length;
+  const canCollapse = visibleCount > initialItems;
   const heroVideo = isVideo(hero.poster);
 
   return (
@@ -123,31 +124,31 @@ export function NoticiasSection({ label, catLabel, items, onOpen, initialItems =
         )}
       </div>
 
-      {/* Botón Ver más / Ver menos */}
-      {hasMore && (
-        <div className="flex justify-center mt-2">
+      {/* Botones de paginación progresiva */}
+      <div className="flex justify-center gap-3 mt-2">
+        {hasMore && (
           <button
-            onClick={() => setShowAll(!showAll)}
+            onClick={() => setVisibleCount((c) => Math.min(c + initialItems, items.length))}
             className="group flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-[#ef4444] text-[#dc2626] hover:text-white border-2 border-[#ef4444] rounded-full font-medium text-sm transition-all duration-200 shadow-sm hover:shadow-md"
           >
-            {showAll ? (
-              <>
-                <span>Ver menos</span>
-                <svg className="w-4 h-4 transform group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
-                </svg>
-              </>
-            ) : (
-              <>
-                <span>Ver más ({resto.length - (initialItems - 1)} restantes)</span>
-                <svg className="w-4 h-4 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                </svg>
-              </>
-            )}
+            <span>Ver más ({resto.length - (visibleCount - 1)} restantes)</span>
+            <svg className="w-4 h-4 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
-        </div>
-      )}
+        )}
+        {canCollapse && (
+          <button
+            onClick={() => setVisibleCount(initialItems)}
+            className="group flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-100 text-gray-500 border-2 border-gray-200 rounded-full font-medium text-sm transition-all duration-200 shadow-sm"
+          >
+            <span>Ver menos</span>
+            <svg className="w-4 h-4 transform group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+        )}
+      </div>
     </section>
   );
 }

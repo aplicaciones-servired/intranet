@@ -11,12 +11,13 @@ interface Props {
 }
 
 export function DestacadaAside({ espacio, catMeta, items, onOpen, initialItems = 5 }: Props) {
-  const [showAll, setShowAll] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(initialItems);
   
   if (!items.length) return null;
 
-  const displayItems = showAll ? items : items.slice(0, initialItems);
-  const hasMore = items.length > initialItems;
+  const displayItems = items.slice(0, visibleCount);
+  const hasMore = visibleCount < items.length;
+  const canCollapse = visibleCount > initialItems;
 
   return (
     <div className="flex flex-col gap-3">
@@ -77,29 +78,31 @@ export function DestacadaAside({ espacio, catMeta, items, onOpen, initialItems =
       </div>
     </aside>
 
-    {/* Botón Ver más / Ver menos */}
-    {hasMore && (
-      <button
-        onClick={() => setShowAll(!showAll)}
-        className="group flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-[#005a9c] text-[#005a9c] hover:text-white border border-[#005a9c] rounded-lg font-medium text-xs transition-all duration-200 shadow-sm hover:shadow-md"
-      >
-        {showAll ? (
-          <>
-            <span>Ver menos</span>
-            <svg className="w-3.5 h-3.5 transform group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
-            </svg>
-          </>
-        ) : (
-          <>
-            <span>Ver más ({items.length - initialItems})</span>
-            <svg className="w-3.5 h-3.5 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-            </svg>
-          </>
-        )}
-      </button>
-    )}
+    {/* Botones de paginación progresiva */}
+    <div className="flex flex-col gap-2">
+      {hasMore && (
+        <button
+          onClick={() => setVisibleCount((c) => Math.min(c + initialItems, items.length))}
+          className="group flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-[#005a9c] text-[#005a9c] hover:text-white border border-[#005a9c] rounded-lg font-medium text-xs transition-all duration-200 shadow-sm hover:shadow-md"
+        >
+          <span>Ver más ({items.length - visibleCount})</span>
+          <svg className="w-3.5 h-3.5 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      )}
+      {canCollapse && (
+        <button
+          onClick={() => setVisibleCount(initialItems)}
+          className="group flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-gray-100 text-gray-500 border border-gray-200 rounded-lg font-medium text-xs transition-all duration-200 shadow-sm"
+        >
+          <span>Ver menos</span>
+          <svg className="w-3.5 h-3.5 transform group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+          </svg>
+        </button>
+      )}
+    </div>
   </div>
   );
 }

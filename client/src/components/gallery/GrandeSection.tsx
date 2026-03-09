@@ -11,12 +11,13 @@ interface Props {
 }
 
 export function GrandeSection({ label, catLabel, items, onOpen, initialItems = 4 }: Props) {
-  const [showAll, setShowAll] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(initialItems);
   
   if (!items.length) return null;
 
-  const displayItems = showAll ? items : items.slice(0, initialItems);
-  const hasMore = items.length > initialItems;
+  const displayItems = items.slice(0, visibleCount);
+  const hasMore = visibleCount < items.length;
+  const canCollapse = visibleCount > initialItems;
 
   return (
     <section className="col-span-full flex flex-col gap-4">
@@ -84,31 +85,31 @@ export function GrandeSection({ label, catLabel, items, onOpen, initialItems = 4
         })}
       </div>
 
-      {/* Botón Ver más / Ver menos */}
-      {hasMore && (
-        <div className="flex justify-center mt-2">
+      {/* Botones de paginación progresiva */}
+      <div className="flex justify-center gap-3 mt-2">
+        {hasMore && (
           <button
-            onClick={() => setShowAll(!showAll)}
+            onClick={() => setVisibleCount((c) => Math.min(c + initialItems, items.length))}
             className="group flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-[#14b8a6] text-[#0f766e] hover:text-white border-2 border-[#14b8a6] rounded-full font-medium text-sm transition-all duration-200 shadow-sm hover:shadow-md"
           >
-            {showAll ? (
-              <>
-                <span>Ver menos</span>
-                <svg className="w-4 h-4 transform group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
-                </svg>
-              </>
-            ) : (
-              <>
-                <span>Ver más ({items.length - initialItems} restantes)</span>
-                <svg className="w-4 h-4 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                </svg>
-              </>
-            )}
+            <span>Ver más ({items.length - visibleCount} restantes)</span>
+            <svg className="w-4 h-4 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
-        </div>
-      )}
+        )}
+        {canCollapse && (
+          <button
+            onClick={() => setVisibleCount(initialItems)}
+            className="group flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-100 text-gray-500 border-2 border-gray-200 rounded-full font-medium text-sm transition-all duration-200 shadow-sm"
+          >
+            <span>Ver menos</span>
+            <svg className="w-4 h-4 transform group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+        )}
+      </div>
     </section>
   );
 }
