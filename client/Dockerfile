@@ -12,7 +12,7 @@ COPY . .
 # Inyectar variables de entorno DURANTE EL BUILD
 ENV PUBLIC_URL_API=/api
 
-RUN npx tsc --skipLibCheck --noEmit && npx astro build
+RUN npm run build
 
 # Etapa final (servidor SSR)
 FROM node:20-alpine
