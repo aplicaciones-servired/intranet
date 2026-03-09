@@ -11,4 +11,5 @@ export const categories = createListCollection({
     ],
 })
 
+export const URL_API_LOGIN = '/api/v2'
 export const API_URL = import.meta.env.PUBLIC_URL_API;

@@ -1,39 +1,43 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/astro/server";
 import { sequence } from "astro:middleware";
 import type { MiddlewareHandler } from "astro";
+import { verifySession, SESSION_COOKIE } from "./lib/session";
 
-// Define las rutas que requieren autenticación
-const isProtectedRoute = createRouteMatcher([
-  "/admin(.*)",
-]);
+// Rutas que requieren sesión activa
+const isAdminRoute = (pathname: string) => pathname.startsWith("/admin");
+const isSignIn = (pathname: string) => pathname === "/sign-in";
 
 // Solo permite redirigir a rutas internas (previene open redirect)
-function safeInternalUrl(raw: string | null, fallback = "/admin/Home"): string {
+function safeInternalUrl(raw: string | null, fallback = "/admin/CartasLaborales"): string {
   if (!raw) return fallback;
-  // Debe empezar con / y NO con // (que sería //evil.com)
   if (raw.startsWith("/") && !raw.startsWith("//")) return raw;
   return fallback;
 }
 
-const clerkHandler = clerkMiddleware((auth, context) => {
-  const { userId, redirectToSignIn } = auth();
+const authHandler: MiddlewareHandler = async (context, next) => {
   const { url } = context;
+  const token = context.cookies.get(SESSION_COOKIE)?.value ?? null;
+  const user = token ? await verifySession(token) : null;
 
-  // Si la ruta es protegida y el usuario no está autenticado
-  if (isProtectedRoute(context.request) && !userId) {
-    return redirectToSignIn({ returnBackUrl: url.pathname });
+  // Exponer el usuario en locals para los layouts
+  (context.locals as any).user = user;
+  (context.locals as any).userId = user?.username ?? null;
+
+  // Ruta protegida sin sesión → redirigir al login
+  if (isAdminRoute(url.pathname) && !user) {
+    const returnTo = encodeURIComponent(url.pathname);
+    return context.redirect(`/sign-in?redirect_url=${returnTo}`);
   }
 
-  // Si el usuario está autenticado y trata de acceder a sign-in, redirigir al redirect_url o al admin
-  // IMPORTANTE: no redirigir si hay __clerk_handshake, ese es el proceso interno de verificación de Clerk
-  if (userId && url.pathname === "/sign-in" && !url.searchParams.has("__clerk_handshake")) {
+  // Ya autenticado intentando ir al login → redirigir al admin
+  if (isSignIn(url.pathname) && user) {
     const redirectUrl = safeInternalUrl(url.searchParams.get("redirect_url"));
     return context.redirect(redirectUrl);
   }
-});
+
+  return next();
+};
 
 // Evita que el navegador cachee las páginas de /admin (deshabilita bfcache)
-// Así, al presionar "atrás" tras cerrar sesión, el servidor siempre verifica la autenticación
 const noCacheForAdmin: MiddlewareHandler = async (context, next) => {
   const response = await next();
   if (context.url.pathname.startsWith("/admin")) {
@@ -43,4 +47,4 @@ const noCacheForAdmin: MiddlewareHandler = async (context, next) => {
   return response;
 };
 
-export const onRequest = sequence(noCacheForAdmin, clerkHandler);
+export const onRequest = sequence(noCacheForAdmin, authHandler);

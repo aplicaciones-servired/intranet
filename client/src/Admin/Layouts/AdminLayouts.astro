@@ -3,13 +3,10 @@ import { fade } from "astro:transitions";
 import "../../styles/global.css";
 import { AdminHeader } from "../components/AdminHeader";
 import { InactivityGuard } from "../components/InactivityGuard";
-import { AuthTokenSync } from "../components/AuthTokenSync";
 
-// Verificar autenticación a nivel de layout
-const { userId } = Astro.locals.auth();
-
-// Si no hay usuario autenticado, redirigir (el middleware también lo hace, esto es una capa extra)
-if (!userId) {
+// Verificar autenticación a nivel de layout (el middleware ya lo garantiza, esto es una capa extra)
+const user = (Astro.locals as any).user;
+if (!user) {
   return Astro.redirect("/sign-in");
 }
 ---
@@ -25,8 +22,6 @@ if (!userId) {
     <title>Intranet - Panel de Administración</title>
   </head>
   <body class="w-full h-full bg-gray-50">
-    {/* Sincroniza el token de Clerk para peticiones admin autenticadas */}
-    <AuthTokenSync client:load />
     {/* Guard de inactividad: cierra sesión tras 10 min sin actividad */}
     <InactivityGuard client:load />
     {/* Sidebar */}

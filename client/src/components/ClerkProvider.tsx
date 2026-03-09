@@ -1,17 +1,5 @@
-import React from 'react'
-import { ClerkProvider } from '@clerk/clerk-react'
-
-// Import your Publishable Key
-const PUBLISHABLE_KEY = import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY
-
-if (!PUBLISHABLE_KEY) {
-    throw new Error('la public key de Clerk no está definida. Asegúrate de tener PUBLIC_CLERK_PUBLISHABLE_KEY en tu archivo .env')
-}
-
+// Este componente ya no es necesario tras migrar de Clerk a autenticación JWT propia
+import React from "react";
 export function ClerkProviderWrapper({ children }: { children: React.ReactNode }) {
-    return (
-        <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-            {children}
-        </ClerkProvider>
-    )
-} 
+  return <>{children}</>;
+}

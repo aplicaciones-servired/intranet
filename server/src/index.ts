@@ -3,7 +3,7 @@ import cors from 'cors'
 import log from 'morgan'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
-import { clerkMiddleware } from '@clerk/express'
+import cookieParser from 'cookie-parser'
 import { intraRoutes } from './routes/insertImagen.routes';
 import { configRoutes } from './routes/config.routes';
 import { categoriaRoutes } from './routes/categoria.routes';
@@ -43,8 +43,8 @@ app.use(
   })
 );
 
-// Clerk middleware: verifica y lanza el contexto de autenticación en cada petición
-app.use(clerkMiddleware());
+// Cookie parser: necesario para leer __session cookie en authMiddleware
+app.use(cookieParser());
 
 // Rate limit global (DoS básico): 200 req / 15 min por IP
 const globalLimiter = rateLimit({

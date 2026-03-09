@@ -1,14 +1,15 @@
 import { Flex, Link, Icon, ChakraProvider, defaultSystem, Text, Box } from "@chakra-ui/react";
-import { ClerkProvider, SignOutButton } from "@clerk/clerk-react";
 import { FiHome, FiLogOut, FiUpload } from "react-icons/fi";
 import { LuTag, LuLayoutDashboard, LuFileText, LuClipboardList } from "react-icons/lu";
 
-const PUBLISHABLE_KEY = import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY;
+async function handleLogout() {
+  await fetch("/api/auth/logout", { method: "POST" });
+  window.location.href = "/sign-in";
+}
 
 export function AdminHeader() {
   return (
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-      <ChakraProvider value={defaultSystem}>
+    <ChakraProvider value={defaultSystem}>
         <Flex
           direction="column"
           position="fixed"
@@ -134,25 +135,23 @@ export function AdminHeader() {
 
           {/* Footer / Logout */}
           <Box mt="auto" pt={4} borderTop="1px solid rgba(148, 163, 184, 0.1)">
-            <SignOutButton redirectUrl="/">
-              <Link
-                display="flex"
-                alignItems="center"
-                p={3}
-                borderRadius="md"
-                color="red.300"
-                _hover={{ bg: "rgba(239, 68, 68, 0.1)", color: "red.400" }}
-                transition="all 0.2s"
-                cursor="pointer"
-                textDecoration="none"
-              >
-                <Icon as={FiLogOut} fontSize="lg" mr={3} />
-                <Text fontSize="sm">Cerrar sesión</Text>
-              </Link>
-            </SignOutButton>
+            <Link
+              display="flex"
+              alignItems="center"
+              p={3}
+              borderRadius="md"
+              color="red.300"
+              _hover={{ bg: "rgba(239, 68, 68, 0.1)", color: "red.400" }}
+              transition="all 0.2s"
+              cursor="pointer"
+              textDecoration="none"
+              onClick={handleLogout}
+            >
+              <Icon as={FiLogOut} fontSize="lg" mr={3} />
+              <Text fontSize="sm">Cerrar sesión</Text>
+            </Link>
           </Box>
         </Flex>
       </ChakraProvider>
-    </ClerkProvider>
   );
 }

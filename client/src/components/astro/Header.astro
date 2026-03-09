@@ -1,7 +1,5 @@
 ---
-import { SignInButton } from "@clerk/astro/components";
-
-const { userId } = Astro.locals.auth();
+const userId = (Astro.locals as any).userId ?? null;
 ---
 
 <nav
@@ -25,14 +23,12 @@ const { userId } = Astro.locals.auth();
           Ir al panel
         </a>
       ) : (
-        <SignInButton
-          signUpForceRedirectUrl="/admin"
-          forceRedirectUrl="/admin/Home"
-          mode="modal"
-          class="cursor-pointer rounded-2xl text-white bg-blue-600 hover:bg-blue-700 box-border border border-transparent focus:ring-4 focus:ring-blue-300 shadow-xs font-medium leading-5 rounded-base text-sm px-3 py-2 focus:outline-none"
+        <a
+          href="/sign-in"
+          class="cursor-pointer rounded-2xl text-white bg-blue-600 hover:bg-blue-700 box-border border border-transparent focus:ring-4 focus:ring-blue-300 shadow-xs font-medium leading-5 text-sm px-3 py-2 focus:outline-none"
         >
           Iniciar sesión
-        </SignInButton>
+        </a>
       )}
 
       <button

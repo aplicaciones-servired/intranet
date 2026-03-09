@@ -3,8 +3,16 @@ import { useEffect, useRef, useState } from "react";
 const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutos
 const WARNING_BEFORE = 60 * 1000;        // advertencia 1 minuto antes
 
+async function doLogout(cb?: () => void) {
+  try {
+    await fetch("/api/auth/logout", { method: "POST" });
+  } catch {
+    // best effort
+  }
+  cb?.();
+}
+
 export function InactivityGuard() {
-  const signOut = (cb?: () => void) => (window.Clerk as any)?.signOut(cb);
   const [showWarning, setShowWarning] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(60);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -46,7 +54,7 @@ export function InactivityGuard() {
 
     // Cierre de sesión al llegar al límite
     timerRef.current = setTimeout(() => {
-      signOut(() => { window.location.href = "/sign-in"; });
+      doLogout(() => { window.location.href = "/sign-in"; });
     }, INACTIVITY_LIMIT);
   };
 
@@ -59,7 +67,7 @@ export function InactivityGuard() {
 
   const cerrarAhora = () => {
     clearAllTimers();
-    signOut(() => { window.location.href = "/sign-in"; });
+    doLogout(() => { window.location.href = "/sign-in"; });
   };
 
   useEffect(() => {

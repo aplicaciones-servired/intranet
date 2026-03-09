@@ -1,25 +1,12 @@
 import axios from "axios";
 
 /**
- * Token de sesión Clerk para peticiones admin.
- * Lo actualiza AuthTokenSync.tsx antes de cualquier llamada.
+ * Instancia de axios para operaciones admin.
+ * Envia automáticamente la cookie de sesión (__session) en cada petición.
+ * Los navegadores incluyen cookies en peticiones al mismo dominio automáticamente
+ * cuando withCredentials es true.
  */
-let _sessionToken: string | null = null;
-
-export function setAdminToken(token: string | null) {
-  _sessionToken = token;
-}
-
-/**
- * Instancia de axios que inyecta automáticamente el JWT de Clerk
- * en el header Authorization: Bearer <token> de cada petición.
- * Usar solo para operaciones que requieren autenticación (admin).
- */
-export const adminAxios = axios.create();
-
-adminAxios.interceptors.request.use((config) => {
-  if (_sessionToken) {
-    config.headers.Authorization = `Bearer ${_sessionToken}`;
-  }
-  return config;
+export const adminAxios = axios.create({
+  withCredentials: true,
 });
+
