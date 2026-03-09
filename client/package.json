@@ -6,9 +6,10 @@
     "dev": "astro dev",
     "dev:host": "astro dev --host",
     "dev:network": "astro dev --host 0.0.0.0",
-    "build": "astro build",
+    "build": "tsc --skipLibCheck --noEmit && astro build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "astro preview",
-    "astro": "astro"
+    "start": "node ./dist/server/entry.mjs --host 0.0.0.0 --port 4321"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.2",
