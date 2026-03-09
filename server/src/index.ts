@@ -63,7 +63,7 @@ info_db.authenticate()
     console.error('❌ Error conectando a MySQL:', err.message);
   });
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || 'localhost';
 
 app.listen(PORT, HOST as string, () => {
