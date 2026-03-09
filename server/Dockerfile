@@ -9,8 +9,11 @@ COPY . .
 
 RUN yarn
 
+# Compilar TypeScript durante el build
+RUN node_modules/.bin/tsc
+
 # Exponer el puerto
 EXPOSE 3000
 
-# Comando para ejecutar la aplicación
-CMD ["yarn", "start"]
+# Ejecutar el JS ya compilado
+CMD ["node", "--env-file=.env", "./dist/index.js"]
