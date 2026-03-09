@@ -64,7 +64,7 @@ info_db.authenticate()
   });
 
 const PORT = Number(process.env.PORT) || 3000;
-const HOST = process.env.HOST || 'localhost';
+const HOST = process.env.HOST || '0.0.0.0';
 
 app.listen(PORT, HOST as string, () => {
   console.log(`🚀 Server is running on http://${HOST}:${PORT}`);
