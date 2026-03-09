@@ -1,10 +1,6 @@
-import { API_URL, API_KEY } from "../utils/const";
+import { API_URL } from "../utils/const";
 import axios from "axios";
-
-// Instancia con header de autenticación para llamadas admin
-const adminAxios = axios.create({
-  headers: { "x-api-key": API_KEY },
-});
+import { adminAxios } from "../utils/adminAxios";
 
 export type EstadoCarta = "pendiente" | "aprobado" | "rechazado";
 

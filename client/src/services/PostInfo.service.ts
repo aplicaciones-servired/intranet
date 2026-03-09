@@ -1,5 +1,5 @@
-import axios from "axios";
 import { API_URL } from "../utils/const";
+import { adminAxios } from "../utils/adminAxios";
 import { useState } from "react";
 
 interface FormData {
@@ -45,7 +45,7 @@ export const usePostInfo = (
     });
 
     try {
-      const response = await axios.post(`${API_URL}/insertImagen`, formData, {
+      const response = await adminAxios.post(`${API_URL}/insertImagen`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

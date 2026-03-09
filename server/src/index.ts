@@ -1,6 +1,9 @@
 import express from 'express'
 import cors from 'cors'
 import log from 'morgan'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
+import { clerkMiddleware } from '@clerk/express'
 import { intraRoutes } from './routes/insertImagen.routes';
 import { configRoutes } from './routes/config.routes';
 import { categoriaRoutes } from './routes/categoria.routes';
@@ -15,6 +18,9 @@ import Formulario from './models/formulario.model';
 import { info_db } from './db/db_info';
 
 const app = express();
+
+// Seguridad: headers HTTP recomendados por OWASP
+app.use(helmet());
 
 // CORS: solo se permiten los orígenes definidos en ALLOWED_ORIGINS
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
@@ -37,6 +43,28 @@ app.use(
   })
 );
 
+// Clerk middleware: verifica y lanza el contexto de autenticación en cada petición
+app.use(clerkMiddleware());
+
+// Rate limit global (DoS básico): 200 req / 15 min por IP
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas peticiones, intente más tarde.' },
+});
+app.use(globalLimiter);
+
+// Rate limit estricto solo para el endpoint público de cartas laborales
+const cartaLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas solicitudes de carta laboral. Intente más tarde.' },
+});
+
 app.use(log('dev'))
 app.use(express.json());
 app.use(intraRoutes);
@@ -44,18 +72,24 @@ app.use(configRoutes);
 app.use(categoriaRoutes);
 app.use(espacioRoutes);
 app.use(formularioRoutes);
+// Aplica el rate-limit estricto solo al POST público de cartas-laborales
+app.use('/cartas-laborales', cartaLimiter);
 app.use(cartaLaboralRoutes);
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Verificar conexión y sincronizar tablas
 info_db.authenticate()
   .then(() => {
     console.log('✅ Conectado a MySQL - Base de datos: intranet');
+    // En producción NO usamos alter:true para evitar modificaciones destructivas del esquema
+    const syncOptions = isProduction ? {} : { alter: true };
     return Promise.all([
-      ConfigModel.sync({ alter: true }),
-      CategoriaModel.sync({ alter: true }),
-      EspacioModel.sync({ alter: true }),
-      Formulario.sync({ alter: true }),
-      CartaLaboral.sync({ alter: true }),
+      ConfigModel.sync(syncOptions),
+      CategoriaModel.sync(syncOptions),
+      EspacioModel.sync(syncOptions),
+      Formulario.sync(syncOptions),
+      CartaLaboral.sync(syncOptions),
     ]);
   })
   .then(() => console.log('✅ Tablas sincronizadas'))

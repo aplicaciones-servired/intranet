@@ -1,5 +1,6 @@
 import { API_URL } from "../utils/const";
 import axios from "axios";
+import { adminAxios } from "../utils/adminAxios";
 
 export type EspacioTipo = "slider" | "destacada" | "grid" | "lista" | "carrusel" | "grande" | "noticias";
 
@@ -19,15 +20,15 @@ export const getEspacios = async (): Promise<Espacio[]> => {
 };
 
 export const createEspacio = async (data: Omit<Espacio, "id">): Promise<Espacio> => {
-  const response = await axios.post(`${API_URL}/espacios`, data);
+  const response = await adminAxios.post(`${API_URL}/espacios`, data);
   return response.data as Espacio;
 };
 
 export const updateEspacio = async (id: number, data: Partial<Omit<Espacio, "id">>): Promise<Espacio> => {
-  const response = await axios.put(`${API_URL}/espacios/${id}`, data);
+  const response = await adminAxios.put(`${API_URL}/espacios/${id}`, data);
   return response.data as Espacio;
 };
 
 export const deleteEspacio = async (id: number): Promise<void> => {
-  await axios.delete(`${API_URL}/espacios/${id}`);
+  await adminAxios.delete(`${API_URL}/espacios/${id}`);
 };

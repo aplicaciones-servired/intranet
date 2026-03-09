@@ -9,6 +9,7 @@ pipeline {
     ENV_CLIENT_INTRANET = credentials('ENV_CLIENT_INTRANET')
     ENV_SERVER_INTRANET = credentials('ENV_SERVER_INTRANET')
     CLERK_SECRET_KEY_INTRANET    = credentials('CLERK_SECRET_KEY_INTRANET')
+    CLERK_PUBLISHABLE_KEY_INTRANET = credentials('CLERK_PUBLISHABLE_KEY_INTRANET')
   }
 
   stages {
@@ -21,6 +22,7 @@ pipeline {
 
           // Añadir clave Clerk al env del cliente
           def env_client_completo = env_client + "\nCLERK_SECRET_KEY=${CLERK_SECRET_KEY_INTRANET}\n"
+          def env_client_completo = env_client_completo + "PUBLIC_CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY_INTRANET}\n"
 
           writeFile file: './server/.env', text: env_server
           writeFile file: './client/.env', text: env_client_completo
@@ -30,6 +32,7 @@ pipeline {
           sh 'ls -la ./client/.env'
           sh 'cat ./client/.env | grep PUBLIC_URL_API'
           sh 'cat ./client/.env | grep CLERK_SECRET_KEY'
+          sh 'cat ./client/.env | grep PUBLIC_CLERK_PUBLISHABLE_KEY'
         }
       }
     }

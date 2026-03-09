@@ -5,10 +5,13 @@ import {
   updateEspacioController,
   deleteEspacioController,
 } from "../controllers/espacio.controller";
+import { requireClerkAuth } from "../Miderlware/authMiddleware";
 
 export const espacioRoutes = Router();
 
+// GET es público (se usa en la intranet)
 espacioRoutes.get("/espacios", getEspaciosController);
-espacioRoutes.post("/espacios", createEspacioController);
-espacioRoutes.put("/espacios/:id", updateEspacioController);
-espacioRoutes.delete("/espacios/:id", deleteEspacioController);
+// Escritura solo para admins autenticados
+espacioRoutes.post("/espacios", requireClerkAuth, createEspacioController);
+espacioRoutes.put("/espacios/:id", requireClerkAuth, updateEspacioController);
+espacioRoutes.delete("/espacios/:id", requireClerkAuth, deleteEspacioController);

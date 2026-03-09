@@ -48,21 +48,6 @@ export function AdminHeader() {
 
           {/* Main Navigation */}
           <Box flex={1}>
-            <Link
-              href="/admin/Home"
-              display="flex"
-              alignItems="center"
-              p={3}
-              mb={2}
-              borderRadius="md"
-              color="white"
-              _hover={{ bg: "rgba(59, 130, 246, 0.1)", color: "#3b82f6" }}
-              transition="all 0.2s"
-              textDecoration="none"
-            >
-              <Icon as={FiUpload} fontSize="lg" mr={3} />
-              <Text fontSize="sm" fontWeight="400">Subir Imágenes</Text>
-            </Link>
 
             <Link
               href="/admin/Categories"
@@ -94,6 +79,22 @@ export function AdminHeader() {
             >
               <Icon fontSize="lg" mr={3}><LuLayoutDashboard /></Icon>
               <Text fontSize="sm" fontWeight="400">Espacios</Text>
+            </Link>
+
+            <Link
+              href="/admin/Home"
+              display="flex"
+              alignItems="center"
+              p={3}
+              mb={2}
+              borderRadius="md"
+              color="white"
+              _hover={{ bg: "rgba(59, 130, 246, 0.1)", color: "#3b82f6" }}
+              transition="all 0.2s"
+              textDecoration="none"
+            >
+              <Icon as={FiUpload} fontSize="lg" mr={3} />
+              <Text fontSize="sm" fontWeight="400">Subir Imágenes</Text>
             </Link>
 
             <Link

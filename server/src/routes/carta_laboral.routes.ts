@@ -6,17 +6,17 @@ import {
   rechazarCartaLaboral,
   deleteCartaLaboral,
 } from "../controllers/carta_laboral.controller";
-import { requireApiKey } from "../Miderlware/authMiddleware";
+import { requireClerkAuth } from "../Miderlware/authMiddleware";
 
 const router = Router();
 
 // Rutas públicas
 router.post("/cartas-laborales", createCartaLaboral);
 
-// Rutas de administración (requieren API key)
-router.get("/cartas-laborales", requireApiKey, getCartasLaborales);
-router.patch("/cartas-laborales/:id/aprobar", requireApiKey, aprobarCartaLaboral);
-router.patch("/cartas-laborales/:id/rechazar", requireApiKey, rechazarCartaLaboral);
-router.delete("/cartas-laborales/:id", requireApiKey, deleteCartaLaboral);
+// Rutas de administración (requieren sesión Clerk)
+router.get("/cartas-laborales", requireClerkAuth, getCartasLaborales);
+router.patch("/cartas-laborales/:id/aprobar", requireClerkAuth, aprobarCartaLaboral);
+router.patch("/cartas-laborales/:id/rechazar", requireClerkAuth, rechazarCartaLaboral);
+router.delete("/cartas-laborales/:id", requireClerkAuth, deleteCartaLaboral);
 
 export default router;
