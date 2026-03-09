@@ -1,12 +1,10 @@
-import { jwtVerify } from "jose";
 import { Request, Response, NextFunction } from "express";
 
 const SESSION_COOKIE = "__session";
 
 /**
  * Middleware que protege rutas verificando el JWT de sesión (__session cookie).
- * El token fue emitido por el cliente Astro tras autenticar contra la API corporativa.
- * Se comparte el mismo JWT_SECRET entre cliente (Astro) y servidor (Express).
+ * Usa dynamic import de jose para compatibilidad con módulos CommonJS del servidor.
  */
 export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
   const token = req.cookies?.[SESSION_COOKIE];
@@ -18,6 +16,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
 
   try {
+    const { jwtVerify } = await import("jose");
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || "");
     await jwtVerify(token, secret);
     next();
