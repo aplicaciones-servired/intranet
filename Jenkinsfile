@@ -22,9 +22,13 @@ pipeline {
 
           // Añadir clave Clerk al env del cliente
           def env_client_completo = env_client + "\nCLERK_SECRET_KEY=${CLERK_SECRET_KEY_INTRANET}\n"
-          def env_client_completo = env_client_completo + "PUBLIC_CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY_INTRANET}\n"
+          env_client_completo = env_client_completo + "PUBLIC_CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY_INTRANET}\n"
 
-          writeFile file: './server/.env', text: env_server
+          // Añadir claves Clerk al env del servidor
+          def env_server_completo = env_server + "\nCLERK_SECRET_KEY=${CLERK_SECRET_KEY_INTRANET}\n"
+          env_server_completo = env_server_completo + "CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY_INTRANET}\n"
+
+          writeFile file: './server/.env', text: env_server_completo
           writeFile file: './client/.env', text: env_client_completo
 
           // Verificar
