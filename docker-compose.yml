@@ -14,6 +14,8 @@ services:
       - red-gane-int
     env_file:
       - ./server/.env
+    environment:
+      - NODE_ENV=production
 
   # --- Frontend Astro SSR (Node)
   web_intranet:
