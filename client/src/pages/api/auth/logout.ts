@@ -1,12 +1,12 @@
 import type { APIRoute } from "astro";
 import { SESSION_COOKIE } from "../../../lib/session";
-import { AUTH_API_URL } from "../../../utils/const";
+import { LOGIN_URL } from "../../../utils/const";
 
 export const POST: APIRoute = async ({ request }) => {
   // Intentar logout en la API corporativa también (best effort)
   try {
     const cookie = request.headers.get("cookie") ?? "";
-    await fetch(`${AUTH_API_URL}/logout`, { headers: { Cookie: cookie } });
+    await fetch(`${LOGIN_URL}/logout`, { headers: { Cookie: cookie } });
   } catch {
     // No interrumpir si la API corporativa no responde
   }

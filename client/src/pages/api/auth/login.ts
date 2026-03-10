@@ -1,8 +1,6 @@
 import type { APIRoute } from "astro";
 import { SESSION_COOKIE } from "../../../lib/session";
-import { AUTH_API_URL } from "../../../utils/const";
-
-
+import { LOGIN_URL } from "../../../utils/const";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -18,7 +16,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Llamar a la API corporativa
-    const loginRes = await fetch(`${AUTH_API_URL}/login`, {
+    const loginRes = await fetch(`${LOGIN_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
