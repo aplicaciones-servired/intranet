@@ -52,3 +52,6 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     res.status(401).json({ error: "Sesión inválida o expirada" });
   }
 }
+
+// Alias para compatibilidad con las rutas existentes
+export const requireClerkAuth = requireAuth;
