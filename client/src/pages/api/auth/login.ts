@@ -1,7 +1,8 @@
 import type { APIRoute } from "astro";
 import { SESSION_COOKIE } from "../../../lib/session";
+import { AUTH_API_URL } from "../../../utils/const";
 
-const AUTH_API_URL = import.meta.env.AUTH_API_URL ?? "http://localhost:9010";
+
 
 export const POST: APIRoute = async ({ request }) => {
   try {

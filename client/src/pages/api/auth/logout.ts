@@ -1,7 +1,6 @@
 import type { APIRoute } from "astro";
 import { SESSION_COOKIE } from "../../../lib/session";
-
-const AUTH_API_URL = import.meta.env.AUTH_API_URL ?? "http://localhost:9010";
+import { AUTH_API_URL } from "../../../utils/const";
 
 export const POST: APIRoute = async ({ request }) => {
   // Intentar logout en la API corporativa también (best effort)
