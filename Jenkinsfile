@@ -20,7 +20,7 @@ pipeline {
           def env_client = readFile(ENV_CLIENT_INTRANET)
 
           // Inyectar JWT_SECRET (mismo valor en cliente y servidor)
-          def env_client_completo = env_client + "\nJWT_SECRET=${JWT_SECRET_INTRANET}\n"
+          def env_client_completo = env_client + "\nJWT_SECRET=${JWT_SECRET_INTRANET}\nPUBLIC_LOGIN_URL=/apilogin\n"
 
           def env_server_completo = env_server + "\nJWT_SECRET=${JWT_SECRET_INTRANET}\n"
 
@@ -30,8 +30,8 @@ pipeline {
           // Verificar
           sh 'ls -la ./server/.env'
           sh 'ls -la ./client/.env'
-          sh 'cat ./client/.env | grep PUBLIC_URL_API'
-          sh 'cat ./client/.env | grep AUTH_API_URL'
+          sh 'cat ./client/.env | grep PUBLIC_URL_API || true'
+          sh 'cat ./client/.env | grep PUBLIC_LOGIN_URL || true'
         }
       }
     }

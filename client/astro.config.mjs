@@ -5,6 +5,7 @@ import react from '@astrojs/react';
 import node from "@astrojs/node";
 
 export default defineConfig({
+  envPrefix: ["PUBLIC_", "VITE_", "CLERK_", "PUBLIC_CLERK_"],
   vite: {
     plugins: [tailwindcss()],
   },
