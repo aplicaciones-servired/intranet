@@ -12,4 +12,4 @@ export const categories = createListCollection({
 })
 
 export const API_URL = import.meta.env.PUBLIC_URL_API;
-export const LOGIN_URL = import.meta.env.VITE_API_URL_LOGIN as string;
+export const LOGIN_URL = import.meta.env.PUBLIC_LOGIN_URL as string;
