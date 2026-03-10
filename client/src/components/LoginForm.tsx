@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AUTH_API_URL } from "../utils/const";
 
 interface Props {
   redirectUrl: string;
@@ -17,7 +18,7 @@ export default function LoginForm({ redirectUrl }: Props) {
     setError(null);
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch(`${AUTH_API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: username.trim(), password }),
