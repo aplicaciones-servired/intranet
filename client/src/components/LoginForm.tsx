@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { LOGIN_URL } from "../utils/const";
-import axios from "axios";
 
 interface Props {
   redirectUrl: string;
@@ -19,11 +17,19 @@ export default function LoginForm({ redirectUrl }: Props) {
     setError(null);
 
     try {
-      await axios.post(`${LOGIN_URL}/login`, { username: username.trim(), password });
-      window.location.href = redirectUrl;
-    } catch (err: any) {
-      const msg = err?.response?.data?.error ?? err?.response?.data?.message ?? "Credenciales inválidas";
-      setError(msg);
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: username.trim(), password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        window.location.href = redirectUrl;
+      } else {
+        setError(data.error ?? "Credenciales inválidas");
+      }
+    } catch {
+      setError("Error de conexión. Por favor intenta de nuevo.");
     } finally {
       setLoading(false);
     }
