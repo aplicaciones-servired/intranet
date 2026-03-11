@@ -20,7 +20,7 @@ pipeline {
           def env_client = readFile(ENV_CLIENT_INTRANET)
 
           // Inyectar JWT_SECRET (mismo valor en cliente y servidor)
-          def env_client_completo = env_client + "\nJWT_SECRET=${JWT_SECRET_INTRANET}\nPUBLIC_LOGIN_URL=/apilogin\n"
+          def env_client_completo = env_client + "\nJWT_SECRET=${JWT_SECRET_INTRANET}\nPUBLIC_LOGIN_URL=/apilogin\nLOGIN_API_URL=http://proxy_intranet:8081/apilogin\n"
 
           def env_server_completo = env_server + "\nJWT_SECRET=${JWT_SECRET_INTRANET}\n"
 

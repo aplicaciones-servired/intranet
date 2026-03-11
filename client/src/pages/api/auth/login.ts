@@ -1,8 +1,11 @@
 import type { APIRoute } from "astro";
 import { SESSION_COOKIE } from "../../../lib/session";
-import { LOGIN_URL } from "../../../utils/const";
 
 export const POST: APIRoute = async ({ request }) => {
+  // LOGIN_API_URL: variable runtime inyectada por docker-compose (proxy nginx interno)
+  // Fallback: PUBLIC_LOGIN_URL para desarrollo local
+  const loginApiUrl = process.env.LOGIN_API_URL ?? (import.meta.env.PUBLIC_LOGIN_URL as string);
+
   try {
     const body = await request.json().catch(() => null);
     const username: string = body?.username?.trim() ?? "";
@@ -16,7 +19,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Llamar a la API corporativa
-    const loginRes = await fetch(`${LOGIN_URL}/login`, {
+    const loginRes = await fetch(`${loginApiUrl}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -46,8 +49,9 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Reenviamos el JWT de la API como nuestra cookie __session.
     // Se verifica con el mismo JWT_SECRET que usa la API corporativa.
-    const isProduction = import.meta.env.PROD;
-    const secure = isProduction ? "; Secure" : "";
+    // X-Forwarded-Proto detecta HTTPS real aunque el contenedor sirva HTTP.
+    const proto = request.headers.get("x-forwarded-proto") ?? "http";
+    const secure = proto === "https" ? "; Secure" : "";
 
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
