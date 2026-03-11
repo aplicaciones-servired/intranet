@@ -5,10 +5,10 @@ import { LuTag, LuLayoutDashboard, LuFileText, LuClipboardList } from "react-ico
 async function handleLogout() {
   try {
     await fetch("/api/auth/logout", { method: "POST" });
-  } catch {
+  } catch (_error) {
     // Si falla la petición, redirigir de todas formas
   } finally {
-    window.location.href = "/sign-in";
+    window.location.href = "/";
   }
 }
 

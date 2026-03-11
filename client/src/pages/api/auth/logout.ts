@@ -8,7 +8,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const cookie = request.headers.get("cookie") ?? "";
     await axios.post(`${loginApiUrl}/logout`, { headers: { Cookie: cookie } });
-  } catch {
+  } catch (_error) {
     // No interrumpir: la cookie local se borra siempre
   }
 
