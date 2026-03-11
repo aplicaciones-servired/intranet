@@ -1,12 +1,15 @@
 import { Flex, Link, Icon, ChakraProvider, defaultSystem, Text, Box } from "@chakra-ui/react";
+import axios from "axios";
 import { FiHome, FiLogOut, FiUpload } from "react-icons/fi";
 import { LuTag, LuLayoutDashboard, LuFileText, LuClipboardList } from "react-icons/lu";
 
 async function handleLogout() {
   try {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await axios.post("/api/auth/logout", { method: "POST" });
+
   } catch (_error) {
     // Si falla la petición, redirigir de todas formas
+    console.log('first', _error);
   } finally {
     window.location.href = "/";
   }
