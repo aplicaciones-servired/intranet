@@ -3,8 +3,13 @@ import { FiHome, FiLogOut, FiUpload } from "react-icons/fi";
 import { LuTag, LuLayoutDashboard, LuFileText, LuClipboardList } from "react-icons/lu";
 
 async function handleLogout() {
-  await fetch("/api/auth/logout", { method: "POST" });
-  window.location.href = "/sign-in";
+  try {
+    await fetch("/api/auth/logout", { method: "POST" });
+  } catch {
+    // Si falla la petición, redirigir de todas formas
+  } finally {
+    window.location.href = "/sign-in";
+  }
 }
 
 export function AdminHeader() {

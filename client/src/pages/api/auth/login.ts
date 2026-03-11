@@ -49,9 +49,8 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Reenviamos el JWT de la API como nuestra cookie __session.
     // Se verifica con el mismo JWT_SECRET que usa la API corporativa.
-    // X-Forwarded-Proto detecta HTTPS real aunque el contenedor sirva HTTP.
-    const proto = request.headers.get("x-forwarded-proto") ?? "http";
-    const secure = proto === "https" ? "; Secure" : "";
+    // NODE_ENV es más confiable que X-Forwarded-Proto (la cadena NPM→nginx puede modificarlo).
+    const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
 
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
