@@ -4,16 +4,12 @@ import axios from "axios";
 
 export const POST: APIRoute = async ({ request }) => {
   const loginApiUrl = process.env.LOGIN_API_URL ?? (import.meta.env.PUBLIC_LOGIN_URL as string);
-  // Intentar logout en la API corporativa también (best effort)
+  // Intentar logout en la API corporativa (best effort — nunca bloquea el borrado de cookie)
   try {
     const cookie = request.headers.get("cookie") ?? "";
     await axios.post(`${loginApiUrl}/logout`, { headers: { Cookie: cookie } });
-  } catch (error) {
-    // Si falla la petición, continuar de todas formas (podría ser un error de red o la API podría no estar disponible
-    return new Response(JSON.stringify({ error: "Error al cerrar sesión en la API corporativa" }), {
-      status: 502,
-      headers: { "Content-Type": "application/json" },
-    });
+  } catch {
+    // No interrumpir: la cookie local se borra siempre
   }
 
   const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
