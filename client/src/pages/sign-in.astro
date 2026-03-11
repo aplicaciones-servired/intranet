@@ -4,13 +4,13 @@ import LoginForm from "../components/LoginForm";
 
 const user = (Astro.locals as any).user;
 const redirectUrl =
-  Astro.url.searchParams.get("redirect_url") ?? "/admin";
+  Astro.url.searchParams.get("redirect_url") ?? "/admin/Home";
 
 // Validar que el redirect sea interno (previene open redirect)
 const safeRedirect =
   redirectUrl.startsWith("/") && !redirectUrl.startsWith("//")
     ? redirectUrl
-    : "/admin";
+    : "/admin/Home";
 
 // Si ya tiene sesión, redirigir directamente
 if (user) {
