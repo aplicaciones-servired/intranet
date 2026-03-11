@@ -11,10 +11,13 @@ export const POST: APIRoute = async ({ request }) => {
     // No interrumpir si la API corporativa no responde
   }
 
+  const proto = request.headers.get("x-forwarded-proto") ?? "http";
+  const secure = proto === "https" ? "; Secure" : "";
+
   return new Response(JSON.stringify({ ok: true }), {
     status: 200,
     headers: {
-      "Set-Cookie": `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT`,
+      "Set-Cookie": `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT${secure}`,
       "Content-Type": "application/json",
     },
   });
