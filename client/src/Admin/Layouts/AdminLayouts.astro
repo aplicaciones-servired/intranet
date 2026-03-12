@@ -3,6 +3,7 @@ import { fade } from "astro:transitions";
 import "../../styles/global.css";
 import { AdminHeader } from "../components/AdminHeader";
 import { InactivityGuard } from "../components/InactivityGuard";
+import NotificacionesGlobales from "../components/NotificacionesGlobales";
 
 // Verificar autenticación a nivel de layout (el middleware ya lo garantiza, esto es una capa extra)
 const user = (Astro.locals as any).user;
@@ -31,6 +32,10 @@ if (!user) {
     <div style="margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column;">
       {/* Top Bar */}
       <div class="bg-white shadow-sm border-b border-gray-200"></div>
+      
+      {/* Botón de notificaciones global - Aparece en todas las páginas */}
+      <NotificacionesGlobales client:load />
+      
       {/* Page Content */}
       <main class="flex-1 overflow-auto p-8 bg-gray-50">
         <slot transition:animate={fade({ duration: "0.4s" })} />

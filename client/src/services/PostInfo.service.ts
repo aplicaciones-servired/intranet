@@ -1,6 +1,10 @@
 import { API_URL } from "../utils/const";
 import { adminAxios } from "../utils/adminAxios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { 
+  obtenerNotificacionesPendientes, 
+  agregarImagenesPendientes 
+} from "../utils/notificacionesCache";
 
 interface FormData {
   categoria: string;
@@ -15,6 +19,18 @@ export const usePostInfo = (
   const [images, setImages] = useState<File[]>([]);
   const [showAlert, setShowAlert] = useState(false);
   const [resetKey, setResetKey] = useState(0);
+  
+  // Inicializar vacío en el servidor, cargar desde storage solo en el cliente
+  const [imagenesIdsSubidas, setImagenesIdsSubidas] = useState<number[]>([]);
+  
+  // Cargar desde sessionStorage después del mount (solo en cliente)
+  useEffect(() => {
+    const pendientes = obtenerNotificacionesPendientes();
+    if (pendientes.imagenesIds.length > 0) {
+      setImagenesIdsSubidas(pendientes.imagenesIds);
+    }
+  }, []);
+  
   const [alertConfig, setAlertConfig] = useState({
     title: "",
     description: "",
@@ -60,6 +76,24 @@ export const usePostInfo = (
         setShowAlert(true);
         setTimeout(() => setShowAlert(false), 5000);
 
+        // Guardar los IDs de las imágenes subidas para notificación posterior
+        console.log('🔍 Respuesta del servidor:', response.data);
+        if (response.data.imagenesIds && Array.isArray(response.data.imagenesIds)) {
+          console.log('✅ IDs recibidos:', response.data.imagenesIds);
+          
+          // Guardar en sessionStorage y actualizar estado
+          agregarImagenesPendientes(response.data.imagenesIds);
+          
+          // Actualizar estado local
+          setImagenesIdsSubidas(prev => {
+            const nuevosIds = [...prev, ...response.data.imagenesIds];
+            console.log('📦 IDs acumulados:', nuevosIds);
+            return nuevosIds;
+          });
+        } else {
+          console.warn('⚠️ No se recibieron imagenesIds en la respuesta');
+        }
+
         setForm({
           categoria: "",
           titulo: "",
@@ -80,5 +114,16 @@ export const usePostInfo = (
     }
   };
 
-  return { handleSubmit, setImages, showAlert, alertConfig, setShowAlert, resetKey };
+  return { 
+    handleSubmit, 
+    setImages, 
+    showAlert, 
+    alertConfig, 
+    setShowAlert, 
+    resetKey,
+    imagenesIdsSubidas,
+    limpiarImagenesSubidas: () => {
+      setImagenesIdsSubidas([]);
+    },
+  };
 };

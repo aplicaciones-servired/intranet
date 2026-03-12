@@ -12,6 +12,12 @@ export interface Formulario {
   fecha_registro?: string;
 }
 
+export interface CrearFormularioResponse {
+  message: string;
+  formulario: Formulario;
+  formularioId: number;
+}
+
 // GETs públicos
 export const getFormulariosActivos = async (): Promise<Formulario[]> => {
   const response = await axios.get(`${API_URL}/formularios/activos`);
@@ -24,13 +30,14 @@ export const getFormularios = async (): Promise<Formulario[]> => {
   return response.data as Formulario[];
 };
 
-export const createFormulario = async (formData: FormData): Promise<Formulario> => {
+export const createFormulario = async (formData: FormData): Promise<CrearFormularioResponse> => {
   const response = await adminAxios.post(`${API_URL}/formularios`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
   });
-  return response.data.formulario as Formulario;
+  console.log('📝 createFormulario - Respuesta completa del backend:', response.data);
+  return response.data as CrearFormularioResponse;
 };
 
 export const updateFormulario = async (id: number, formData: FormData): Promise<Formulario> => {

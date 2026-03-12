@@ -207,3 +207,92 @@ export async function enviarCartaLaboral({
     ],
   });
 }
+
+interface OpcionesNotificacionIntranet {
+  cantidad: number;
+  categoria: string;
+  titulo: string;
+  descripcion?: string;
+  urlIntranet: string;
+  tipo?: "imagen" | "formulario";
+}
+
+export async function enviarNotificacionNuevaInformacion({
+  cantidad,
+  categoria,
+  titulo,
+  descripcion,
+  urlIntranet,
+  tipo = "imagen",
+}: OpcionesNotificacionIntranet): Promise<void> {
+  const correosDestino = process.env.PUBLIC_CORREOS_URL;
+  if (!correosDestino) {
+    console.warn("No se encontró PUBLIC_CORREOS_URL en las variables de entorno");
+    return;
+  }
+
+  const fechaActual = new Date().toLocaleDateString("es-CO", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const tipoTexto = tipo === "formulario" ? "formulario" : "imagen";
+  const tipoPlural = tipo === "formulario" ? "formularios" : "imágenes";
+  const emoji = tipo === "formulario" ? "📝" : "📸";
+
+  await transporter.sendMail({
+    from: `"Sistema Intranet" <${process.env.EMAIL_USER}>`,
+    to: correosDestino,
+    subject: `📢 Nuevo contenido en la Intranet — ${titulo}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 22px;">📢 Nuevo contenido en la Intranet</h1>
+          <p style="color: rgba(255,255,255,0.9); margin: 6px 0 0; font-size: 13px;">${fechaActual}</p>
+        </div>
+        <div style="background: #ffffff; padding: 28px; border: 1px solid #e5e7eb; border-top: none;">
+          <p style="color: #374151; font-size: 15px; margin: 0 0 20px;">
+            Se ha publicado nueva información en la <strong>Intranet Corporativa</strong>:
+          </p>
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 24px;">
+            <tr style="background: #f9fafb;">
+              <td style="padding: 10px 14px; color: #6b7280; font-weight: 600; width: 30%; border-bottom: 1px solid #e5e7eb;">Título</td>
+              <td style="padding: 10px 14px; color: #111827; border-bottom: 1px solid #e5e7eb;">${esc(titulo)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 14px; color: #6b7280; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Categoría</td>
+              <td style="padding: 10px 14px; color: #111827; border-bottom: 1px solid #e5e7eb;">${emoji} ${cantidad} ${cantidad === 1 ? tipoTexto : tipoPlural}</td>
+            </tr>
+            <tr style="background: #f9fafb;">
+              <td style="padding: 10px 14px; color: #6b7280; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Cantidad</td>
+              <td style="padding: 10px 14px; color: #111827; border-bottom: 1px solid #e5e7eb;">${cantidad} imagen(es)</td>
+            </tr>
+            ${descripcion ? `
+            <tr>
+              <td style="padding: 10px 14px; color: #6b7280; font-weight: 600;">Descripción</td>
+              <td style="padding: 10px 14px; color: #111827;">${esc(descripcion)}</td>
+            </tr>
+            ` : ''}
+          </table>
+          <div style="text-align: center; margin-bottom: 20px;">
+            <a href="${urlIntranet}"
+              style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              🔗 Ver en la Intranet
+            </a>
+          </div>
+          <div style="background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 6px; padding: 14px;">
+            <p style="color: #047857; font-size: 13px; margin: 0;">
+              ✨ Haz clic en el botón de arriba para acceder al contenido completo
+            </p>
+          </div>
+        </div>
+        <div style="background: #f9fafb; padding: 14px; border-radius: 0 0 8px 8px; border: 1px solid #e5e7eb; border-top: none; text-align: center;">
+          <p style="color: #9ca3af; font-size: 11px; margin: 0;">Sistema Intranet — Notificación automática</p>
+        </div>
+      </div>
+    `,
+  });
+}

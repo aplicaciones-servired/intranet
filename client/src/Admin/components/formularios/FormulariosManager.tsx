@@ -23,6 +23,7 @@ import {
 } from "../../../services/GetInfo.service";
 import { FormularioForm } from "./FormularioForm";
 import { FormularioCard } from "./FormularioCard";
+import { agregarFormulariosPendientes } from "../../../utils/notificacionesCache";
 
 type Mode = "list" | "create" | "edit";
 
@@ -128,7 +129,20 @@ export default function FormulariosManager() {
         await updateFormulario(editing.id, formData);
         setToast({ title: "Formulario actualizado", description: "Los cambios se guardaron correctamente.", type: "success" });
       } else {
-        await createFormulario(formData);
+        const respuesta = await createFormulario(formData);
+        console.log('📝 Formulario creado, respuesta completa:', respuesta);
+        
+        // Extraer el ID del formulario y guardarlo en sessionStorage para notificación
+        const formularioId = respuesta.formularioId;
+        console.log('📝 Formulario ID extraído:', formularioId);
+        
+        if (formularioId) {
+          console.log('💾 Guardando formulario en sessionStorage:', [formularioId]);
+          agregarFormulariosPendientes([formularioId]);
+        } else {
+          console.warn('⚠️ No se pudo extraer el ID del formulario creado');
+        }
+        
         setToast({ title: "Formulario creado", description: "El nuevo formulario está disponible.", type: "success" });
       }
 

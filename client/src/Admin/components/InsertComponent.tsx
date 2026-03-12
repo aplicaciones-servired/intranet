@@ -23,37 +23,39 @@ const Dropzone = () => (
         }}
         cursor="pointer"
     >
-        <Flex direction="column" alignItems="center" gap={4}>
-            <Box
-                p={4}
-                bg="linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)"
-                borderRadius="2xl"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                shadow="lg"
-                transition="all 0.3s"
-                _hover={{
-                    transform: "scale(1.1) rotate(5deg)",
-                    shadow: "xl"
-                }}
-            >
-                <Icon fontSize="3xl" color="white"><LuUpload /></Icon>
-            </Box>
-            <FileUpload.DropzoneContent>
-                <Text fontSize="lg" fontWeight="bold" color="gray.800" textAlign="center">
-                    Arrastra tus imágenes aquí
-                </Text>
-                <Text fontSize="sm" color="gray.600" textAlign="center" mt={2}>
-                    o haz clic para seleccionar desde tu computadora
-                </Text>
-                <Box mt={4} px={4} py={2} bg="blue.100" borderRadius="full">
-                    <Text fontSize="xs" color="blue.700" fontWeight="semibold">
-                        PNG, JPG, JPEG • Máx. 5MB
-                    </Text>
+        <FileUpload.Trigger asChild>
+            <Flex direction="column" alignItems="center" gap={4}>
+                <Box
+                    p={4}
+                    bg="linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)"
+                    borderRadius="2xl"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    shadow="lg"
+                    transition="all 0.3s"
+                    _hover={{
+                        transform: "scale(1.1) rotate(5deg)",
+                        shadow: "xl"
+                    }}
+                >
+                    <Icon fontSize="3xl" color="white"><LuUpload /></Icon>
                 </Box>
-            </FileUpload.DropzoneContent>
-        </Flex>
+                <FileUpload.DropzoneContent>
+                    <Text fontSize="lg" fontWeight="bold" color="gray.800" textAlign="center">
+                        Arrastra tus imágenes aquí
+                    </Text>
+                    <Text fontSize="sm" color="gray.600" textAlign="center" mt={2}>
+                        o haz clic para seleccionar desde tu computadora
+                    </Text>
+                    <Box mt={4} px={4} py={2} bg="blue.100" borderRadius="full">
+                        <Text fontSize="xs" color="blue.700" fontWeight="semibold">
+                            PNG, JPG, JPEG • Máx. 5MB
+                        </Text>
+                    </Box>
+                </FileUpload.DropzoneContent>
+            </Flex>
+        </FileUpload.Trigger>
     </FileUpload.Dropzone>
 )
 

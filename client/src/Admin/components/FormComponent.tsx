@@ -49,7 +49,21 @@ export default function FormComponent() {
         items: categoriasApi.map((c) => ({ label: c.label, value: c.value })),
     });
 
-    const { handleSubmit, setImages, showAlert, alertConfig, setShowAlert, resetKey } = usePostInfo(form, setForm);
+    const { 
+        handleSubmit, 
+        setImages, 
+        showAlert, 
+        alertConfig, 
+        setShowAlert, 
+        resetKey,
+        imagenesIdsSubidas,
+        limpiarImagenesSubidas,
+    } = usePostInfo(form, setForm);
+
+    // DEBUG: Ver los IDs en consola
+    useEffect(() => {
+        console.log('📸 IDs de imágenes subidas:', imagenesIdsSubidas);
+    }, [imagenesIdsSubidas]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -270,6 +284,9 @@ export default function FormComponent() {
                     </Grid>
                 </Container>
             </form>
+
+            {/* Nota: El botón de notificación ahora está en NotificacionesGlobales.tsx 
+                y aparece en todas las páginas del admin automáticamente */}
         </ChakraProvider>
     )
 }

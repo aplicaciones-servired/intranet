@@ -16,6 +16,7 @@ export class ImagenesModels extends Model<
   declare titulo: string;
   declare descripcion?: string;
   declare fecha_registro?: Date;
+  declare notificado?: boolean;
 }
 
 ImagenesModels.init(
@@ -45,6 +46,11 @@ ImagenesModels.init(
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
+    },
+    notificado: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
   },
   {

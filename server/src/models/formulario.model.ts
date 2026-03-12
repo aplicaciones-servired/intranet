@@ -9,6 +9,7 @@ interface FormularioAttributes {
   imagen: string;
   activo: boolean;
   fecha_registro?: Date;
+  notificado?: boolean;
 }
 
 class Formulario extends Model<FormularioAttributes> implements FormularioAttributes {
@@ -19,6 +20,7 @@ class Formulario extends Model<FormularioAttributes> implements FormularioAttrib
   public imagen!: string;
   public activo!: boolean;
   public fecha_registro!: Date;
+  public notificado!: boolean;
 }
 
 Formulario.init(
@@ -51,6 +53,11 @@ Formulario.init(
     fecha_registro: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
+    },
+    notificado: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
   },
   {

@@ -4,7 +4,9 @@
 DESPLIEGUE.md
 MIDDLEWARE_Y_BUSQUEDA.md
 CARTA_LABORAL.md
-
+NOTIFICACIONES_INTRANET.md
+add_notificado_column.sql
+SOLUCION_BOTON_NOTIFICAR.md
 # Variables de entorno
 .env
 *.env

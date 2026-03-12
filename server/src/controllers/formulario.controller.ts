@@ -58,11 +58,13 @@ export const createFormulario = async (req: any, res: Response) => {
       url,
       imagen: imagenUrl,
       activo: true,
+      notificado: false,
     });
 
     res.status(201).json({
       message: "Formulario creado exitosamente",
       formulario: nuevoFormulario,
+      formularioId: nuevoFormulario.id, // Para notificación
     });
   } catch (error) {
     handleServerError(res, error, "createFormulario");
