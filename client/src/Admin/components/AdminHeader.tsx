@@ -1,7 +1,7 @@
 import { Flex, Link, Icon, ChakraProvider, defaultSystem, Text, Box } from "@chakra-ui/react";
 import axios from "axios";
 import { FiHome, FiLogOut, FiUpload } from "react-icons/fi";
-import { LuTag, LuLayoutDashboard, LuFileText, LuClipboardList } from "react-icons/lu";
+import { LuTag, LuLayoutDashboard, LuFileText, LuClipboardList, LuImage } from "react-icons/lu";
 
 async function handleLogout() {
   try {
@@ -104,6 +104,22 @@ export function AdminHeader() {
             >
               <Icon as={FiUpload} fontSize="lg" mr={3} />
               <Text fontSize="sm" fontWeight="400">Subir Imágenes</Text>
+            </Link>
+
+            <Link
+              href="/admin/imagenes"
+              display="flex"
+              alignItems="center"
+              p={3}
+              mb={2}
+              borderRadius="md"
+              color="white"
+              _hover={{ bg: "rgba(236, 72, 153, 0.1)", color: "#f472b6" }}
+              transition="all 0.2s"
+              textDecoration="none"
+            >
+              <Icon fontSize="lg" mr={3}><LuImage /></Icon>
+              <Text fontSize="sm" fontWeight="400">Gestión de Imágenes</Text>
             </Link>
 
             <Link

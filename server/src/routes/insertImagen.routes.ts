@@ -1,4 +1,4 @@
-import { getImagenesController, imagenesController, notificarSubidaController } from "../controllers/imagenes.Controller";
+import { getImagenesController, imagenesController, notificarSubidaController, deleteImagenController } from "../controllers/imagenes.Controller";
 import { Router } from "express";
 import { multer_minio } from "../Miderlware/miderlware_minio";
 import { requireClerkAuth } from "../Miderlware/authMiddleware";
@@ -11,3 +11,5 @@ intraRoutes.post("/insertImagen", requireClerkAuth, multer_minio.array("images",
 intraRoutes.get("/getImagenes", getImagenesController);
 // POST para notificar nueva información subida
 intraRoutes.post("/notificar-subida", requireClerkAuth, notificarSubidaController);
+// DELETE para eliminar imagen (requiere autenticación)
+intraRoutes.delete("/imagenes/:id", requireClerkAuth, deleteImagenController);

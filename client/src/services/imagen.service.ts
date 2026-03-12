@@ -43,3 +43,20 @@ export async function notificarSubida(
     );
   }
 }
+
+/**
+ * Eliminar una imagen por su ID
+ * @param id ID de la imagen a eliminar
+ * @returns Promise con el mensaje de confirmación
+ */
+export async function deleteImagen(id: number): Promise<{ message: string }> {
+  try {
+    const response = await adminAxios.delete(`${API_URL}/imagenes/${id}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error al eliminar imagen:", error);
+    throw new Error(
+      error.response?.data?.error || "Error al eliminar la imagen"
+    );
+  }
+}

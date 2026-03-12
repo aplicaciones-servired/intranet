@@ -157,3 +157,29 @@ export const notificarSubidaController = async (
     res.status(500).json({ error: "Error al enviar notificación" });
   }
 };
+
+// Eliminar imagen
+export const deleteImagenController = async (
+  req: any,
+  res: any,
+): Promise<any> => {
+  try {
+    const { id } = req.params;
+
+    const imagen = await ImagenesModels.findByPk(Number(id));
+
+    if (!imagen) {
+      return res.status(404).json({ error: "Imagen no encontrada" });
+    }
+
+    // Eliminar registro de la base de datos
+    await imagen.destroy();
+
+    res.status(200).json({
+      message: "Imagen eliminada exitosamente"
+    });
+  } catch (error) {
+    console.error("Error al eliminar imagen:", error);
+    res.status(500).json({ error: "Error al eliminar imagen" });
+  }
+};
