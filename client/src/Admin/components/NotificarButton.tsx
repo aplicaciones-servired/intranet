@@ -9,14 +9,10 @@ import {
 import Toast from "./Toast";
 
 interface NotificarButtonProps {
-  imagenesIds?: number[];
-  formularioIds?: number[];
   onNotificacionEnviada?: () => void;
 }
 
 export default function NotificarButton({ 
-  imagenesIds: imagenesIdsProp = [], 
-  formularioIds: formularioIdsProp = [], 
   onNotificacionEnviada 
 }: NotificarButtonProps) {
   const [enviando, setEnviando] = useState(false);
@@ -28,18 +24,15 @@ export default function NotificarButton({
     type: "success" as "success" | "error" | "warning"
   });
   
-  // Inicializar vacío, cargar en useEffect
   const [pendientes, setPendientes] = useState<NotificacionesPendientes>({
     imagenesIds: [],
     formularioIds: []
   });
 
-  // Sincronizar con sessionStorage solo en el cliente
+  // Sincronizar con sessionStorage
   useEffect(() => {
-    // Cargar inicial
     setPendientes(obtenerNotificacionesPendientes());
     
-    // Actualizar cada segundo
     const interval = setInterval(() => {
       setPendientes(obtenerNotificacionesPendientes());
     }, 1000);
@@ -47,7 +40,6 @@ export default function NotificarButton({
     return () => clearInterval(interval);
   }, []);
 
-  // Usar los IDs de sessionStorage en lugar de las props
   const imagenesIds = pendientes.imagenesIds;
   const formularioIds = pendientes.formularioIds;
   const totalItems = imagenesIds.length + formularioIds.length;
@@ -57,24 +49,19 @@ export default function NotificarButton({
 
     setEnviando(true);
     try {
-      // Importar dinámicamente el servicio
       const { notificarSubida } = await import("../../services/imagen.service");
       
       await notificarSubida(imagenesIds, formularioIds);
       
-      // Mostrar toast ANTES de limpiar (para guardar el total)
       setToastConfig({
         title: "¡Notificación enviada!",
         description: `Se notificó exitosamente ${totalItems} ${totalItems === 1 ? 'item' : 'items'} a todos los usuarios.`,
         type: "success"
       });
       setShowToast(true);
-      console.log("✅ Toast de éxito activado - La notificación se envió correctamente");
       
-      // Limpiar el storage después de mostrar el toast
       limpiarNotificacionesPendientes();
       setPendientes({ imagenesIds: [], formularioIds: [] });
-      
       setEnviado(true);
       
       setTimeout(() => {
@@ -86,21 +73,20 @@ export default function NotificarButton({
         onNotificacionEnviada();
       }
     } catch (error) {
-      console.error("❌ Error al notificar:", error);
+      console.error("Error al notificar:", error);
       setToastConfig({
         title: "Error al notificar",
         description: "No se pudo enviar la notificación. Por favor, intenta nuevamente.",
         type: "error"
       });
       setShowToast(true);
-      console.log("⚠️ Toast de error activado - La notificación falló");
-      setTimeout(() => setShowToast(false), 20000);
+      setTimeout(() => setShowToast(false), 5000);
     } finally {
       setEnviando(false);
     }
   };
 
-  // Mostrar el Toast si está activo, incluso si no hay items
+  // Mostrar el Toast si está activo
   if (showToast) {
     return (
       <Toast
@@ -112,7 +98,7 @@ export default function NotificarButton({
     );
   }
 
-  // Si no hay IDs y no hay toast, no mostrar nada
+  // Si no hay items pendientes, no mostrar nada
   if (totalItems === 0) {
     return null;
   }
