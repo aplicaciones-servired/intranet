@@ -130,17 +130,10 @@ export default function FormulariosManager() {
         setToast({ title: "Formulario actualizado", description: "Los cambios se guardaron correctamente.", type: "success" });
       } else {
         const respuesta = await createFormulario(formData);
-        console.log('📝 Formulario creado, respuesta completa:', respuesta);
         
-        // Extraer el ID del formulario y guardarlo en sessionStorage para notificación
-        const formularioId = respuesta.formularioId;
-        console.log('📝 Formulario ID extraído:', formularioId);
-        
-        if (formularioId) {
-          console.log('💾 Guardando formulario en sessionStorage:', [formularioId]);
-          agregarFormulariosPendientes([formularioId]);
-        } else {
-          console.warn('⚠️ No se pudo extraer el ID del formulario creado');
+        // Guardar el ID del formulario para notificación
+        if (respuesta.formularioId) {
+          agregarFormulariosPendientes([respuesta.formularioId]);
         }
         
         setToast({ title: "Formulario creado", description: "El nuevo formulario está disponible.", type: "success" });

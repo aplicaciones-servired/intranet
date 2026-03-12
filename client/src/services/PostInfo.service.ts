@@ -77,21 +77,12 @@ export const usePostInfo = (
         setTimeout(() => setShowAlert(false), 5000);
 
         // Guardar los IDs de las imágenes subidas para notificación posterior
-        console.log('🔍 Respuesta del servidor:', response.data);
         if (response.data.imagenesIds && Array.isArray(response.data.imagenesIds)) {
-          console.log('✅ IDs recibidos:', response.data.imagenesIds);
-          
-          // Guardar en sessionStorage y actualizar estado
+          // Guardar en sessionStorage
           agregarImagenesPendientes(response.data.imagenesIds);
           
           // Actualizar estado local
-          setImagenesIdsSubidas(prev => {
-            const nuevosIds = [...prev, ...response.data.imagenesIds];
-            console.log('📦 IDs acumulados:', nuevosIds);
-            return nuevosIds;
-          });
-        } else {
-          console.warn('⚠️ No se recibieron imagenesIds en la respuesta');
+          setImagenesIdsSubidas(prev => [...prev, ...response.data.imagenesIds]);
         }
 
         setForm({

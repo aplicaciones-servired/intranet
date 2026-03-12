@@ -22,7 +22,7 @@ import {
 } from "@chakra-ui/react"
 import { LuUpload, LuImage, LuFileText, LuFolder, LuMessageSquare, LuSend } from "react-icons/lu"
 import InsertComponent from "./InsertComponent"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import Toast from "./Toast"
 import { usePostInfo } from "../../services/PostInfo.service"
 import { getCategorias, type Categoria } from "../../services/GetInfo.service"
@@ -59,11 +59,6 @@ export default function FormComponent() {
         imagenesIdsSubidas,
         limpiarImagenesSubidas,
     } = usePostInfo(form, setForm);
-
-    // DEBUG: Ver los IDs en consola
-    useEffect(() => {
-        console.log('📸 IDs de imágenes subidas:', imagenesIdsSubidas);
-    }, [imagenesIdsSubidas]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });

@@ -36,7 +36,6 @@ export const createFormulario = async (formData: FormData): Promise<CrearFormula
       "Content-Type": "multipart/form-data",
     },
   });
-  console.log('📝 createFormulario - Respuesta completa del backend:', response.data);
   return response.data as CrearFormularioResponse;
 };
 

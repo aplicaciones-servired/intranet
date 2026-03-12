@@ -6,6 +6,7 @@ import {
   limpiarNotificacionesPendientes,
   type NotificacionesPendientes
 } from "../../utils/notificacionesCache";
+import Toast from "./Toast";
 
 interface NotificarButtonProps {
   imagenesIds?: number[];
@@ -20,6 +21,12 @@ export default function NotificarButton({
 }: NotificarButtonProps) {
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastConfig, setToastConfig] = useState({
+    title: "",
+    description: "",
+    type: "success" as "success" | "error" | "warning"
+  });
   
   // Inicializar vacío, cargar en useEffect
   const [pendientes, setPendientes] = useState<NotificacionesPendientes>({
@@ -45,12 +52,6 @@ export default function NotificarButton({
   const formularioIds = pendientes.formularioIds;
   const totalItems = imagenesIds.length + formularioIds.length;
 
-  // DEBUG: Ver qué recibe el componente
-  console.log('🔔 NotificarButton renderizado con:');
-  console.log('   - Imágenes:', imagenesIds.length);
-  console.log('   - Formularios:', formularioIds.length);
-  console.log('   - Total:', totalItems);
-
   const handleNotificar = async () => {
     if (totalItems === 0) return;
 
@@ -61,25 +62,57 @@ export default function NotificarButton({
       
       await notificarSubida(imagenesIds, formularioIds);
       
-      // Limpiar el storage después de notificar exitosamente
+      // Mostrar toast ANTES de limpiar (para guardar el total)
+      setToastConfig({
+        title: "¡Notificación enviada!",
+        description: `Se notificó exitosamente ${totalItems} ${totalItems === 1 ? 'item' : 'items'} a todos los usuarios.`,
+        type: "success"
+      });
+      setShowToast(true);
+      console.log("✅ Toast de éxito activado - La notificación se envió correctamente");
+      
+      // Limpiar el storage después de mostrar el toast
       limpiarNotificacionesPendientes();
       setPendientes({ imagenesIds: [], formularioIds: [] });
       
       setEnviado(true);
-      setTimeout(() => setEnviado(false), 3000);
+      
+      setTimeout(() => {
+        setEnviado(false);
+        setShowToast(false);
+      }, 5000);
       
       if (onNotificacionEnviada) {
         onNotificacionEnviada();
       }
     } catch (error) {
-      console.error("Error al notificar:", error);
-      alert("Error al enviar la notificación. Por favor, intenta nuevamente.");
+      console.error("❌ Error al notificar:", error);
+      setToastConfig({
+        title: "Error al notificar",
+        description: "No se pudo enviar la notificación. Por favor, intenta nuevamente.",
+        type: "error"
+      });
+      setShowToast(true);
+      console.log("⚠️ Toast de error activado - La notificación falló");
+      setTimeout(() => setShowToast(false), 20000);
     } finally {
       setEnviando(false);
     }
   };
 
-  // Si no hay IDs, no mostrar el componente
+  // Mostrar el Toast si está activo, incluso si no hay items
+  if (showToast) {
+    return (
+      <Toast
+        title={toastConfig.title}
+        description={toastConfig.description}
+        type={toastConfig.type}
+        onClose={() => setShowToast(false)}
+      />
+    );
+  }
+
+  // Si no hay IDs y no hay toast, no mostrar nada
   if (totalItems === 0) {
     return null;
   }
