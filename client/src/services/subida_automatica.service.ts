@@ -38,11 +38,26 @@ export async function updateSubidaAutomaticaPendiente(
   id: number,
   formData: FormData,
 ): Promise<{ message: string; subida: SubidaAutomatica }> {
-  const response = await adminAxios.put(`${API_URL}/subidas-automaticas/${id}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  try {
+    const response = await adminAxios.post(`${API_URL}/subidas-automaticas/${id}/editar`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-  return response.data as { message: string; subida: SubidaAutomatica };
+    return response.data as { message: string; subida: SubidaAutomatica };
+  } catch (error: any) {
+    if (error?.response?.status !== 404) {
+      throw error;
+    }
+
+    // Compatibilidad con versiones del backend que solo exponen PUT /subidas-automaticas/:id
+    const fallbackResponse = await adminAxios.put(`${API_URL}/subidas-automaticas/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return fallbackResponse.data as { message: string; subida: SubidaAutomatica };
+  }
 }

@@ -30,4 +30,14 @@ subidaAutomaticaRoutes.put(
   updateSubidaAutomaticaPendiente,
 );
 
+subidaAutomaticaRoutes.post(
+  "/subidas-automaticas/:id/editar",
+  requireClerkAuth,
+  multer_minio.fields([
+    { name: "images", maxCount: 10 },
+    { name: "imagen", maxCount: 1 },
+  ]),
+  updateSubidaAutomaticaPendiente,
+);
+
 export default subidaAutomaticaRoutes;

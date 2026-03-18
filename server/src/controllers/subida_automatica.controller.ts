@@ -271,9 +271,8 @@ export const updateSubidaAutomaticaPendiente = async (req: any, res: Response) =
       if (Number.isNaN(fechaProgramada.getTime())) {
         return res.status(400).json({ error: "La fecha de programación no es válida" });
       }
-      if (fechaProgramada.getTime() < Date.now()) {
-        return res.status(400).json({ error: "La fecha de programación debe ser futura" });
-      }
+      // En edición permitimos fechas pasadas para que se procese inmediatamente
+      // (útil cuando un pendiente quedó atrasado y solo se corrigen datos).
     }
 
     let payloadActualizado: Record<string, any> = { ...payloadActual };

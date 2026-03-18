@@ -3,6 +3,65 @@ import { LuUpload } from "react-icons/lu";
 import { formatDate, normalizarPayload, normalizarUrlsImagenes } from "./utils";
 import type { SubidaTipoListProps } from "../../../types/subiaTypes";
 
+function PreviewsImagenesSeleccionadas({ files }: { files: File[] }) {
+  if (files.length === 0) return null;
+
+  return (
+    <Box mt={2}>
+      <Text fontSize="xs" color="blue.700" fontWeight="semibold" mb={1}>
+        Vista previa de nuevas imagenes
+      </Text>
+      <Flex wrap="wrap" gap={2}>
+        {files.map((file, index) => {
+          const src = URL.createObjectURL(file);
+          return (
+            <img
+              key={`${file.name}-${index}`}
+              src={src}
+              alt={`Nueva imagen ${index + 1}`}
+              style={{
+                width: "90px",
+                height: "90px",
+                objectFit: "cover",
+                borderRadius: "0.5rem",
+                border: "1px solid #cbd5e1",
+              }}
+              onLoad={() => URL.revokeObjectURL(src)}
+            />
+          );
+        })}
+      </Flex>
+    </Box>
+  );
+}
+
+function PreviewFormularioSeleccionado({ file }: { file: File | null }) {
+  if (!file) return null;
+  const src = URL.createObjectURL(file);
+
+  return (
+    <Box mt={2}>
+      <img
+        src={src}
+        alt="Nueva imagen seleccionada"
+        style={{
+          width: "100%",
+          maxWidth: "320px",
+          height: "140px",
+          objectFit: "cover",
+          borderRadius: "0.75rem",
+          border: "1px solid #3b82f6",
+          boxShadow: "0 8px 20px rgba(15, 23, 42, 0.12)",
+        }}
+        onLoad={() => URL.revokeObjectURL(src)}
+      />
+      <Text fontSize="xs" color="blue.700" mt={1} fontWeight="semibold">
+        Nueva imagen seleccionada
+      </Text>
+    </Box>
+  );
+}
+
 export default function SubidaTipoList({
   items,
   tipoItem,
@@ -239,9 +298,12 @@ export default function SubidaTipoList({
                           />
                         </Box>
                         {editImages.length > 0 ? (
-                          <Text fontSize="xs" color="blue.700" mt={1} fontWeight="semibold">
-                            Nuevas imagenes: {editImages.map((f) => f.name).join(", ")}
-                          </Text>
+                          <>
+                            <Text fontSize="xs" color="blue.700" mt={1} fontWeight="semibold">
+                              Nuevas imagenes: {editImages.map((f) => f.name).join(", ")}
+                            </Text>
+                            <PreviewsImagenesSeleccionadas files={editImages} />
+                          </>
                         ) : null}
                         <Text fontSize="xs" color="gray.500" mt={1}>
                           Actuales: {imagenesActuales}. Nuevas seleccionadas: {editImages.length}.
@@ -312,6 +374,7 @@ export default function SubidaTipoList({
                         <Text fontSize="xs" color="gray.500" mt={1}>
                           {editFormImage ? `Nueva imagen: ${editFormImage.name}` : "Se conservara la imagen actual si no seleccionas una nueva."}
                         </Text>
+                        <PreviewFormularioSeleccionado file={editFormImage} />
                       </Box>
                     )}
 

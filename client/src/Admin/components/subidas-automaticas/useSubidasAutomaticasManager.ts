@@ -15,6 +15,23 @@ interface ToastState {
   type: "success" | "error" | "warning";
 }
 
+const MAX_ITEMS_POR_LISTA = 5;
+
+function ordenarPorFechaDesc(
+  items: SubidaAutomatica[],
+  field: "programado_para" | "fecha_procesado" | "fecha_creacion",
+): SubidaAutomatica[] {
+  return [...items].sort((a, b) => {
+    const aTime = new Date((a as any)[field] || 0).getTime();
+    const bTime = new Date((b as any)[field] || 0).getTime();
+    return bTime - aTime;
+  });
+}
+
+function limitarUltimosCinco(items: SubidaAutomatica[]): SubidaAutomatica[] {
+  return items.slice(0, MAX_ITEMS_POR_LISTA);
+}
+
 export function useSubidasAutomaticasManager() {
   const [tipo, setTipo] = useState<TipoSubidaAutomatica | null>(null);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -84,19 +101,28 @@ export function useSubidasAutomaticasManager() {
   const fallidas = useMemo(() => subidas.filter((s) => s.estado === "error"), [subidas]);
   const procesadas = useMemo(() => subidas.filter((s) => s.estado === "publicado"), [subidas]);
 
-  const pendientesImagen = useMemo(() => pendientes.filter((s) => s.tipo === "imagen"), [pendientes]);
-  const pendientesFormulario = useMemo(
-    () => pendientes.filter((s) => s.tipo === "formulario"),
+  const pendientesImagen = useMemo(
+    () => limitarUltimosCinco(ordenarPorFechaDesc(pendientes.filter((s) => s.tipo === "imagen"), "programado_para")),
     [pendientes],
   );
-  const fallidasImagen = useMemo(() => fallidas.filter((s) => s.tipo === "imagen"), [fallidas]);
-  const fallidasFormulario = useMemo(
-    () => fallidas.filter((s) => s.tipo === "formulario"),
+  const pendientesFormulario = useMemo(
+    () => limitarUltimosCinco(ordenarPorFechaDesc(pendientes.filter((s) => s.tipo === "formulario"), "programado_para")),
+    [pendientes],
+  );
+  const fallidasImagen = useMemo(
+    () => limitarUltimosCinco(ordenarPorFechaDesc(fallidas.filter((s) => s.tipo === "imagen"), "programado_para")),
     [fallidas],
   );
-  const procesadasImagen = useMemo(() => procesadas.filter((s) => s.tipo === "imagen"), [procesadas]);
+  const fallidasFormulario = useMemo(
+    () => limitarUltimosCinco(ordenarPorFechaDesc(fallidas.filter((s) => s.tipo === "formulario"), "programado_para")),
+    [fallidas],
+  );
+  const procesadasImagen = useMemo(
+    () => limitarUltimosCinco(ordenarPorFechaDesc(procesadas.filter((s) => s.tipo === "imagen"), "fecha_procesado")),
+    [procesadas],
+  );
   const procesadasFormulario = useMemo(
-    () => procesadas.filter((s) => s.tipo === "formulario"),
+    () => limitarUltimosCinco(ordenarPorFechaDesc(procesadas.filter((s) => s.tipo === "formulario"), "fecha_procesado")),
     [procesadas],
   );
 
@@ -326,9 +352,15 @@ export function useSubidasAutomaticasManager() {
       cancelarEdicionPendiente();
       await loadData();
     } catch (error: any) {
+      const detalleError =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "No se pudo actualizar la programacion pendiente.";
+
       setToast({
         title: "No se pudo editar",
-        description: error?.response?.data?.error || "No se pudo actualizar la programacion pendiente.",
+        description: detalleError,
         type: "error",
       });
     } finally {

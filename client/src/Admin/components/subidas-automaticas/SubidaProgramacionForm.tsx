@@ -108,13 +108,13 @@ export default function SubidaProgramacionForm({
                 <Text fontSize="sm" fontWeight="bold" color="gray.700" mb={2}>Tipo seleccionado</Text>
                 <Box
                   border="1px solid"
-                  borderColor={tipo === "imagen" ? "blue.200" : "emerald.200"}
-                  bg={tipo === "imagen" ? "blue.50" : "emerald.50"}
+                  borderColor={tipo === "imagen" ? "blue.200" : "green.200"}
+                  bg={tipo === "imagen" ? "blue.50" : "green.50"}
                   borderRadius="lg"
                   px={3}
                   py={2}
                 >
-                  <Text fontSize="sm" fontWeight="semibold" color={tipo === "imagen" ? "blue.800" : "emerald.800"}>
+                  <Text fontSize="sm" fontWeight="semibold" color={tipo === "imagen" ? "blue.800" : "green.500"}>
                     {tipo === "imagen" ? "Formulario de publicacion de imagenes" : "Formulario de publicacion de formularios"}
                   </Text>
                 </Box>
@@ -243,21 +243,21 @@ export default function SubidaProgramacionForm({
                     alignItems="center"
                     justifyContent="center"
                     border="3px dashed"
-                    borderColor="blue.400"
+                    borderColor="green.400"
                     borderRadius="xl"
                     p={8}
-                    bg="linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)"
+                    bg="green.50"
                     cursor="pointer"
                     transition="all 0.3s"
                     _hover={{
-                      borderColor: "blue.600",
-                      bg: "linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%)",
+                      borderColor: "green.600",
+                      bg: "green.100",
                       transform: "scale(1.01)",
                     }}
                   >
                     <Box
                       p={4}
-                      bg="linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)"
+                      bg="green.500"
                       borderRadius="2xl"
                       display="flex"
                       alignItems="center"
@@ -267,14 +267,14 @@ export default function SubidaProgramacionForm({
                     >
                       <Icon fontSize="3xl" color="white"><LuUpload /></Icon>
                     </Box>
-                    <Text fontSize="2xl" fontWeight="bold" color="gray.800" textAlign="center">
+                    <Text fontSize="2xl" fontWeight="bold" color="green.800" textAlign="center">
                       Arrastra tu imagen aqui
                     </Text>
-                    <Text fontSize="sm" color="gray.600" textAlign="center" mt={2}>
+                    <Text fontSize="sm" color="green.600" textAlign="center" mt={2}>
                       o haz clic para seleccionar desde tu computadora
                     </Text>
-                    <Box mt={4} px={4} py={2} bg="blue.100" borderRadius="full">
-                      <Text fontSize="xs" color="blue.700" fontWeight="semibold">
+                    <Box mt={4} px={4} py={2} bg="green.100" borderRadius="full">
+                      <Text fontSize="xs" color="green.700" fontWeight="semibold">
                         PNG, JPG, JPEG - Max. 5MB
                       </Text>
                     </Box>
