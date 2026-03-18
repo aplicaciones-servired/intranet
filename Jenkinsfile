@@ -102,8 +102,19 @@ pipeline {
           sh 'docker compose ps'
           // Validar que nginx vea al backend dentro de la red docker
           sh 'docker compose exec -T proxy_intranet sh -c "wget -q -O- http://api_intranet:3000/getImagenes >/dev/null"'
-          // Validar ruta final con prefijo /api que usa el frontend
-          sh 'docker compose exec -T proxy_intranet sh -c "wget -q -O- http://localhost:8081/api/getImagenes >/dev/null"'
+          // Validar ruta final con prefijo /api que usa el frontend.
+          // Usar 127.0.0.1 evita problemas de localhost/IPv6 en Alpine.
+          sh '''docker compose exec -T proxy_intranet sh -c '
+            i=1
+            while [ $i -le 10 ]; do
+              wget -q -O- http://127.0.0.1:8081/api/getImagenes >/dev/null && exit 0
+              echo "Esperando proxy interno (intento $i/10)..."
+              i=$((i+1))
+              sleep 2
+            done
+            echo "Fallo healthcheck en proxy_intranet:8081/api/getImagenes"
+            exit 1
+          '''
         }
       }
     }
