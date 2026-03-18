@@ -33,3 +33,16 @@ export async function getSubidasAutomaticas(): Promise<SubidaAutomatica[]> {
   const response = await adminAxios.get(`${API_URL}/subidas-automaticas`);
   return response.data as SubidaAutomatica[];
 }
+
+export async function updateSubidaAutomaticaPendiente(
+  id: number,
+  formData: FormData,
+): Promise<{ message: string; subida: SubidaAutomatica }> {
+  const response = await adminAxios.put(`${API_URL}/subidas-automaticas/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data as { message: string; subida: SubidaAutomatica };
+}

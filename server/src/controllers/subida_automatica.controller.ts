@@ -14,6 +14,22 @@ function esCorreoValido(correo: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
 }
 
+function normalizarPayload(payload: unknown): Record<string, any> {
+  if (!payload) return {};
+  if (typeof payload === "string") {
+    try {
+      const parsed = JSON.parse(payload);
+      return parsed && typeof parsed === "object" ? (parsed as Record<string, any>) : {};
+    } catch {
+      return {};
+    }
+  }
+  if (typeof payload === "object") {
+    return payload as Record<string, any>;
+  }
+  return {};
+}
+
 function normalizarListaImagenesEntrada(input: unknown): string[] {
   if (!input) return [];
 
@@ -194,6 +210,191 @@ export const getSubidasAutomaticas = async (req: Request, res: Response) => {
     console.error("Error al listar subidas automáticas:", error);
     return res.status(500).json({
       error: error?.message || "No se pudieron obtener las subidas automáticas",
+    });
+  }
+};
+
+export const updateSubidaAutomaticaPendiente = async (req: any, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0) {
+      return res.status(400).json({ error: "El id de la subida no es válido" });
+    }
+
+    const subida = await SubidaAutomatica.findByPk(id);
+    if (!subida) {
+      return res.status(404).json({ error: "La subida automática no existe" });
+    }
+
+    if (subida.estado !== "pendiente") {
+      return res.status(400).json({
+        error: "Solo se pueden editar subidas en estado pendiente",
+      });
+    }
+
+    const payloadActual = normalizarPayload(subida.payload);
+    const {
+      programadoPara,
+      correosDestino,
+      categoria,
+      titulo,
+      descripcion,
+      url,
+      imagenesUrls,
+      imagenes_urls,
+      urls,
+      imagenUrl,
+    } = req.body;
+
+    const correosEntrada =
+      typeof correosDestino === "string" && correosDestino.trim().length > 0
+        ? correosDestino
+        : subida.correos_destino;
+
+    const correos = normalizarCorreos(correosEntrada);
+    if (correos.length === 0) {
+      return res.status(400).json({
+        error: "Debes indicar al menos un correo destino válido",
+      });
+    }
+
+    const invalidos = correos.filter((c) => !esCorreoValido(c));
+    if (invalidos.length > 0) {
+      return res.status(400).json({
+        error: `Correos inválidos: ${invalidos.join(", ")}`,
+      });
+    }
+
+    let fechaProgramada = new Date(subida.programado_para);
+    if (typeof programadoPara === "string" && programadoPara.trim().length > 0) {
+      fechaProgramada = new Date(programadoPara);
+      if (Number.isNaN(fechaProgramada.getTime())) {
+        return res.status(400).json({ error: "La fecha de programación no es válida" });
+      }
+      if (fechaProgramada.getTime() < Date.now()) {
+        return res.status(400).json({ error: "La fecha de programación debe ser futura" });
+      }
+    }
+
+    let payloadActualizado: Record<string, any> = { ...payloadActual };
+
+    if (subida.tipo === "imagen") {
+      const files = req.files?.images as Express.Multer.File[] | undefined;
+      const imagenesSubidas: string[] = [];
+
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const imagenSubida = await insertFileToMinio(
+            file.buffer,
+            file.originalname,
+            file.mimetype,
+          );
+          imagenesSubidas.push(imagenSubida);
+        }
+      }
+
+      const imagenesEntrada = normalizarListaImagenesEntrada(
+        imagenesUrls ?? imagenes_urls ?? urls,
+      );
+
+      const imagenesBase =
+        imagenesSubidas.length > 0 || imagenesEntrada.length > 0
+          ? [...imagenesSubidas, ...imagenesEntrada]
+          : normalizarListaImagenesEntrada(payloadActual.imagenesUrls || payloadActual.imagenes_urls);
+
+      const imagenesFinales = imagenesBase
+        .map((value) => value.trim())
+        .filter(Boolean)
+        .filter((value, index, arr) => arr.indexOf(value) === index);
+
+      const categoriaFinal = typeof categoria === "string" && categoria.trim().length > 0
+        ? categoria.trim()
+        : String(payloadActual.categoria || "").trim();
+
+      const tituloFinal = typeof titulo === "string" && titulo.trim().length > 0
+        ? titulo.trim()
+        : String(payloadActual.titulo || "").trim();
+
+      const descripcionFinal = typeof descripcion === "string"
+        ? descripcion.trim()
+        : String(payloadActual.descripcion || "").trim();
+
+      if (!categoriaFinal || !tituloFinal || imagenesFinales.length === 0) {
+        return res.status(400).json({
+          error: "Para imágenes debes conservar categoría, título y al menos una imagen.",
+        });
+      }
+
+      payloadActualizado = {
+        ...payloadActual,
+        categoria: categoriaFinal,
+        titulo: tituloFinal,
+        descripcion: descripcionFinal,
+        imagenesUrls: imagenesFinales,
+      };
+    } else {
+      const fileImagen = req.files?.imagen?.[0] as Express.Multer.File | undefined;
+
+      let imagenFinal = typeof imagenUrl === "string" && imagenUrl.trim().length > 0
+        ? imagenUrl.trim()
+        : String(payloadActual.imagenUrl || "").trim();
+
+      if (fileImagen) {
+        imagenFinal = await insertFileToMinio(
+          fileImagen.buffer,
+          fileImagen.originalname,
+          fileImagen.mimetype,
+        );
+      }
+
+      const tituloFinal = typeof titulo === "string" && titulo.trim().length > 0
+        ? titulo.trim()
+        : String(payloadActual.titulo || "").trim();
+
+      const urlFinal = typeof url === "string" && url.trim().length > 0
+        ? url.trim()
+        : String(payloadActual.url || "").trim();
+
+      const descripcionFinal = typeof descripcion === "string"
+        ? descripcion.trim()
+        : String(payloadActual.descripcion || "").trim();
+
+      if (!tituloFinal || !urlFinal || !imagenFinal) {
+        return res.status(400).json({
+          error: "Para formularios debes conservar título, URL e imagen.",
+        });
+      }
+
+      try {
+        new URL(urlFinal);
+      } catch {
+        return res.status(400).json({ error: "La URL del formulario no es válida" });
+      }
+
+      payloadActualizado = {
+        ...payloadActual,
+        titulo: tituloFinal,
+        descripcion: descripcionFinal,
+        url: urlFinal,
+        imagenUrl: imagenFinal,
+      };
+    }
+
+    await subida.update({
+      payload: payloadActualizado,
+      programado_para: fechaProgramada,
+      correos_destino: correos.join(","),
+      error_mensaje: null,
+    });
+
+    return res.status(200).json({
+      message: "Subida automática pendiente actualizada correctamente",
+      subida,
+    });
+  } catch (error: any) {
+    console.error("Error al editar subida automática pendiente:", error);
+    return res.status(500).json({
+      error: error?.message || "No se pudo editar la subida automática",
     });
   }
 };
