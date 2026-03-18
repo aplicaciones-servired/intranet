@@ -19,10 +19,18 @@ pipeline {
           def env_server = readFile(ENV_SERVER_INTRANET)
           def env_client = readFile(ENV_CLIENT_INTRANET)
 
-          // Inyectar JWT_SECRET (mismo valor en cliente y servidor)
-          def env_client_completo = env_client + "\nJWT_SECRET=${JWT_SECRET_INTRANET}\nPUBLIC_LOGIN_URL=/apilogin\nLOGIN_API_URL=http://proxy_intranet:8081/apilogin\n"
+          def upsertEnvVar = { String content, String key, String value ->
+            def pattern = "(?m)^" + java.util.regex.Pattern.quote(key) + "=.*\\R?"
+            def sanitized = content.replaceAll(pattern, "").trim()
+            return "${sanitized}\n${key}=${value}\n"
+          }
 
-          def env_server_completo = env_server + "\nJWT_SECRET=${JWT_SECRET_INTRANET}\n"
+          // Inyectar variables sin duplicarlas (si existen, se reemplazan)
+          def env_client_completo = upsertEnvVar(env_client, 'JWT_SECRET', JWT_SECRET_INTRANET)
+          env_client_completo = upsertEnvVar(env_client_completo, 'PUBLIC_LOGIN_URL', '/apilogin')
+          env_client_completo = upsertEnvVar(env_client_completo, 'LOGIN_API_URL', 'http://proxy_intranet:8081/apilogin')
+
+          def env_server_completo = upsertEnvVar(env_server, 'JWT_SECRET', JWT_SECRET_INTRANET)
 
           writeFile file: './server/.env', text: env_server_completo
           writeFile file: './client/.env', text: env_client_completo
