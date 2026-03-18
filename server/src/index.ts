@@ -77,7 +77,12 @@ app.use(espacioRoutes);
 app.use(formularioRoutes);
 app.use(subidaAutomaticaRoutes);
 // Aplica el rate-limit estricto solo al POST público de cartas-laborales
-app.use('/cartas-laborales', cartaLimiter);
+app.use('/cartas-laborales', (req, res, next) => {
+  if (req.method === 'POST') {
+    return cartaLimiter(req, res, next);
+  }
+  next();
+});
 app.use(cartaLaboralRoutes);
 
 const isProduction = process.env.NODE_ENV === 'production';
