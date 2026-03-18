@@ -215,6 +215,7 @@ interface OpcionesNotificacionIntranet {
   descripcion?: string;
   urlIntranet: string;
   tipo?: "imagen" | "formulario";
+  correosDestino?: string[];
 }
 
 export async function enviarNotificacionNuevaInformacion({
@@ -224,9 +225,14 @@ export async function enviarNotificacionNuevaInformacion({
   descripcion,
   urlIntranet,
   tipo = "imagen",
+  correosDestino,
 }: OpcionesNotificacionIntranet): Promise<void> {
-  const correosDestino = process.env.PUBLIC_CORREOS_URL;
-  if (!correosDestino) {
+  const correosFinales =
+    correosDestino && correosDestino.length > 0
+      ? correosDestino.join(",")
+      : process.env.PUBLIC_CORREOS_URL;
+
+  if (!correosFinales) {
     console.warn("No se encontró PUBLIC_CORREOS_URL en las variables de entorno");
     return;
   }
@@ -245,7 +251,7 @@ export async function enviarNotificacionNuevaInformacion({
 
   await transporter.sendMail({
     from: `"Sistema Intranet" <${process.env.EMAIL_USER}>`,
-    to: correosDestino,
+    to: correosFinales,
     subject: `📢 Nuevo contenido en la Intranet — ${titulo}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; padding: 20px;">
@@ -268,7 +274,7 @@ export async function enviarNotificacionNuevaInformacion({
             </tr>
             <tr style="background: #f9fafb;">
               <td style="padding: 10px 14px; color: #6b7280; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Cantidad</td>
-              <td style="padding: 10px 14px; color: #111827; border-bottom: 1px solid #e5e7eb;">${cantidad} imagen(es)</td>
+              <td style="padding: 10px 14px; color: #111827; border-bottom: 1px solid #e5e7eb;">${cantidad} ${cantidad === 1 ? tipoTexto : tipoPlural}</td>
             </tr>
             ${descripcion ? `
             <tr>

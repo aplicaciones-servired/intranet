@@ -10,12 +10,15 @@ import { categoriaRoutes } from './routes/categoria.routes';
 import { espacioRoutes } from './routes/espacio.routes';
 import formularioRoutes from './routes/formulario.routes';
 import cartaLaboralRoutes from './routes/carta_laboral.routes';
+import subidaAutomaticaRoutes from './routes/subida_automatica.routes';
 import CartaLaboral from './models/carta_laboral.model';
 import { ConfigModel } from './models/config.model';
 import { CategoriaModel } from './models/categoria.model';
 import { EspacioModel } from './models/espacio.model';
 import Formulario from './models/formulario.model';
+import SubidaAutomatica from './models/subida_automatica.model';
 import { info_db } from './db/db_info';
+import { iniciarProcesadorSubidasAutomaticas } from './services/subida_automatica.processor';
 
 const app = express();
 
@@ -72,27 +75,34 @@ app.use(configRoutes);
 app.use(categoriaRoutes);
 app.use(espacioRoutes);
 app.use(formularioRoutes);
+app.use(subidaAutomaticaRoutes);
 // Aplica el rate-limit estricto solo al POST público de cartas-laborales
 app.use('/cartas-laborales', cartaLimiter);
 app.use(cartaLaboralRoutes);
 
 const isProduction = process.env.NODE_ENV === 'production';
+const enableAlterSync = !isProduction && process.env.DB_SYNC_ALTER === 'true';
 
 // Verificar conexión y sincronizar tablas
 info_db.authenticate()
   .then(() => {
     console.log('✅ Conectado a MySQL - Base de datos: intranet');
-    // En producción NO usamos alter:true para evitar modificaciones destructivas del esquema
-    const syncOptions = isProduction ? {} : { alter: true };
+    // Evita alter por defecto para no generar índices duplicados en entornos con tablas antiguas.
+    // Si necesitas alter en desarrollo, define DB_SYNC_ALTER=true.
+    const syncOptions = enableAlterSync ? { alter: true } : {};
     return Promise.all([
       ConfigModel.sync(syncOptions),
       CategoriaModel.sync(syncOptions),
       EspacioModel.sync(syncOptions),
       Formulario.sync(syncOptions),
+      SubidaAutomatica.sync(syncOptions),
       CartaLaboral.sync(syncOptions),
     ]);
   })
-  .then(() => console.log('✅ Tablas sincronizadas'))
+  .then(() => {
+    console.log('✅ Tablas sincronizadas');
+    iniciarProcesadorSubidasAutomaticas();
+  })
   .catch((err: any) => {
     console.error('❌ Error conectando a MySQL:', err.message);
   });
@@ -100,9 +110,22 @@ info_db.authenticate()
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 
-app.listen(PORT, HOST as string, () => {
+const server = app.listen(PORT, HOST as string, () => {
   console.log(`🚀 Server is running on http://${HOST}:${PORT}`);
   if (HOST === '0.0.0.0') {
     console.log('📡 Servidor accesible desde la red local');
   }
+});
+
+server.on('error', (error: NodeJS.ErrnoException) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`❌ No se pudo iniciar: el puerto ${PORT} ya está en uso.`);
+    console.error('En Windows puedes liberar el puerto con:');
+    console.error(`   netstat -ano | findstr :${PORT}`);
+    console.error('   Stop-Process -Id <PID> -Force');
+  } else {
+    console.error('❌ Error iniciando servidor:', error.message);
+  }
+
+  process.exit(1);
 });

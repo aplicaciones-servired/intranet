@@ -5,5 +5,6 @@ export * from "./categoria.service";
 export * from "./espacio.service";
 export * from "./formulario.service";
 export * from "./carta_laboral.service";
+export * from "./subida_automatica.service";
 export * from "./GetInfo.service";
 export * from "./PostInfo.service";
