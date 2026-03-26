@@ -78,6 +78,9 @@ export function FiltrosImagenes({
           <Button
             size="md"
             variant="ghost"
+            color={"white"}
+            bg={"blue.500"}
+            _hover={{ bg: "blue.600" }}
             onClick={onLimpiarFiltros}
           >
             Limpiar

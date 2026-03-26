@@ -35,8 +35,20 @@ export default function SubidasEstadoGrid({
   procesadasFormulario,
   listProps,
 }: SubidasEstadoGridProps) {
+  const tipoSeleccionado = Boolean(tipo);
+
+  if (!tipoSeleccionado) {
+    return null;
+  }
+
   return (
-    <Grid templateColumns={{ base: "1fr", xl: "repeat(3, 1fr)" }} gap={6}>
+    <Grid
+      templateColumns={{
+        base: "1fr",
+        xl: "repeat(3, 1fr)",
+      }}
+      gap={6}
+    >
       <EstadoSubidasPanel
         title="Pendientes de subir"
         count={pendientesCount}
@@ -44,7 +56,7 @@ export default function SubidasEstadoGrid({
         iconColor="orange.500"
         bg="linear-gradient(180deg, #ffffff 0%, #fff7ed 100%)"
         borderColor="orange.100"
-        tipoSeleccionado={Boolean(tipo)}
+        tipoSeleccionado={tipoSeleccionado}
       >
         <SubidaTipoList
           {...listProps}
@@ -61,7 +73,7 @@ export default function SubidasEstadoGrid({
         iconColor="red.500"
         bg="linear-gradient(180deg, #ffffff 0%, #fef2f2 100%)"
         borderColor="red.100"
-        tipoSeleccionado={Boolean(tipo)}
+        tipoSeleccionado={tipoSeleccionado}
       >
         <SubidaTipoList
           {...listProps}
@@ -78,7 +90,7 @@ export default function SubidasEstadoGrid({
         iconColor="green.500"
         bg="linear-gradient(180deg, #ffffff 0%, #ecfdf5 100%)"
         borderColor="green.100"
-        tipoSeleccionado={Boolean(tipo)}
+        tipoSeleccionado={tipoSeleccionado}
       >
         <SubidaTipoList
           {...listProps}

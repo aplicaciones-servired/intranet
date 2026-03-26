@@ -25,7 +25,7 @@ export function CategoriaSection({
 }: CategoriaSectionProps) {
   const [expandido, setExpandido] = useState(true);
   const [mostrarTodas, setMostrarTodas] = useState(false);
-  
+
   const todasSeleccionadas = imagenes.every(img => imagenesSeleccionadas.has(img.id));
   const hayMasImagenes = imagenes.length > IMAGENES_POR_PAGINA;
   const imagenesMostradas = mostrarTodas ? imagenes : imagenes.slice(0, IMAGENES_POR_PAGINA);
@@ -74,13 +74,16 @@ export function CategoriaSection({
               size="sm"
               variant="surface"
               colorScheme="dark"
+              color={"white"}
+              bg={"green.600"}
+              _hover={{ bg: "green.700" }}
               onClick={(e) => {
                 e.stopPropagation();
                 onSeleccionarTodas(categoria);
               }}
             >
               <Icon mr={2}><LuCheck /></Icon>
-              {todasSeleccionadas ? "Deseleccionar todas" : "Seleccionar todas"}
+              {todasSeleccionadas ? "Quitar selección" : "Seleccionar todas"}
             </Button>
             <Badge
               colorScheme="cyan"

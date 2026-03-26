@@ -36,7 +36,7 @@ export default function SubidasAutomaticasManager() {
               <Box bg="linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)" p={2.5} borderRadius="lg">
                 <Icon color="white" fontSize="xl"><LuCalendarClock /></Icon>
               </Box>
-              <Text fontSize="2xl" fontWeight="bold" color="gray.900">
+              <Text fontSize="2xl" fontWeight="bold" color="gray.900"> 
                 Subida Automática
               </Text>
             </Flex>
@@ -44,7 +44,7 @@ export default function SubidasAutomaticasManager() {
               Programa imágenes o formularios para publicarse en una fecha y hora específicas.
             </Text>
           </Box>
-          <Button size="sm" onClick={manager.loadData} variant="outline" borderRadius="lg">
+          <Button size="sm" onClick={manager.loadData} variant="outline" borderRadius="lg" color={"white"} bg={"blue.500"} _hover={{ bg: "teal.600" }}>
             <Icon mr={2}><LuListFilter /></Icon>
             Actualizar listados
           </Button>

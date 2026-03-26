@@ -192,7 +192,7 @@ export default function CartasLaboralesManager() {
               <Text color="gray.500" fontSize="sm">Gestiona las solicitudes de cartas laborales</Text>
             </Box>
           </Flex>
-          <Button onClick={loadData} size="sm" variant="outline" borderRadius="lg" color="gray.600">
+          <Button onClick={loadData} size="sm" variant="outline" borderRadius="lg" bgColor={"blue.300"} _hover={{ bg: "blue.400" }} disabled={loading}>
             Actualizar
           </Button>
         </Flex>

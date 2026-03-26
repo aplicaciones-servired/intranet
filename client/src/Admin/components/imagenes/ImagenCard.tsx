@@ -9,11 +9,11 @@ interface ImagenCardProps {
   onEliminar: (imagen: Imagen) => void;
 }
 
-export function ImagenCard({ 
-  imagen, 
-  estaSeleccionada, 
-  onToggleSeleccion, 
-  onEliminar 
+export function ImagenCard({
+  imagen,
+  estaSeleccionada,
+  onToggleSeleccion,
+  onEliminar
 }: ImagenCardProps) {
   return (
     <Box
@@ -23,10 +23,10 @@ export function ImagenCard({
       border="2px solid"
       borderColor={estaSeleccionada ? "blue.500" : "gray.200"}
       transition="all 0.2s"
-      _hover={{ 
-        boxShadow: "md", 
-        transform: "translateY(-2px)", 
-        borderColor: estaSeleccionada ? "blue.600" : "blue.300" 
+      _hover={{
+        boxShadow: "md",
+        transform: "translateY(-2px)",
+        borderColor: estaSeleccionada ? "blue.600" : "blue.300"
       }}
       position="relative"
     >
@@ -63,9 +63,9 @@ export function ImagenCard({
       </Box>
 
       {/* Imagen */}
-      <Box 
-        position="relative" 
-        paddingBottom="75%" 
+      <Box
+        position="relative"
+        paddingBottom="75%"
         bg="gray.100"
         onClick={() => onToggleSeleccion(imagen.id)}
         cursor="pointer"
@@ -102,10 +102,10 @@ export function ImagenCard({
 
       {/* Info */}
       <Box p={3}>
-        <Text 
-          fontSize="sm" 
-          fontWeight="bold" 
-          color="gray.900" 
+        <Text
+          fontSize="sm"
+          fontWeight="bold"
+          color="gray.900"
           mb={1}
           overflow="hidden"
           textOverflow="ellipsis"
@@ -118,9 +118,9 @@ export function ImagenCard({
           {imagen.titulo}
         </Text>
         {imagen.descripcion && (
-          <Text 
-            fontSize="xs" 
-            color="gray.500" 
+          <Text
+            fontSize="xs"
+            color="gray.500"
             mb={3}
             overflow="hidden"
             textOverflow="ellipsis"
@@ -145,6 +145,9 @@ export function ImagenCard({
           colorScheme="red"
           variant="ghost"
           width="100%"
+          bg="red.500" 
+          _hover={{ bg: "red.600" }}
+          color="white"
           onClick={(e) => {
             e.stopPropagation();
             onEliminar(imagen);
