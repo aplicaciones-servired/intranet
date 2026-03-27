@@ -56,8 +56,29 @@ export function ImagenesGallery() {
   const [configuredSliderCat, setConfiguredSliderCat] = useState("comunicaciones");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [modalItem, setModalItem] = useState<Imagen | null>(null);
+  const [modalItems, setModalItems] = useState<Imagen[]>([]);
+  const [modalIndex, setModalIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const modalItem = modalItems[modalIndex] ?? null;
+
+  const openSingleModal = (item: Imagen) => {
+    setModalItems([item]);
+    setModalIndex(0);
+  };
+
+  const closeModal = () => {
+    setModalItems([]);
+    setModalIndex(0);
+  };
+
+  const goPrevModal = () => {
+    setModalIndex((current) => (current - 1 + modalItems.length) % modalItems.length);
+  };
+
+  const goNextModal = () => {
+    setModalIndex((current) => (current + 1) % modalItems.length);
+  };
 
   useEffect(() => {
     Promise.all([
@@ -92,6 +113,39 @@ export function ImagenesGallery() {
 
     const url = new URL(window.location.href);
     const openImageId = url.searchParams.get("openImageId");
+    const openImageIds = url.searchParams.get("openImageIds");
+
+    if (openImageIds) {
+      const idsSolicitados = openImageIds
+        .split(",")
+        .map((id) => Number(id.trim()))
+        .filter((id) => Number.isFinite(id));
+
+      if (idsSolicitados.length > 0) {
+        const mapaPorId = new Map(imagenes.map((img) => [Number(img.id), img]));
+        const lote = idsSolicitados
+          .map((id) => mapaPorId.get(id))
+          .filter((img): img is Imagen => Boolean(img));
+
+        if (lote.length > 0) {
+          const principalId = openImageId ? Number(openImageId) : Number(lote[0].id);
+          const indexInicial = Math.max(
+            lote.findIndex((img) => Number(img.id) === principalId),
+            0
+          );
+
+          setSliderCat(lote[indexInicial].categoria);
+          setModalItems(lote);
+          setModalIndex(indexInicial);
+
+          url.searchParams.delete("openImageIds");
+          url.searchParams.delete("openImageId");
+          const cleanedUrl = `${url.pathname}${url.search}${url.hash}`;
+          window.history.replaceState({}, "", cleanedUrl);
+          return;
+        }
+      }
+    }
 
     if (!openImageId) {
       return;
@@ -108,7 +162,8 @@ export function ImagenesGallery() {
     }
 
     setSliderCat(imagenObjetivo.categoria);
-    setModalItem(imagenObjetivo);
+    setModalItems([imagenObjetivo]);
+    setModalIndex(0);
 
     url.searchParams.delete("openImageId");
     const cleanedUrl = `${url.pathname}${url.search}${url.hash}`;
@@ -165,7 +220,7 @@ export function ImagenesGallery() {
       {loading ? (
         <LoadingSlider />
       ) : !error ? (
-        <Slider items={sliderItems} onOpen={setModalItem} />
+        <Slider items={sliderItems} onOpen={openSingleModal} />
       ) : (
         <div className="max-w-lg mx-auto mt-10 bg-red-50 border border-red-200 rounded-xl p-6 text-center">
           <p className="text-red-600 font-medium">{error}</p>
@@ -217,7 +272,7 @@ export function ImagenesGallery() {
                         espacio={esp}
                         catMeta={catMeta as Categoria | undefined}
                         items={items}
-                        onOpen={setModalItem}
+                        onOpen={openSingleModal}
                       />
                     );
                   })}
@@ -243,7 +298,7 @@ export function ImagenesGallery() {
                         key={isEspacio ? (item as Espacio).id : catValue}
                         label={label}
                         items={items}
-                        onOpen={setModalItem}
+                        onOpen={openSingleModal}
                       />
                     );
                     if (tipo === "carrusel") {
@@ -261,7 +316,7 @@ export function ImagenesGallery() {
                           key={isEspacio ? (item as Espacio).id : catValue}
                           label={label}
                           items={recentItems}
-                          onOpen={setModalItem}
+                          onOpen={openSingleModal}
                         />
                       );
                     }
@@ -271,7 +326,7 @@ export function ImagenesGallery() {
                         label={label}
                         catLabel={catMeta?.label ?? catValue}
                         items={items}
-                        onOpen={setModalItem}
+                        onOpen={openSingleModal}
                       />
                     );
                     if (tipo === "noticias") return (
@@ -280,7 +335,7 @@ export function ImagenesGallery() {
                         label={label}
                         catLabel={catMeta?.label ?? catValue}
                         items={items}
-                        onOpen={setModalItem}
+                        onOpen={openSingleModal}
                       />
                     );
                     // lista (default)
@@ -290,7 +345,7 @@ export function ImagenesGallery() {
                         label={label}
                         catLabel={catMeta?.label ?? catValue}
                         items={items}
-                        onOpen={setModalItem}
+                        onOpen={openSingleModal}
                       />
                     );
                   })}
@@ -305,7 +360,7 @@ export function ImagenesGallery() {
                       key={esp.id}
                       titulo={esp.nombre}
                       items={items}
-                      onOpen={setModalItem}
+                      onOpen={openSingleModal}
                     />
                   );
                 })}
@@ -321,7 +376,11 @@ export function ImagenesGallery() {
         <MediaModal
           item={modalItem}
           catLabel={CATEGORIAS.find((c) => c.value === modalItem.categoria)?.label ?? modalItem.categoria}
-          onClose={() => setModalItem(null)}
+          onClose={closeModal}
+          onPrev={modalItems.length > 1 ? goPrevModal : undefined}
+          onNext={modalItems.length > 1 ? goNextModal : undefined}
+          hasPrev={modalItems.length > 1}
+          hasNext={modalItems.length > 1}
         />
       )}
     </div>

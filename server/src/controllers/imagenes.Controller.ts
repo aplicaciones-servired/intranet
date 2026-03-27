@@ -83,6 +83,7 @@ export const notificarSubidaController = async (
     let tipoEvento: "imagen" | "formulario" | "mixto" = "mixto";
     let urlDestinoEvento = baseUrl;
     let primeraImagenId: number | null = null;
+    let imagenesNotificadasIds: number[] = [];
     let primerFormularioId: number | null = null;
     let primerFormularioUrl = "";
     const infoNotificacion: any = {
@@ -103,13 +104,26 @@ export const notificarSubidaController = async (
       if (imagenes.length > 0) {
         const primeraImagen = imagenes[0];
         primeraImagenId = Number(primeraImagen.id);
+        imagenesNotificadasIds = imagenes
+          .map((img) => Number(img.id))
+          .filter((id) => Number.isFinite(id));
         tituloResumen = primeraImagen.titulo || tituloResumen;
         categoriaResumen = primeraImagen.categoria || categoriaResumen;
         descripcionResumen = primeraImagen.descripcion || descripcionResumen;
 
+        const queryImagenes = imagenesNotificadasIds.length > 0
+          ? `?openImageIds=${imagenesNotificadasIds.join(",")}${
+              primeraImagenId && Number.isFinite(primeraImagenId)
+                ? `&openImageId=${primeraImagenId}`
+                : ""
+            }`
+          : primeraImagenId && Number.isFinite(primeraImagenId)
+            ? `?openImageId=${primeraImagenId}`
+            : "";
+
         const urlDestinoImagen =
-          primeraImagenId && Number.isFinite(primeraImagenId)
-            ? `${baseUrl}/?openImageId=${primeraImagenId}`
+          queryImagenes.length > 0
+            ? `${baseUrl}/${queryImagenes}`
             : baseUrl;
         
         const { enviarNotificacionNuevaInformacion } = await import("../utils/enviarCorreo");
@@ -191,10 +205,17 @@ export const notificarSubidaController = async (
 
     if (infoNotificacion.imagenes > 0 && infoNotificacion.formularios === 0) {
       tipoEvento = "imagen";
-      urlDestinoEvento =
-        primeraImagenId && Number.isFinite(primeraImagenId)
-          ? `${baseUrl}/?openImageId=${primeraImagenId}`
-          : baseUrl;
+      const queryImagenes = imagenesNotificadasIds.length > 0
+        ? `?openImageIds=${imagenesNotificadasIds.join(",")}${
+            primeraImagenId && Number.isFinite(primeraImagenId)
+              ? `&openImageId=${primeraImagenId}`
+              : ""
+          }`
+        : primeraImagenId && Number.isFinite(primeraImagenId)
+          ? `?openImageId=${primeraImagenId}`
+          : "";
+
+      urlDestinoEvento = queryImagenes.length > 0 ? `${baseUrl}/${queryImagenes}` : baseUrl;
     } else if (infoNotificacion.formularios > 0 && infoNotificacion.imagenes === 0) {
       tipoEvento = "formulario";
       categoriaResumen = "Formularios";
@@ -209,7 +230,14 @@ export const notificarSubidaController = async (
     } else {
       tipoEvento = "mixto";
       categoriaResumen = "Actualización general";
-      if (primeraImagenId && Number.isFinite(primeraImagenId)) {
+      if (imagenesNotificadasIds.length > 0) {
+        const queryImagenes = `?openImageIds=${imagenesNotificadasIds.join(",")}${
+          primeraImagenId && Number.isFinite(primeraImagenId)
+            ? `&openImageId=${primeraImagenId}`
+            : ""
+        }`;
+        urlDestinoEvento = `${baseUrl}/${queryImagenes}`;
+      } else if (primeraImagenId && Number.isFinite(primeraImagenId)) {
         urlDestinoEvento = `${baseUrl}/?openImageId=${primeraImagenId}`;
       } else if (primerFormularioUrl.length > 0) {
         urlDestinoEvento = primerFormularioUrl;

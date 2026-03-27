@@ -6,9 +6,13 @@ interface Props {
   item: Imagen;
   catLabel: string;
   onClose: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  hasPrev?: boolean;
+  hasNext?: boolean;
 }
 
-export function MediaModal({ item, catLabel, onClose }: Props) {
+export function MediaModal({ item, catLabel, onClose, onPrev, onNext, hasPrev = false, hasNext = false }: Props) {
   const video = isVideo(item.poster);
   const [zoom, setZoom] = useState(1);
   const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
@@ -37,10 +41,20 @@ export function MediaModal({ item, catLabel, onClose }: Props) {
 
   // Cerrar con Escape
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+      if (e.key === "ArrowLeft" && hasPrev && onPrev) {
+        onPrev();
+      }
+      if (e.key === "ArrowRight" && hasNext && onNext) {
+        onNext();
+      }
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
+  }, [onClose, hasPrev, hasNext, onPrev, onNext]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -157,6 +171,40 @@ export function MediaModal({ item, catLabel, onClose }: Props) {
       >
         {/* Media */}
         <div className="relative" style={{ maxHeight: "65vh" }}>
+          {hasPrev && onPrev && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onPrev();
+              }}
+              className="absolute z-30 left-3 top-1/2 -translate-y-1/2 bg-black/55 hover:bg-black/75 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+              aria-label="Anterior"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+
+          {hasNext && onNext && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onNext();
+              }}
+              className="absolute z-30 right-3 top-1/2 -translate-y-1/2 bg-black/55 hover:bg-black/75 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+              aria-label="Siguiente"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
+
           <div 
             ref={mediaRef}
             className={`w-full bg-black flex overflow-auto ${zoom > 1 ? "items-start justify-start" : "items-center justify-center"}`}
@@ -274,6 +322,9 @@ export function MediaModal({ item, catLabel, onClose }: Props) {
           <span className="text-[10px] font-bold uppercase tracking-widest bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full">
             {catLabel}
           </span>
+          {(hasPrev || hasNext) && (
+            <p className="text-xs text-gray-400 mt-2">Usa las flechas para navegar por las imágenes notificadas.</p>
+          )}
           <h2 className="text-lg font-bold text-gray-900 mt-3">{item.titulo}</h2>
           {item.descripcion && (
             <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">{item.descripcion}</p>
