@@ -8,6 +8,7 @@ export interface NotificacionTopItem {
   titulo: string;
   categoria: string;
   cantidad: number;
+  preview_image_url?: string | null;
   shown_count: number;
   opened_count: number;
   clicked_count: number;

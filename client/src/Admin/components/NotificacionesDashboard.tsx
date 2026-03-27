@@ -9,6 +9,7 @@ import {
   Grid,
   Heading,
   HStack,
+  Image,
   Spinner,
   Text,
   defaultSystem,
@@ -58,7 +59,11 @@ function TopTable({
         <Text px={5} py={6} color="gray.500" fontSize="sm">Sin datos todavía.</Text>
       ) : (
         <Box>
-          {items.map((item, index) => (
+          {items.map((item, index) => {
+            const previewUrl = String(item.preview_image_url || "").trim();
+            const totalItems = Math.max(Number(item.cantidad || 1), 1);
+            const extraItems = Math.max(totalItems - 1, 0);
+            return (
             <Flex
               key={`${title}-${item.id}-${index}`}
               px={5}
@@ -71,27 +76,68 @@ function TopTable({
               <Box minW="28px" h="28px" borderRadius="full" bg="gray.100" color="gray.700" fontSize="xs" fontWeight="bold" display="flex" alignItems="center" justifyContent="center">
                 {index + 1}
               </Box>
+              <Box
+                w="42px"
+                h="42px"
+                minW="42px"
+                borderRadius="md"
+                overflow="hidden"
+                position="relative"
+                border="1px solid"
+                borderColor="gray.200"
+                bg="gray.50"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                {previewUrl ? (
+                  <Image
+                    src={previewUrl}
+                    alt={item.titulo}
+                    w="full"
+                    h="full"
+                    objectFit="cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <Text fontSize="xs" color="gray.400">N/A</Text>
+                )}
+                {extraItems > 0 ? (
+                  <Badge
+                    position="absolute"
+                    top="-7px"
+                    right="-7px"
+                    colorPalette="blue"
+                    borderRadius="full"
+                    px={1.5}
+                    py={0.5}
+                    fontSize="10px"
+                    lineHeight="1"
+                    boxShadow="sm"
+                  >
+                    +{extraItems}
+                  </Badge>
+                ) : null}
+              </Box>
               <Box flex={1} minW={0}>
-                <Text fontSize="sm" color="gray.900" fontWeight="600" noOfLines={1}>{item.titulo}</Text>
-                <Text fontSize="xs" color="gray.500">{item.categoria} · {item.tipo}</Text>
+                <Text fontSize="sm" color="gray.900" fontWeight="600" lineClamp={1}>{item.titulo}</Text>
+                <Text fontSize="xs" color="gray.500">{item.categoria} · {item.tipo} · {totalItems} item{totalItems > 1 ? "s" : ""}</Text>
               </Box>
               <HStack gap={2}>
                 <Badge colorPalette="purple" variant="subtle" px={2} borderRadius="full">
                   {item[metricKey]}
                 </Badge>
                 <Button
-                  as="a"
-                  href={item.url_destino}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   size="xs"
                   variant="outline"
+                  onClick={() => window.open(item.url_destino, "_blank", "noopener,noreferrer")}
                 >
                   <LuExternalLink />
                 </Button>
               </HStack>
             </Flex>
-          ))}
+            );
+          })}
         </Box>
       )}
     </Box>
@@ -138,7 +184,7 @@ export default function NotificacionesDashboard() {
               <Text fontSize="sm" color="gray.600">Más vistas, clics y rendimiento general del canal de avisos.</Text>
             </Box>
           </HStack>
-          <Button onClick={load} variant="outline" borderRadius="xl" disabled={loading}>
+          <Button onClick={load} variant="outline" borderRadius="xl" disabled={loading} bg={"blue.500"} _hover={{bg:"teal.500"}} color="white"  aria-label="Actualizar métricas">
             <LuRefreshCcw />
             Actualizar
           </Button>

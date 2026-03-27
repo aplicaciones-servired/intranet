@@ -281,6 +281,7 @@ export async function topNotificaciones(limit = 10): Promise<{
       "titulo",
       "categoria",
       "cantidad",
+      "preview_image_url",
       "shown_count",
       "opened_count",
       "clicked_count",
