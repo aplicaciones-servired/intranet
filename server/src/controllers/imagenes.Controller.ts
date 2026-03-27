@@ -1,6 +1,7 @@
 import { where } from "sequelize";
 import { ImagenesModels } from "../models/imagenes.model";
 import { insertFileToMinio } from "../utils/insertMinio";
+import { abrirStreamNotificaciones, emitirNotificacionNuevaInformacion } from "../utils/notificacionesRealtime";
 
 export const imagenesController = async (req: any, res: any): Promise<any> => {
   const { categoria, titulo, descripcion } = req.body;
@@ -67,8 +68,23 @@ export const notificarSubidaController = async (
 ): Promise<any> => {
   try {
     const { imagenesIds, formularioIds, urlIntranet } = req.body;
+    const baseIntranetUrl =
+      urlIntranet ||
+      process.env.PUBLIC_INTRANET_URL ||
+      "https://intranet.grupomultired.com.co";
+
+    const normalizarBase = (url: string): string => url.replace(/\/+$/, "");
+    const baseUrl = normalizarBase(baseIntranetUrl);
 
     let totalNotificados = 0;
+    let tituloResumen = "Nueva actualización";
+    let categoriaResumen = "Intranet";
+    let descripcionResumen = "Se publicó contenido nuevo en la intranet.";
+    let tipoEvento: "imagen" | "formulario" | "mixto" = "mixto";
+    let urlDestinoEvento = baseUrl;
+    let primeraImagenId: number | null = null;
+    let primerFormularioId: number | null = null;
+    let primerFormularioUrl = "";
     const infoNotificacion: any = {
       imagenes: 0,
       formularios: 0,
@@ -86,6 +102,15 @@ export const notificarSubidaController = async (
 
       if (imagenes.length > 0) {
         const primeraImagen = imagenes[0];
+        primeraImagenId = Number(primeraImagen.id);
+        tituloResumen = primeraImagen.titulo || tituloResumen;
+        categoriaResumen = primeraImagen.categoria || categoriaResumen;
+        descripcionResumen = primeraImagen.descripcion || descripcionResumen;
+
+        const urlDestinoImagen =
+          primeraImagenId && Number.isFinite(primeraImagenId)
+            ? `${baseUrl}/?openImageId=${primeraImagenId}`
+            : baseUrl;
         
         const { enviarNotificacionNuevaInformacion } = await import("../utils/enviarCorreo");
         
@@ -94,7 +119,7 @@ export const notificarSubidaController = async (
           categoria: primeraImagen.categoria,
           titulo: primeraImagen.titulo,
           descripcion: primeraImagen.descripcion,
-          urlIntranet: urlIntranet || process.env.PUBLIC_INTRANET_URL || "https://intranet.grupomultired.com.co",
+          urlIntranet: urlDestinoImagen,
           tipo: "imagen",
         });
 
@@ -121,6 +146,23 @@ export const notificarSubidaController = async (
 
       if (formularios.length > 0) {
         const primerFormulario = formularios[0];
+        primerFormularioId = Number(primerFormulario.id);
+        primerFormularioUrl = String(primerFormulario.url || "").trim();
+
+        if (!infoNotificacion.imagenes) {
+          tituloResumen = primerFormulario.titulo || tituloResumen;
+          categoriaResumen = "Formularios";
+          descripcionResumen = primerFormulario.descripcion || descripcionResumen;
+        }
+
+        const urlDestinoFormulario =
+          primerFormularioUrl.length > 0
+            ? primerFormularioUrl
+            : `${baseUrl}/formularios${
+                primerFormularioId && Number.isFinite(primerFormularioId)
+                  ? `?openFormularioId=${primerFormularioId}`
+                  : ""
+              }`;
         
         const { enviarNotificacionNuevaInformacion } = await import("../utils/enviarCorreo");
         
@@ -129,7 +171,7 @@ export const notificarSubidaController = async (
           categoria: "Formularios",
           titulo: primerFormulario.titulo,
           descripcion: primerFormulario.descripcion,
-          urlIntranet: urlIntranet || process.env.PUBLIC_INTRANET_URL || "https://intranet.grupomultired.com.co",
+          urlIntranet: urlDestinoFormulario,
           tipo: "formulario",
         });
 
@@ -147,6 +189,46 @@ export const notificarSubidaController = async (
       return res.status(404).json({ error: "No se encontraron items pendientes de notificar" });
     }
 
+    if (infoNotificacion.imagenes > 0 && infoNotificacion.formularios === 0) {
+      tipoEvento = "imagen";
+      urlDestinoEvento =
+        primeraImagenId && Number.isFinite(primeraImagenId)
+          ? `${baseUrl}/?openImageId=${primeraImagenId}`
+          : baseUrl;
+    } else if (infoNotificacion.formularios > 0 && infoNotificacion.imagenes === 0) {
+      tipoEvento = "formulario";
+      categoriaResumen = "Formularios";
+      urlDestinoEvento =
+        primerFormularioUrl.length > 0
+          ? primerFormularioUrl
+          : `${baseUrl}/formularios${
+              primerFormularioId && Number.isFinite(primerFormularioId)
+                ? `?openFormularioId=${primerFormularioId}`
+                : ""
+            }`;
+    } else {
+      tipoEvento = "mixto";
+      categoriaResumen = "Actualización general";
+      if (primeraImagenId && Number.isFinite(primeraImagenId)) {
+        urlDestinoEvento = `${baseUrl}/?openImageId=${primeraImagenId}`;
+      } else if (primerFormularioUrl.length > 0) {
+        urlDestinoEvento = primerFormularioUrl;
+      } else if (primerFormularioId && Number.isFinite(primerFormularioId)) {
+        urlDestinoEvento = `${baseUrl}/formularios?openFormularioId=${primerFormularioId}`;
+      }
+    }
+
+    emitirNotificacionNuevaInformacion({
+      eventId: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      tipo: tipoEvento,
+      cantidad: totalNotificados,
+      titulo: tituloResumen,
+      categoria: categoriaResumen,
+      descripcion: descripcionResumen,
+      urlDestino: urlDestinoEvento,
+      fecha: new Date().toISOString(),
+    });
+
     res.status(200).json({
       message: "Notificación enviada exitosamente",
       totalNotificados,
@@ -156,6 +238,10 @@ export const notificarSubidaController = async (
     console.error("Error al notificar subida:", error);
     res.status(500).json({ error: "Error al enviar notificación" });
   }
+};
+
+export const streamNotificacionesController = (req: any, res: any): void => {
+  abrirStreamNotificaciones(req, res);
 };
 
 // Eliminar imagen

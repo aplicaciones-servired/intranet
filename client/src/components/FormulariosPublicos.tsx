@@ -23,6 +23,31 @@ export default function FormulariosPublicos() {
     }
   };
 
+  useEffect(() => {
+    if (loading || formularios.length === 0 || typeof window === "undefined") {
+      return;
+    }
+
+    const currentUrl = new URL(window.location.href);
+    const openFormularioId = currentUrl.searchParams.get("openFormularioId");
+
+    if (!openFormularioId) {
+      return;
+    }
+
+    const formularioId = Number(openFormularioId);
+    if (!Number.isFinite(formularioId)) {
+      return;
+    }
+
+    const formularioObjetivo = formularios.find((f) => Number(f.id) === formularioId);
+    if (!formularioObjetivo?.url) {
+      return;
+    }
+
+    window.location.href = formularioObjetivo.url;
+  }, [loading, formularios]);
+
   const filteredFormularios = formularios.filter((form) => {
     const matchesSearch =
       form.titulo.toLowerCase().includes(searchQuery.toLowerCase()) ||

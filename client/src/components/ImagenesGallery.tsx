@@ -85,6 +85,36 @@ export function ImagenesGallery() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (loading || imagenes.length === 0 || typeof window === "undefined") {
+      return;
+    }
+
+    const url = new URL(window.location.href);
+    const openImageId = url.searchParams.get("openImageId");
+
+    if (!openImageId) {
+      return;
+    }
+
+    const targetId = Number(openImageId);
+    if (!Number.isFinite(targetId)) {
+      return;
+    }
+
+    const imagenObjetivo = imagenes.find((img) => Number(img.id) === targetId);
+    if (!imagenObjetivo) {
+      return;
+    }
+
+    setSliderCat(imagenObjetivo.categoria);
+    setModalItem(imagenObjetivo);
+
+    url.searchParams.delete("openImageId");
+    const cleanedUrl = `${url.pathname}${url.search}${url.hash}`;
+    window.history.replaceState({}, "", cleanedUrl);
+  }, [loading, imagenes]);
+
   const CATEGORIAS = dinamicCats.length > 0 ? dinamicCats : STATIC_CATS;
 
   // Función para filtrar imágenes según búsqueda
