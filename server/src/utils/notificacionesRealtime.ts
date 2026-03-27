@@ -2,12 +2,15 @@ import type { Request, Response } from "express";
 
 interface NotificacionRealtimePayload {
   eventId: string;
+  notificationId?: number;
   tipo: "imagen" | "formulario" | "mixto";
   cantidad: number;
   titulo: string;
   categoria: string;
   descripcion?: string;
   urlDestino: string;
+  prioridad?: "baja" | "media" | "alta";
+  previewImageUrl?: string;
   fecha: string;
 }
 

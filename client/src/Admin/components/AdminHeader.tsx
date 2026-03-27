@@ -1,7 +1,7 @@
 import { Flex, Link, Icon, ChakraProvider, defaultSystem, Text, Box } from "@chakra-ui/react";
 import axios from "axios";
 import { FiClock, FiHome, FiLogOut, FiUpload } from "react-icons/fi";
-import { LuTag, LuLayoutDashboard, LuFileText, LuClipboardList, LuImage } from "react-icons/lu";
+import { LuTag, LuLayoutDashboard, LuFileText, LuClipboardList, LuImage, LuBell } from "react-icons/lu";
 
 
 async function handleLogout() {
@@ -198,6 +198,14 @@ export function AdminHeader() {
             icon={<FiClock />}
             description="Configurar subidas automáticas"
             isActive={isActive('SubidaAutomatica')}
+          />
+
+          <NavItem
+            href="/admin/Notificaciones"
+            label="Analítica de Notificaciones"
+            icon={<LuBell />}
+            description="Ver más vistas, clics y rendimiento"
+            isActive={isActive('Notificaciones')}
           />
         </Box>
 

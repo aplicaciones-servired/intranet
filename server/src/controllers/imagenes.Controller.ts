@@ -2,6 +2,7 @@ import { where } from "sequelize";
 import { ImagenesModels } from "../models/imagenes.model";
 import { insertFileToMinio } from "../utils/insertMinio";
 import { abrirStreamNotificaciones, emitirNotificacionNuevaInformacion } from "../utils/notificacionesRealtime";
+import { crearNotificacion } from "../utils/notificacionesStore";
 
 export const imagenesController = async (req: any, res: any): Promise<any> => {
   const { categoria, titulo, descripcion } = req.body;
@@ -67,7 +68,7 @@ export const notificarSubidaController = async (
   res: any,
 ): Promise<any> => {
   try {
-    const { imagenesIds, formularioIds, urlIntranet } = req.body;
+    const { imagenesIds, formularioIds, urlIntranet, prioridad, audiencia, digestMode } = req.body;
     const baseIntranetUrl =
       urlIntranet ||
       process.env.PUBLIC_INTRANET_URL ||
@@ -86,6 +87,8 @@ export const notificarSubidaController = async (
     let imagenesNotificadasIds: number[] = [];
     let primerFormularioId: number | null = null;
     let primerFormularioUrl = "";
+    let previewImageUrl = "";
+    let correosDestino = "";
     const infoNotificacion: any = {
       imagenes: 0,
       formularios: 0,
@@ -104,6 +107,7 @@ export const notificarSubidaController = async (
       if (imagenes.length > 0) {
         const primeraImagen = imagenes[0];
         primeraImagenId = Number(primeraImagen.id);
+        previewImageUrl = String(primeraImagen.poster || "");
         imagenesNotificadasIds = imagenes
           .map((img) => Number(img.id))
           .filter((id) => Number.isFinite(id));
@@ -137,6 +141,8 @@ export const notificarSubidaController = async (
           tipo: "imagen",
         });
 
+        correosDestino = String(process.env.PUBLIC_CORREOS_URL || "");
+
         await ImagenesModels.update(
           { notificado: true },
           { where: { id: imagenesIds } }
@@ -162,6 +168,9 @@ export const notificarSubidaController = async (
         const primerFormulario = formularios[0];
         primerFormularioId = Number(primerFormulario.id);
         primerFormularioUrl = String(primerFormulario.url || "").trim();
+        if (!previewImageUrl) {
+          previewImageUrl = String(primerFormulario.imagen || "");
+        }
 
         if (!infoNotificacion.imagenes) {
           tituloResumen = primerFormulario.titulo || tituloResumen;
@@ -246,19 +255,44 @@ export const notificarSubidaController = async (
       }
     }
 
+    const notificacion = await crearNotificacion({
+      tipo: tipoEvento,
+      prioridad: prioridad === "alta" || prioridad === "baja" ? prioridad : "media",
+      digest: digestMode === "diario" || digestMode === "semanal" ? digestMode : "ninguno",
+      titulo: tituloResumen,
+      descripcion: descripcionResumen,
+      categoria: categoriaResumen,
+      cantidad: totalNotificados,
+      imagenIds: imagenesNotificadasIds,
+      formularioIds: primerFormularioId ? [primerFormularioId] : [],
+      urlDestino: urlDestinoEvento,
+      previewImageUrl,
+      audiencia: audiencia && typeof audiencia === "object" ? audiencia : { scope: "publico", tags: ["all"] },
+      metadata: {
+        imagenes: infoNotificacion.imagenes,
+        formularios: infoNotificacion.formularios,
+      },
+      enviadaCorreo: true,
+      correosDestino,
+    });
+
     emitirNotificacionNuevaInformacion({
       eventId: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      notificationId: notificacion?.id,
       tipo: tipoEvento,
       cantidad: totalNotificados,
       titulo: tituloResumen,
       categoria: categoriaResumen,
       descripcion: descripcionResumen,
       urlDestino: urlDestinoEvento,
+      prioridad: prioridad === "alta" || prioridad === "baja" ? prioridad : "media",
+      previewImageUrl,
       fecha: new Date().toISOString(),
     });
 
     res.status(200).json({
       message: "Notificación enviada exitosamente",
+      notificacionId: notificacion?.id || null,
       totalNotificados,
       detalles: infoNotificacion,
     });

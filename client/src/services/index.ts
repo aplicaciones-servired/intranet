@@ -8,3 +8,5 @@ export * from "./carta_laboral.service";
 export * from "./subida_automatica.service";
 export * from "./GetInfo.service";
 export * from "./PostInfo.service";
+export * from "./notificacion.service";
+export * from "./notificacionAdmin.service";

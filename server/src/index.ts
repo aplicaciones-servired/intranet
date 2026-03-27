@@ -11,12 +11,15 @@ import { espacioRoutes } from './routes/espacio.routes';
 import formularioRoutes from './routes/formulario.routes';
 import cartaLaboralRoutes from './routes/carta_laboral.routes';
 import subidaAutomaticaRoutes from './routes/subida_automatica.routes';
+import notificacionRoutes from './routes/notificacion.routes';
 import CartaLaboral from './models/carta_laboral.model';
 import { ConfigModel } from './models/config.model';
 import { CategoriaModel } from './models/categoria.model';
 import { EspacioModel } from './models/espacio.model';
 import Formulario from './models/formulario.model';
 import SubidaAutomatica from './models/subida_automatica.model';
+import { NotificacionModel } from './models/notificacion.model';
+import { NotificacionLecturaModel } from './models/notificacion_lectura.model';
 import { info_db } from './db/db_info';
 import { iniciarProcesadorSubidasAutomaticas } from './services/subida_automatica.processor';
 
@@ -76,6 +79,7 @@ app.use(categoriaRoutes);
 app.use(espacioRoutes);
 app.use(formularioRoutes);
 app.use(subidaAutomaticaRoutes);
+app.use(notificacionRoutes);
 // Aplica el rate-limit estricto solo al POST público de cartas-laborales
 app.use('/cartas-laborales', (req, res, next) => {
   if (req.method === 'POST') {
@@ -102,6 +106,8 @@ info_db.authenticate()
       Formulario.sync(syncOptions),
       SubidaAutomatica.sync(syncOptions),
       CartaLaboral.sync(syncOptions),
+      NotificacionModel.sync(syncOptions),
+      NotificacionLecturaModel.sync(syncOptions),
     ]);
   })
   .then(() => {
