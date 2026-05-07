@@ -7,7 +7,7 @@ WORKDIR /app
 # Instalar dependencias
 COPY . .
 
-RUN yarn
+RUN npm install
 
 # Compilar TypeScript durante el build
 RUN node_modules/.bin/tsc
