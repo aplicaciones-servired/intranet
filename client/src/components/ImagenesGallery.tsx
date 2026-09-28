@@ -198,11 +198,10 @@ export function ImagenesGallery() {
   const sliderSpaces = espacios.filter((e) => e.tipo === "slider");
   const extraSliders = sliderSpaces.slice(1);
 
-  // Secciones de contenido principal: todo lo que no sea slider ni destacada
-  const hayEspaciosContenido = espacios.some((e) => e.tipo !== "slider" && e.tipo !== "destacada");
-  const seccionesContenido = hayEspaciosContenido
-    ? espacios.filter((e) => e.tipo !== "slider" && e.tipo !== "destacada")
-    : (CATEGORIAS as { value: string; label: string }[]).filter((c) => porCategoria(c.value).length > 0);
+  // Secciones de contenido principal: SOLO espacios configurados (nunca secciones
+  // autogeneradas por categoría). Si una imagen no coincide con la categoría de
+  // un espacio visible, no se muestra en ninguna sección.
+  const seccionesContenido = espacios.filter((e) => e.tipo !== "slider" && e.tipo !== "destacada");
 
   return (
     <div className="min-h-screen bg-[#f2f4f7]">

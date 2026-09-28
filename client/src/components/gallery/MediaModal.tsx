@@ -15,7 +15,7 @@ interface Props {
 export function MediaModal({ item, catLabel, onClose, onPrev, onNext, hasPrev = false, hasNext = false }: Props) {
   const video = isVideo(item.poster);
   const [zoom, setZoom] = useState(1);
-  const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
+  const [fittedSize, setFittedSize] = useState<{ width: number; height: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const mediaRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef({
@@ -74,7 +74,13 @@ export function MediaModal({ item, catLabel, onClose, onPrev, onNext, hasPrev = 
 
     el.scrollLeft = centerX;
     el.scrollTop = centerY;
-  }, [zoom, imageSize, video]);
+  }, [zoom, fittedSize, video]);
+
+  // Reiniciar zoom y medida al cambiar de imagen (navegación prev/next o item nuevo)
+  useEffect(() => {
+    setZoom(1);
+    setFittedSize(null);
+  }, [item.id, item.poster]);
 
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -207,7 +213,7 @@ export function MediaModal({ item, catLabel, onClose, onPrev, onNext, hasPrev = 
 
           <div 
             ref={mediaRef}
-            className={`w-full bg-black flex overflow-auto ${zoom > 1 ? "items-start justify-start" : "items-center justify-center"}`}
+            className="w-full bg-black flex items-center justify-center overflow-auto"
             style={{ 
               maxHeight: "65vh",
               overscrollBehavior: 'contain',
@@ -223,16 +229,19 @@ export function MediaModal({ item, catLabel, onClose, onPrev, onNext, hasPrev = 
               <video src={item.poster} controls autoPlay className="w-full" style={{ maxHeight: "65vh" }} />
             ) : (
               <div
-                style={{
-                  width: zoom === 1 ? "100%" : imageSize ? `${imageSize.width * zoom}px` : `${zoom * 100}%`,
-                  height: zoom === 1 ? "auto" : imageSize ? `${imageSize.height * zoom}px` : "auto",
-                  display: "flex",
-                  flex: "0 0 auto",
-                  flexShrink: 0,
-                  alignItems: zoom === 1 ? "center" : "flex-start",
-                  justifyContent: zoom === 1 ? "center" : "flex-start"
-                }}
-              >
+              style={{
+                width: zoom === 1 || !fittedSize ? "100%" : `${fittedSize.width * zoom}px`,
+                height: zoom === 1 || !fittedSize ? "auto" : `${fittedSize.height * zoom}px`,
+                display: "flex",
+                flex: "0 0 auto",
+                flexShrink: 0,
+                alignItems: "center",
+                justifyContent: "center",
+                // margin auto: mantiene la imagen centrada cuando es más grande
+                // que el visor y permite desplazarse a ambos lados sin trucar el inicio.
+                margin: "auto"
+              }}
+            >
                 <img 
                   src={item.poster} 
                   alt={item.titulo} 
@@ -245,9 +254,10 @@ export function MediaModal({ item, catLabel, onClose, onPrev, onNext, hasPrev = 
                     cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in'
                   }}
                   onLoad={(e) => {
-                    setImageSize({
-                      width: e.currentTarget.naturalWidth,
-                      height: e.currentTarget.naturalHeight,
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setFittedSize({
+                      width: Math.round(rect.width),
+                      height: Math.round(rect.height),
                     });
                   }}
                   draggable={false}
@@ -313,6 +323,13 @@ export function MediaModal({ item, catLabel, onClose, onPrev, onNext, hasPrev = 
           {!video && zoom > 1 && (
             <div className="absolute z-30 bottom-3 left-3 bg-black/60 text-white text-xs px-2.5 py-1 rounded-full font-medium">
               {zoom}x
+            </div>
+          )}
+
+          {/* Ayuda para mover la imagen con zoom */}
+          {!video && zoom > 1 && (
+            <div className="absolute z-30 bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full font-medium pointer-events-none">
+              Arrastra la imagen para moverte
             </div>
           )}
         </div>
