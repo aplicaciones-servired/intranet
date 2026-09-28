@@ -17,6 +17,7 @@ import { ConfigModel } from './models/config.model';
 import { CategoriaModel } from './models/categoria.model';
 import { EspacioModel } from './models/espacio.model';
 import Formulario from './models/formulario.model';
+import { ImagenesModels } from './models/imagenes.model';
 import SubidaAutomatica from './models/subida_automatica.model';
 import { NotificacionModel } from './models/notificacion.model';
 import { NotificacionLecturaModel } from './models/notificacion_lectura.model';
@@ -24,6 +25,10 @@ import { info_db } from './db/db_info';
 import { iniciarProcesadorSubidasAutomaticas } from './services/subida_automatica.processor';
 
 const app = express();
+
+// Confiar en el primer proxy (nginx). Sin esto, express-rate-limit y req.ip
+// ven siempre la IP del gateway y todos los clientes comparten el bucket.
+app.set('trust proxy', 1);
 
 // Seguridad: headers HTTP recomendados por OWASP
 app.use(helmet());
@@ -89,6 +94,25 @@ app.use('/cartas-laborales', (req, res, next) => {
 });
 app.use(cartaLaboralRoutes);
 
+// 404 JSON para rutas no registradas
+app.use((req, res) => {
+  res.status(404).json({ error: 'Ruta no encontrada' });
+});
+
+// Manejador global de errores (multer, etc.) sin exponer detalles internos en producción
+app.use((err: any, req: any, res: any, next: any) => {
+  if (res.headersSent) return next(err);
+  const status = Number(err?.status || err?.statusCode || 500);
+  const esErrorCliente = status >= 400 && status < 500;
+  const esDev = process.env.NODE_ENV !== 'production';
+  if (!esErrorCliente) {
+    console.error('❌ Error no capturado:', err?.message || err);
+  }
+  res.status(status).json({
+    error: esErrorCliente || esDev ? (err?.message || 'Error') : 'Error interno del servidor',
+  });
+});
+
 const isProduction = process.env.NODE_ENV === 'production';
 const enableAlterSync = !isProduction && process.env.DB_SYNC_ALTER === 'true';
 
@@ -104,6 +128,7 @@ info_db.authenticate()
       CategoriaModel.sync(syncOptions),
       EspacioModel.sync(syncOptions),
       Formulario.sync(syncOptions),
+      ImagenesModels.sync(syncOptions),
       SubidaAutomatica.sync(syncOptions),
       CartaLaboral.sync(syncOptions),
       NotificacionModel.sync(syncOptions),
@@ -116,6 +141,8 @@ info_db.authenticate()
   })
   .catch((err: any) => {
     console.error('❌ Error conectando a MySQL:', err.message);
+    // Salir para que el orquestador (docker restart) reintente el arranque
+    process.exit(1);
   });
 
 const PORT = Number(process.env.PORT) || 3000;

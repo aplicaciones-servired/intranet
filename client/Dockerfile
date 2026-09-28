@@ -2,14 +2,14 @@
 FROM node:slim AS build
 WORKDIR /app
 
-# Copiar el archivo .env ANTES de instalar dependencias
+# Copiar el archivo package*.json ANTES de instalar dependencias
 COPY package*.json ./
-COPY .env ./
 RUN npm install --legacy-peer-deps
 
 COPY . .
 
-# Inyectar variables de entorno DURANTE EL BUILD
+# Inyectar variables de entorno DURANTE EL BUILD (solo públicas; el JWT_SECRET se
+# lee en runtime via process.env, nunca se incrusta en el bundle)
 ENV PUBLIC_URL_API=/api
 
 RUN node_modules/.bin/astro build
@@ -21,12 +21,11 @@ WORKDIR /app
 COPY --from=build /app /app
 ENV NODE_ENV=production
 
-# Asegurar que el .env esté disponible
-COPY --from=build /app/.env ./
-
 EXPOSE 4321
 
 ENV HOST=0.0.0.0
 ENV PORT=4321
 
+# Las variables de entorno (JWT_SECRET, PUBLIC_LOGIN_URL, etc.) llegan vía env_file
+# de docker-compose, no vía /app/.env.
 CMD ["node", "./dist/server/entry.mjs"]

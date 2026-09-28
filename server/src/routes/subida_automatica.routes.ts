@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { multer_minio } from "../Miderlware/miderlware_minio";
-import { requireClerkAuth } from "../Miderlware/authMiddleware";
+import { requireAdmin } from "../Miderlware/authMiddleware";
 import {
   createSubidaAutomatica,
   getSubidasAutomaticas,
@@ -9,10 +9,10 @@ import {
 
 const subidaAutomaticaRoutes = Router();
 
-subidaAutomaticaRoutes.get("/subidas-automaticas", requireClerkAuth, getSubidasAutomaticas);
+subidaAutomaticaRoutes.get("/subidas-automaticas", requireAdmin, getSubidasAutomaticas);
 subidaAutomaticaRoutes.post(
   "/subidas-automaticas",
-  requireClerkAuth,
+  requireAdmin,
   multer_minio.fields([
     { name: "images", maxCount: 10 },
     { name: "imagen", maxCount: 1 },
@@ -22,7 +22,7 @@ subidaAutomaticaRoutes.post(
 
 subidaAutomaticaRoutes.put(
   "/subidas-automaticas/:id",
-  requireClerkAuth,
+  requireAdmin,
   multer_minio.fields([
     { name: "images", maxCount: 10 },
     { name: "imagen", maxCount: 1 },
@@ -32,7 +32,7 @@ subidaAutomaticaRoutes.put(
 
 subidaAutomaticaRoutes.post(
   "/subidas-automaticas/:id/editar",
-  requireClerkAuth,
+  requireAdmin,
   multer_minio.fields([
     { name: "images", maxCount: 10 },
     { name: "imagen", maxCount: 1 },

@@ -226,7 +226,7 @@ export async function enviarNotificacionNuevaInformacion({
   urlIntranet,
   tipo = "imagen",
   correosDestino,
-}: OpcionesNotificacionIntranet): Promise<void> {
+}: OpcionesNotificacionIntranet): Promise<boolean> {
   const correosFinales =
     correosDestino && correosDestino.length > 0
       ? correosDestino.join(",")
@@ -234,7 +234,7 @@ export async function enviarNotificacionNuevaInformacion({
 
   if (!correosFinales) {
     console.warn("No se encontró PUBLIC_CORREOS_URL en las variables de entorno");
-    return;
+    return false;
   }
 
   const fechaActual = new Date().toLocaleDateString("es-CO", {
@@ -284,7 +284,7 @@ export async function enviarNotificacionNuevaInformacion({
             ` : ''}
           </table>
           <div style="text-align: center; margin-bottom: 20px;">
-            <a href="${urlIntranet}"
+            <a href="${esc(urlIntranet)}"
               style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
               🔗 Ver en la Intranet
             </a>
@@ -301,4 +301,7 @@ export async function enviarNotificacionNuevaInformacion({
       </div>
     `,
   });
+
+  // Devuelve true únicamente cuando el correo realmente salió.
+  return true;
 }

@@ -7,6 +7,7 @@ interface DatosCartaLaboral {
   cargo: string;
   empresa: "Multired" | "Servired";
   sueldo: string;
+  contrato: string;
   fecha_ingreso: Date;
   fecha_aprobacion: Date;
 }
@@ -32,8 +33,8 @@ const DATOS_EMPRESA: Record<string, {
     direccion: "Carrera 34 No. 16 - 55",
     municipio: "Yumbo, Valle del cauca",
     correo: "correspondencia@grupomultired.com.co",
-    firmante: "hola",
-    cargoFirmante: "ASISTENTE DE GESTIÓN HUMANA",
+    firmante: "SANDRA RUIZ ESCOBAR",
+    cargoFirmante: "JEFE DE GESTIÓN HUMANA",
   },
   Servired: {
     razon: "GRUPO EMPRESARIAL SERVIRED S.A.",
@@ -44,8 +45,8 @@ const DATOS_EMPRESA: Record<string, {
     direccion: "Carrera 10 No. 12 - 25",
     municipio: "Jamundí, Valle del cauca",
     correo: "correspondencia@gruposervired.com.co",
-    firmante: "hola",
-    cargoFirmante: "ASISTENTE DE GESTIÓN HUMANA",
+    firmante: "SANDRA RUIZ ESCOBAR",
+    cargoFirmante: "JEFE DE GESTIÓN HUMANA",
   },
 };
 
@@ -129,7 +130,7 @@ export function generarCartaPDF(datos: DatosCartaLaboral): Promise<Buffer> {
     doc.moveDown(0.3);
     doc
       .fontSize(11)
-      .font("Helvetica")
+      .font("Helvetica-Bold")
       .text(`NIT. ${empresa.nit}`, margin, doc.y, { width: contentW, align: "center" });
 
     doc.moveDown(1.8);
@@ -146,6 +147,7 @@ export function generarCartaPDF(datos: DatosCartaLaboral): Promise<Buffer> {
     const nombreUpper = (datos.nombre_completo ?? "").toUpperCase();
     const cargoUpper  = (datos.cargo ?? "").toUpperCase();
     const sueldoUpper = (datos.sueldo ?? "").toUpperCase();
+    const contratoUpper = (datos.contrato ?? "");
     const diaLetrasIngCap = diaLetrasIng.charAt(0).toUpperCase() + diaLetrasIng.slice(1);
     const fechaIngreso = `${diaLetrasIngCap} (${diaIng}) de ${mesIng.toUpperCase()} de ${anioIng}`;
 
@@ -157,9 +159,11 @@ export function generarCartaPDF(datos: DatosCartaLaboral): Promise<Buffer> {
     doc.font("Helvetica-Bold").text(nombreUpper, c);
     doc.font("Helvetica").text(", identificado con cédula de ciudadanía No. ", c);
     doc.font("Helvetica-Bold").text(datos.cedula, c);
-    doc.font("Helvetica").text(", labora en nuestra empresa desde el día ", c);
+    doc.font("Helvetica").text(", labora en nuestra compañía desde el día ", c);
     doc.font("Helvetica-Bold").text(fechaIngreso, c);
-    doc.font("Helvetica").text(", con un contrato a término indefinido, desempeñándose en el cargo de ", c);
+    doc.font("Helvetica").text(", con un contrato ", c);
+    doc.font("Helvetica").text(contratoUpper, c);
+    doc.font("Helvetica").text(", desempeñándose en el cargo de ", c);
     doc.font("Helvetica-Bold").text(cargoUpper, c);
     doc.font("Helvetica").text(" su asignación salarial mensual es de ", c);
     doc.font("Helvetica-Bold").text(`${sueldoUpper}.`, end);

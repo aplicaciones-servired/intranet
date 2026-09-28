@@ -12,6 +12,7 @@ export interface CartaLaboral {
   cargo: string;
   empresa: "Multired" | "Servired";
   sueldo?: string;
+  contrato?: string;
   observaciones?: string;
   estado: EstadoCarta;
   fecha_solicitud?: string;
@@ -36,12 +37,30 @@ export const createCartaLaboral = async (data: {
   return response.data.carta as CartaLaboral;
 };
 
+export interface ResultadoAprobarCarta {
+  carta: CartaLaboral;
+  emailEnviado: boolean;
+  message?: string;
+}
+
 export const aprobarCartaLaboral = async (
   id: number,
-  data: { sueldo: string; observaciones?: string; fecha_ingreso: string }
-): Promise<CartaLaboral> => {
+  data: { sueldo: string; observaciones?: string; fecha_ingreso: string, contrato: string }
+): Promise<ResultadoAprobarCarta> => {
   const response = await adminAxios.patch(`${API_URL}/cartas-laborales/${id}/aprobar`, data);
-  return response.data.carta as CartaLaboral;
+  return response.data as ResultadoAprobarCarta;
+};
+
+export const getVistaPreviaCartaLaboral = async (
+  id: number,
+  data: { sueldo: string; fecha_ingreso: string, contrato: string }
+): Promise<Blob> => {
+  const response = await adminAxios.post(
+    `${API_URL}/cartas-laborales/${id}/vista-previa`,
+    data,
+    { responseType: "blob" }
+  );
+  return response.data as Blob;
 };
 
 export const rechazarCartaLaboral = async (

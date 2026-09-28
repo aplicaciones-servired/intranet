@@ -133,18 +133,51 @@ export async function listarNotificacionesCliente(options: {
   }
 }
 
-export async function marcarLeida(notificacionId: number, clienteId: string): Promise<void> {
+export async function contarNoLeidas(clienteId: string, audienciaTag?: string): Promise<number> {
+  try {
+    // Excluye lo leído y lo diferido ("recordar luego" activo) para alinearse con listarNotificacionesCliente
+    const ignoradas = await NotificacionLecturaModel.findAll({
+      attributes: ["notificacion_id"],
+      where: {
+        cliente_id: clienteId,
+        [Op.or]: [
+          { leida: true },
+          { recordarme_luego_hasta: { [Op.gte]: new Date() } },
+        ],
+      },
+    });
+
+    const idsIgnorados = ignoradas.map((l) => l.notificacion_id);
+
+    const where: any = buildAudienciaWhere(audienciaTag);
+    if (idsIgnorados.length > 0) {
+      where.id = { [Op.notIn]: idsIgnorados };
+    }
+
+    return await NotificacionModel.count({ where });
+  } catch (error: any) {
+    if (isMissingNotificationsTableError(error)) {
+      return 0;
+    }
+    throw error;
+  }
+}
+
+export async function marcarLeida(notificacionId: number, clienteId: string): Promise<boolean> {
   try {
     const existing = await NotificacionLecturaModel.findOne({
       where: { notificacion_id: notificacionId, cliente_id: clienteId },
     });
 
     if (existing) {
+      if (existing.leida) {
+        return false;
+      }
       existing.leida = true;
       existing.fecha_lectura = new Date();
       existing.fecha_actualizacion = new Date();
       await existing.save();
-      return;
+      return true;
     }
 
     await NotificacionLecturaModel.create({
@@ -155,15 +188,16 @@ export async function marcarLeida(notificacionId: number, clienteId: string): Pr
       fecha_lectura: new Date(),
       fecha_actualizacion: new Date(),
     });
+    return true;
   } catch (error: any) {
     if (isMissingNotificationsTableError(error)) {
-      return;
+      return false;
     }
     throw error;
   }
 }
 
-export async function recordarLuego(notificacionId: number, clienteId: string, minutos: number): Promise<void> {
+export async function recordarLuego(notificacionId: number, clienteId: string, minutos: number): Promise<boolean> {
   try {
     const hasta = new Date(Date.now() + minutos * 60 * 1000);
     const existing = await NotificacionLecturaModel.findOne({
@@ -171,10 +205,16 @@ export async function recordarLuego(notificacionId: number, clienteId: string, m
     });
 
     if (existing) {
+      const yaDiferida = existing.recordarme_luego_hasta
+        ? new Date(existing.recordarme_luego_hasta).getTime() > Date.now()
+        : false;
+      if (yaDiferida) {
+        return false;
+      }
       existing.recordarme_luego_hasta = hasta;
       existing.fecha_actualizacion = new Date();
       await existing.save();
-      return;
+      return true;
     }
 
     await NotificacionLecturaModel.create({
@@ -185,27 +225,32 @@ export async function recordarLuego(notificacionId: number, clienteId: string, m
       recordarme_luego_hasta: hasta,
       fecha_actualizacion: new Date(),
     });
+    return true;
   } catch (error: any) {
     if (isMissingNotificationsTableError(error)) {
-      return;
+      return false;
     }
     throw error;
   }
 }
 
-export async function registrarClick(notificacionId: number, clienteId: string): Promise<void> {
+export async function registrarClick(notificacionId: number, clienteId: string): Promise<boolean> {
   try {
     const existing = await NotificacionLecturaModel.findOne({
       where: { notificacion_id: notificacionId, cliente_id: clienteId },
     });
 
     if (existing) {
+      if (existing.clickeada) {
+        return false;
+      }
       existing.clickeada = true;
       existing.leida = true;
       existing.fecha_click = new Date();
       existing.fecha_lectura = existing.fecha_lectura || new Date();
       existing.fecha_actualizacion = new Date();
       await existing.save();
+      return true;
     } else {
       await NotificacionLecturaModel.create({
         notificacion_id: notificacionId,
@@ -216,10 +261,11 @@ export async function registrarClick(notificacionId: number, clienteId: string):
         fecha_click: new Date(),
         fecha_actualizacion: new Date(),
       });
+      return true;
     }
   } catch (error: any) {
     if (isMissingNotificationsTableError(error)) {
-      return;
+      return false;
     }
     throw error;
   }

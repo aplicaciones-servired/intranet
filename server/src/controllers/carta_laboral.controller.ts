@@ -31,6 +31,10 @@ export const createCartaLaboral = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Empresa debe ser Multired o Servired" });
     }
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+      return res.status(400).json({ error: "El correo no tiene un formato válido" });
+    }
+
     const nuevaCarta = await CartaLaboral.create({
       nombre_completo,
       cedula,
@@ -65,7 +69,7 @@ export const createCartaLaboral = async (req: Request, res: Response) => {
 export const aprobarCartaLaboral = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { sueldo, observaciones, fecha_ingreso } = req.body;
+    const { sueldo, observaciones, fecha_ingreso, contrato } = req.body;
 
     if (!sueldo) {
       return res.status(400).json({ error: "El sueldo es obligatorio para aprobar" });
@@ -79,9 +83,17 @@ export const aprobarCartaLaboral = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Solicitud no encontrada" });
     }
 
+    // Evita re-aprobar (y reenviar el PDF) una solicitud ya aprobada
+    if (carta.estado === "aprobado") {
+      return res.status(409).json({ error: "La solicitud ya fue aprobada y enviada por correo" });
+    }
+
     const fechaAprobacion = new Date();
 
     const fechaIngresoDate = new Date(fecha_ingreso);
+    if (Number.isNaN(fechaIngresoDate.getTime())) {
+      return res.status(400).json({ error: "La fecha de ingreso no es válida" });
+    }
 
     await carta.update({
       sueldo,
@@ -102,6 +114,7 @@ export const aprobarCartaLaboral = async (req: Request, res: Response) => {
         cargo: String(datos.cargo ?? ""),
         empresa: (datos.empresa as "Multired" | "Servired") ?? "Servired",
         sueldo,
+        contrato: String(contrato ?? ""),
         fecha_ingreso: fechaIngresoDate,
         fecha_aprobacion: fechaAprobacion,
       });
@@ -127,6 +140,50 @@ export const aprobarCartaLaboral = async (req: Request, res: Response) => {
     });
   } catch (error) {
     handleServerError(res, error, "aprobarCartaLaboral");
+  }
+};
+
+// Vista previa de la carta (admin): genera el PDF con los datos enviados
+// SIN guardar en base de datos ni enviar correo.
+export const vistaPreviaCartaLaboral = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { sueldo, fecha_ingreso, contrato } = req.body;
+
+    if (!sueldo || !fecha_ingreso) {
+      return res.status(400).json({
+        error: "El sueldo y la fecha de ingreso son obligatorios para la vista previa",
+      });
+    }
+
+    const fechaIngresoDate = new Date(fecha_ingreso);
+    if (Number.isNaN(fechaIngresoDate.getTime())) {
+      return res.status(400).json({ error: "La fecha de ingreso no es válida" });
+    }
+
+    const carta = await CartaLaboral.findByPk(Number(id));
+    if (!carta) {
+      return res.status(404).json({ error: "Solicitud no encontrada" });
+    }
+
+    const datos = carta.dataValues as typeof carta.dataValues;
+    const pdfBuffer = await generarCartaPDF({
+      nombre_completo: String(datos.nombre_completo ?? ""),
+      cedula: String(datos.cedula ?? ""),
+      cargo: String(datos.cargo ?? ""),
+      empresa: (datos.empresa as "Multired" | "Servired") ?? "Servired",
+      sueldo: String(sueldo ?? ""),
+      contrato: String(contrato ?? ""),
+      fecha_ingreso: fechaIngresoDate,
+      fecha_aprobacion: new Date(),
+    });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'inline; filename="vista-previa-carta-laboral.pdf"');
+    res.setHeader("Content-Length", String(pdfBuffer.length));
+    res.send(pdfBuffer);
+  } catch (error) {
+    handleServerError(res, error, "vistaPreviaCartaLaboral");
   }
 };
 

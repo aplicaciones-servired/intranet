@@ -142,7 +142,7 @@ export function ImagenCard({
         {/* Botón eliminar individual */}
         <Button
           size="sm"
-          colorScheme="red"
+          colorPalette="red"
           variant="ghost"
           width="100%"
           bg="red.500" 

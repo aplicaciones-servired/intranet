@@ -226,7 +226,7 @@ export default function SubidaProgramacionForm({
                       <Button
                         type="button"
                         size="xs"
-                        colorScheme="red"
+                        colorPalette="red"
                         variant="outline"
                         onClick={() => setFormImage(null)}
                       >

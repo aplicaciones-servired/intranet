@@ -53,6 +53,7 @@ export function SearchBar({ onSearch, totalResults, placeholder = "Buscar public
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
+          aria-label={placeholder}
           className={`w-full pl-14 pr-32 py-4 text-base bg-white border-2 rounded-2xl text-gray-800 placeholder-gray-400 transition-all duration-300 outline-none font-medium
             ${isFocused 
               ? 'border-[#005a9c] shadow-xl shadow-[#005a9c]/25 bg-blue-50/30' 

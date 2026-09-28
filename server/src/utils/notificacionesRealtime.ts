@@ -16,6 +16,14 @@ interface NotificacionRealtimePayload {
 
 const clientesSSE = new Set<Response>();
 
+function limpiarClientesInactivos(): void {
+  for (const cliente of clientesSSE) {
+    if (cliente.destroyed || cliente.writableEnded) {
+      clientesSSE.delete(cliente);
+    }
+  }
+}
+
 export function abrirStreamNotificaciones(req: Request, res: Response): void {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache, no-transform");
@@ -32,6 +40,8 @@ export function abrirStreamNotificaciones(req: Request, res: Response): void {
 }
 
 export function emitirNotificacionNuevaInformacion(payload: NotificacionRealtimePayload): void {
+  limpiarClientesInactivos();
+
   if (clientesSSE.size === 0) {
     return;
   }
@@ -48,6 +58,8 @@ export function emitirNotificacionNuevaInformacion(payload: NotificacionRealtime
 }
 
 setInterval(() => {
+  limpiarClientesInactivos();
+
   for (const cliente of clientesSSE) {
     try {
       cliente.write(": ping\n\n");

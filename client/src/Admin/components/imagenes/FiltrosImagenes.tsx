@@ -99,7 +99,7 @@ export function FiltrosImagenes({
           <Button
             size="sm"
             variant="ghost"
-            colorScheme="blue"
+            colorPalette="blue"
             onClick={onLimpiarSeleccion}
           >
             Limpiar selección

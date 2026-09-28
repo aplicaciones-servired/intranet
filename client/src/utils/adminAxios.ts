@@ -10,3 +10,19 @@ export const adminAxios = axios.create({
   withCredentials: true,
 });
 
+// Si la sesión expira mientras se usa el panel admin (401), redirige al login
+// preservando la URL de regreso.
+adminAxios.interceptors.response.use(
+  (response) => response,
+  (error: any) => {
+    if (error?.response?.status === 401 && typeof window !== "undefined") {
+      const path = window.location.pathname;
+      if (!path.startsWith("/sign-in")) {
+        const destino = encodeURIComponent(path + window.location.search);
+        window.location.assign(`/sign-in?redirect_url=${destino}`);
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+

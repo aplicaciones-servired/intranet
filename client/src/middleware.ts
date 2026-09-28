@@ -6,10 +6,19 @@ import { verifySession, SESSION_COOKIE } from "./lib/session";
 const isAdminRoute = (pathname: string) => pathname.startsWith("/admin");
 const isSignIn = (pathname: string) => pathname === "/sign-in";
 
-// Solo permite redirigir a rutas internas (previene open redirect)
+// Solo permite redirigir a rutas internas (previene open redirect).
+// Rechaza backslashes ("\\evil.com"), "//host" y esquemas como "javascript:".
 function safeInternalUrl(raw: string | null, fallback = "/admin/CartasLaborales"): string {
   if (!raw) return fallback;
-  if (raw.startsWith("/") && !raw.startsWith("//")) return raw;
+  const value = raw.trim();
+  if (
+    value.startsWith("/") &&
+    !value.startsWith("//") &&
+    !value.includes("\\") &&
+    !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(value)
+  ) {
+    return value;
+  }
   return fallback;
 }
 

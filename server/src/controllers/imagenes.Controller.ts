@@ -1,6 +1,5 @@
-import { where } from "sequelize";
 import { ImagenesModels } from "../models/imagenes.model";
-import { insertFileToMinio } from "../utils/insertMinio";
+import { deleteFileFromMinio, insertFileToMinio } from "../utils/insertMinio";
 import { abrirStreamNotificaciones, emitirNotificacionNuevaInformacion } from "../utils/notificacionesRealtime";
 import { crearNotificacion } from "../utils/notificacionesStore";
 
@@ -69,15 +68,43 @@ export const notificarSubidaController = async (
 ): Promise<any> => {
   try {
     const { imagenesIds, formularioIds, urlIntranet, prioridad, audiencia, digestMode } = req.body;
-    const baseIntranetUrl =
-      urlIntranet ||
-      process.env.PUBLIC_INTRANET_URL ||
-      "https://intranet.grupomultired.com.co";
 
     const normalizarBase = (url: string): string => url.replace(/\/+$/, "");
-    const baseUrl = normalizarBase(baseIntranetUrl);
+
+    const intranetConfigurada = process.env.PUBLIC_INTRANET_URL
+      ? normalizarBase(process.env.PUBLIC_INTRANET_URL)
+      : "";
+
+    const baseIntranetUrl =
+      (typeof urlIntranet === "string" && urlIntranet.trim().length > 0
+        ? urlIntranet.trim()
+        : process.env.PUBLIC_INTRANET_URL) ||
+      "https://intranet.grupomultired.com.co";
+
+    let baseUrl = normalizarBase(baseIntranetUrl);
+
+    // C5: validar urlIntranet recibida del cliente: solo http(s) y, si el servidor
+    // define PUBLIC_INTRANET_URL, coincidir con su mismo origen. Evita inyectar
+    // URLs de terceros en los correos y en la notificación.
+    try {
+      const urlValida = new URL(baseUrl);
+      if (urlValida.protocol !== "http:" && urlValida.protocol !== "https:") {
+        throw new Error("protocolo no permitido");
+      }
+      if (intranetConfigurada) {
+        const origenConfigurado = new URL(intranetConfigurada).origin;
+        if (urlValida.origin !== origenConfigurado) {
+          throw new Error("el origen no coincide con PUBLIC_INTRANET_URL");
+        }
+      }
+    } catch (error: any) {
+      return res.status(400).json({
+        error: `urlIntranet inválida: ${error?.message || "URL no válida"}`,
+      });
+    }
 
     let totalNotificados = 0;
+    let correoEnviado = false;
     let tituloResumen = "Nueva actualización";
     let categoriaResumen = "Intranet";
     let descripcionResumen = "Se publicó contenido nuevo en la intranet.";
@@ -132,7 +159,7 @@ export const notificarSubidaController = async (
         
         const { enviarNotificacionNuevaInformacion } = await import("../utils/enviarCorreo");
         
-        await enviarNotificacionNuevaInformacion({
+        const correoEnviadoImagenes = await enviarNotificacionNuevaInformacion({
           cantidad: imagenes.length,
           categoria: primeraImagen.categoria,
           titulo: primeraImagen.titulo,
@@ -141,12 +168,16 @@ export const notificarSubidaController = async (
           tipo: "imagen",
         });
 
-        correosDestino = String(process.env.PUBLIC_CORREOS_URL || "");
-
-        await ImagenesModels.update(
-          { notificado: true },
-          { where: { id: imagenesIds } }
-        );
+        if (correoEnviadoImagenes) {
+          correoEnviado = true;
+          correosDestino = String(process.env.PUBLIC_CORREOS_URL || "");
+          // Solo marcar como notificado cuando el correo realmente salió.
+          // Si el envío falló, reintentarNotificacionesPendientes lo vuelve a intentar.
+          await ImagenesModels.update(
+            { notificado: true },
+            { where: { id: imagenesIds } }
+          );
+        }
 
         infoNotificacion.imagenes = imagenes.length;
         totalNotificados += imagenes.length;
@@ -189,7 +220,7 @@ export const notificarSubidaController = async (
         
         const { enviarNotificacionNuevaInformacion } = await import("../utils/enviarCorreo");
         
-        await enviarNotificacionNuevaInformacion({
+        const correoEnviadoFormularios = await enviarNotificacionNuevaInformacion({
           cantidad: formularios.length,
           categoria: "Formularios",
           titulo: primerFormulario.titulo,
@@ -198,10 +229,13 @@ export const notificarSubidaController = async (
           tipo: "formulario",
         });
 
-        await Formulario.update(
-          { notificado: true },
-          { where: { id: formularioIds } }
-        );
+        if (correoEnviadoFormularios) {
+          correoEnviado = true;
+          await Formulario.update(
+            { notificado: true },
+            { where: { id: formularioIds } }
+          );
+        }
 
         infoNotificacion.formularios = formularios.length;
         totalNotificados += formularios.length;
@@ -272,7 +306,7 @@ export const notificarSubidaController = async (
         imagenes: infoNotificacion.imagenes,
         formularios: infoNotificacion.formularios,
       },
-      enviadaCorreo: true,
+      enviadaCorreo: correoEnviado,
       correosDestino,
     });
 
@@ -318,6 +352,16 @@ export const deleteImagenController = async (
 
     if (!imagen) {
       return res.status(404).json({ error: "Imagen no encontrada" });
+    }
+
+    // Eliminar el objeto de MinIO (best-effort, no debe impedir el borrado lógico)
+    const poster = String(imagen.poster || "");
+    if (poster) {
+      try {
+        await deleteFileFromMinio(poster);
+      } catch (error: any) {
+        console.warn("⚠️ No se pudo eliminar el archivo de MinIO:", error?.message || error);
+      }
     }
 
     // Eliminar registro de la base de datos

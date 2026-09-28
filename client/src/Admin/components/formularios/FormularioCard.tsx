@@ -101,7 +101,7 @@ export function FormularioCard({ formulario, onToggle, onEdit, onDelete }: Props
           <Button
             size="sm"
             variant="outline"
-            colorScheme="blue"
+            colorPalette="blue"
             onClick={() => onEdit(formulario)}
           >
             <Icon><LuPencil /></Icon>
@@ -109,7 +109,7 @@ export function FormularioCard({ formulario, onToggle, onEdit, onDelete }: Props
           <Button
             size="sm"
             variant="outline"
-            colorScheme="red"
+            colorPalette="red"
             onClick={() => onDelete(formulario.id)}
           >
             <Icon><LuTrash2 /></Icon>

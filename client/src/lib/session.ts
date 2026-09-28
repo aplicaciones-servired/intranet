@@ -20,8 +20,11 @@ export interface SessionUser {
 export const SESSION_COOKIE = "__session";
 
 function getSecret(): Uint8Array {
-  // En Astro SSR las variables privadas están disponibles vía import.meta.env
-  const secret = import.meta.env.JWT_SECRET as string | undefined;
+  // El secreto solo se lee en runtime (process.env), nunca vía import.meta.env:
+  // Vite incrustaría el literal en dist/server durante el build.
+  // En dev, astro.config.mjs carga client/.env en process.env; en producción,
+  // docker-compose lo inyecta como env_file.
+  const secret = process.env.JWT_SECRET as string | undefined;
   if (!secret) throw new Error("JWT_SECRET no está configurado");
   return new TextEncoder().encode(secret);
 }

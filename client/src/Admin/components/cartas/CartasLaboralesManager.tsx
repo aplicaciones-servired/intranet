@@ -72,8 +72,8 @@ export default function CartasLaboralesManager() {
     if (!selectedCarta) return;
     setSubmitting(true);
     try {
-      const res: any = await aprobarCartaLaboral(selectedCarta.id, { sueldo: sueldo.trim(), observaciones, fecha_ingreso: fechaIngreso });
-      const enviado = res?.emailEnviado ?? true;
+      const res = await aprobarCartaLaboral(selectedCarta.id, { sueldo: sueldo.trim(), observaciones, fecha_ingreso: fechaIngreso });
+      const enviado = res?.emailEnviado ?? false;
       setToast({
         title: "Carta aprobada",
         description: enviado

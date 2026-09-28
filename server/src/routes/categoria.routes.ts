@@ -5,13 +5,13 @@ import {
   updateCategoriaController,
   deleteCategoriaController,
 } from "../controllers/categoria.controller";
-import { requireClerkAuth } from "../Miderlware/authMiddleware";
+import { requireAdmin } from "../Miderlware/authMiddleware";
 
 export const categoriaRoutes = Router();
 
 // GET es público (se usa en la intranet para mostrar el menú)
 categoriaRoutes.get("/categorias", getCategoriasController);
 // Escritura solo para admins autenticados
-categoriaRoutes.post("/categorias", requireClerkAuth, createCategoriaController);
-categoriaRoutes.put("/categorias/:id", requireClerkAuth, updateCategoriaController);
-categoriaRoutes.delete("/categorias/:id", requireClerkAuth, deleteCategoriaController);
+categoriaRoutes.post("/categorias", requireAdmin, createCategoriaController);
+categoriaRoutes.put("/categorias/:id", requireAdmin, updateCategoriaController);
+categoriaRoutes.delete("/categorias/:id", requireAdmin, deleteCategoriaController);

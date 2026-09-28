@@ -30,7 +30,9 @@ export function Slider({ items, onOpen, titulo }: Props) {
 
   if (!items.length) return null;
 
-  const item = items[current];
+  // Índice siempre dentro de rango aunque `items` cambie de tamaño entre renders
+  // (p. ej. al cambiar de categoría con el auto-play en curso).
+  const item = items[current % items.length];
   const video = isVideo(item.poster);
 
   return (

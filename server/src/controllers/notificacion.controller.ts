@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
-import { requireClerkAuth } from "../Miderlware/authMiddleware";
+import { requireAdmin } from "../Miderlware/authMiddleware";
 import { NotificacionModel } from "../models/notificacion.model";
 import {
+  contarNoLeidas,
   incrementarMetrica,
   isMissingNotificationsTableError,
   listarNotificacionesCliente,
@@ -18,23 +19,39 @@ function buildClientId(): string {
   return `cli_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function getClienteId(req: Request, res: Response): string {
-  const fromBodyOrQuery = String(req.body?.clienteId || req.query?.clienteId || "").trim();
-  const fromCookie = String(req.cookies?.intranet_client_id || "").trim();
-
-  const candidate = fromBodyOrQuery || fromCookie;
-  if (candidate) {
-    return candidate.slice(0, 120);
-  }
-
-  const generated = buildClientId();
-  res.cookie("intranet_client_id", generated, {
+function fijarCookieClienteId(res: Response, value: string): void {
+  res.cookie("intranet_client_id", value, {
     httpOnly: false,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     maxAge: 1000 * 60 * 60 * 24 * 365,
   });
+}
 
+/**
+ * Identifica al cliente anónimo para el tracking.
+ * La cookie es la fuente de verdad: si existe, el clienteId enviado en body/query se ignora.
+ * El valor body/query solo se adopta cuando aún no hay cookie (lo siembra una sola vez).
+ * Esto permite a los clientes que no reciben la cookie (dev cross-origin) seguir el
+ * tracking con su id local, sin permitir forjar el id de otro cliente en producción.
+ */
+function getClienteId(req: Request, res: Response): string {
+  const fromCookie = String(req.cookies?.intranet_client_id || "").trim();
+  if (fromCookie) {
+    return fromCookie.slice(0, 120);
+  }
+
+  const fromBodyOrQuery = String(req.body?.clienteId || req.query?.clienteId || "").trim();
+  // C6: solo se adopta un id del body/query si tiene el formato generado por el servidor
+  // (cli_<timestamp>_<aleatorio>). Evita forjar el id de otro cliente sin cookie.
+  if (fromBodyOrQuery && /^cli_[A-Za-z0-9_-]{6,}$/.test(fromBodyOrQuery)) {
+    const adoptado = fromBodyOrQuery.slice(0, 120);
+    fijarCookieClienteId(res, adoptado);
+    return adoptado;
+  }
+
+  const generated = buildClientId();
+  fijarCookieClienteId(res, generated);
   return generated;
 }
 
@@ -52,7 +69,7 @@ export async function listarNotificaciones(req: Request, res: Response): Promise
       audienciaTag,
     });
 
-    const unreadCount = items.filter((i) => !i.leida).length;
+    const unreadCount = await contarNoLeidas(clienteId, audienciaTag);
 
     res.status(200).json({
       clienteId,
@@ -74,8 +91,10 @@ export async function marcarNotificacionLeida(req: Request, res: Response): Prom
       return;
     }
 
-    await marcarLeida(id, clienteId);
-    await incrementarMetrica(id, "opened");
+    const fueMarcadaLeida = await marcarLeida(id, clienteId);
+    if (fueMarcadaLeida) {
+      await incrementarMetrica(id, "opened");
+    }
 
     res.status(200).json({ ok: true });
   } catch (error: any) {
@@ -92,8 +111,10 @@ export async function clickNotificacion(req: Request, res: Response): Promise<vo
       return;
     }
 
-    await registrarClick(id, clienteId);
-    await incrementarMetrica(id, "clicked");
+    const fueClickeada = await registrarClick(id, clienteId);
+    if (fueClickeada) {
+      await incrementarMetrica(id, "clicked");
+    }
 
     res.status(200).json({ ok: true });
   } catch (error: any) {
@@ -105,15 +126,20 @@ export async function recordarNotificacion(req: Request, res: Response): Promise
   try {
     const id = Number(req.params.id);
     const clienteId = getClienteId(req, res);
-    const minutos = Math.min(Math.max(Number(req.body?.minutes || 30), 5), 1440);
+    const minutosRaw = Number(req.body?.minutes);
+    const minutos = Number.isFinite(minutosRaw) && minutosRaw > 0
+      ? Math.min(Math.max(minutosRaw, 5), 1440)
+      : 30;
 
     if (!Number.isFinite(id)) {
       res.status(400).json({ error: "Id de notificación inválido" });
       return;
     }
 
-    await recordarLuego(id, clienteId, minutos);
-    await incrementarMetrica(id, "dismissed");
+    const fueDiferida = await recordarLuego(id, clienteId, minutos);
+    if (fueDiferida) {
+      await incrementarMetrica(id, "dismissed");
+    }
 
     res.status(200).json({ ok: true });
   } catch (error: any) {
@@ -205,4 +231,4 @@ export async function enviarResumenDigest(req: Request, res: Response): Promise<
   }
 }
 
-export const requireNotificacionAdmin = requireClerkAuth;
+export const requireNotificacionAdmin = requireAdmin;

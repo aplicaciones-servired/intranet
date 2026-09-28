@@ -5,9 +5,16 @@ import Formulario from "../models/formulario.model";
 import { enviarNotificacionNuevaInformacion } from "../utils/enviarCorreo";
 
 let processorTimer: NodeJS.Timeout | null = null;
+let cicloEnEjecucion = false;
 
 const RETRY_NOTIFY_ATTEMPTS = 3;
 const RETRY_NOTIFY_DELAY_MS = 2000;
+const MAX_REINTENTOS_ERROR = 3;
+const TIEMPO_RECLAMAR_PROCESANDO_MS = 10 * 60 * 1000;
+
+// Backoff en memoria: evita reencolar en bucle infinito una subida en error que
+// siempre falla. Se reinicia al reiniciar el proceso.
+const reintentosError: Record<number, number> = {};
 
 function normalizarPayload(payload: unknown): Record<string, any> {
   if (!payload) return {};
@@ -114,13 +121,12 @@ async function delay(ms: number): Promise<void> {
 }
 
 async function enviarNotificacionConReintentos(
-  envio: () => Promise<void>,
+  envio: () => Promise<boolean>,
   contextoError: string,
 ): Promise<boolean> {
   for (let intento = 1; intento <= RETRY_NOTIFY_ATTEMPTS; intento += 1) {
     try {
-      await envio();
-      return true;
+      return await envio();
     } catch (error: any) {
       const esUltimoIntento = intento === RETRY_NOTIFY_ATTEMPTS;
       const mensaje = error?.message || "Error desconocido";
@@ -371,11 +377,23 @@ async function recuperarErroresRecuperables(): Promise<void> {
       continue;
     }
 
+    const reintentoActual = (reintentosError[subida.id] || 0) + 1;
+    if (reintentoActual > MAX_REINTENTOS_ERROR) {
+      console.warn(
+        `⛔ Subida ${subida.id} agotó ${MAX_REINTENTOS_ERROR} reintentos; se deja en error. Revisa el error_mensaje.`,
+      );
+      continue;
+    }
+    reintentosError[subida.id] = reintentoActual;
+
+    // Reencola con backoff creciente (30s, 1min, 1.5min) en lugar de cada 30s fijos.
+    const retrasoBackoff = Math.min(30 * 1000 * reintentoActual, 10 * 60 * 1000);
+
     await SubidaAutomatica.update(
       {
         estado: "pendiente",
         error_mensaje: null,
-        programado_para: new Date(),
+        programado_para: new Date(Date.now() + retrasoBackoff),
       },
       {
         where: {
@@ -387,10 +405,40 @@ async function recuperarErroresRecuperables(): Promise<void> {
   }
 }
 
+// Reencola filas que quedaron en "procesando" (p. ej. el proceso se reinició a mitad).
+async function reclamarProcesandoColgados(): Promise<void> {
+  const limite = new Date(Date.now() - TIEMPO_RECLAMAR_PROCESANDO_MS);
+  await SubidaAutomatica.update(
+    {
+      estado: "pendiente",
+      error_mensaje: "Procesando caducado; se reencola la subida.",
+    },
+    {
+      where: {
+        estado: "procesando",
+        programado_para: {
+          [Op.lt]: limite,
+        },
+      },
+    },
+  );
+}
+
 async function ejecutarCicloProcesador(): Promise<void> {
-  await recuperarErroresRecuperables();
-  await procesarSubidasPendientes();
-  await reintentarNotificacionesPendientes();
+  // Reentrancia: nunca dejar que dos ciclos se pisen (el procesador vive solo
+  // dentro de un proceso, pero las promesas de setInterval pueden encimarse).
+  if (cicloEnEjecucion) {
+    return;
+  }
+  cicloEnEjecucion = true;
+  try {
+    await reclamarProcesandoColgados();
+    await recuperarErroresRecuperables();
+    await procesarSubidasPendientes();
+    await reintentarNotificacionesPendientes();
+  } finally {
+    cicloEnEjecucion = false;
+  }
 }
 
 export async function procesarSubidasPendientes(): Promise<void> {

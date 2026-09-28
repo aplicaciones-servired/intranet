@@ -190,7 +190,7 @@ export default function ImagenesManager() {
             <Text color="red.600" fontSize="sm" mb={4}>
               {loadError}
             </Text>
-            <Button onClick={loadData} colorScheme="red" size="sm">
+            <Button onClick={loadData} colorPalette="red" size="sm">
               Reintentar
             </Button>
           </Box>

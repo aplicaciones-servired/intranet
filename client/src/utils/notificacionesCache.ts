@@ -34,7 +34,16 @@ export function obtenerNotificacionesPendientes(): NotificacionesPendientes {
     }
     
     const parsed = JSON.parse(data);
-    return parsed;
+    // Validar la forma del dato almacenado (evita crash si sessionStorage fue
+    // escrito con otro formato por una versión anterior o queda corrupto).
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return { imagenesIds: [], formularioIds: [] };
+    }
+    const pendientes = parsed as Partial<NotificacionesPendientes>;
+    return {
+      imagenesIds: Array.isArray(pendientes.imagenesIds) ? pendientes.imagenesIds : [],
+      formularioIds: Array.isArray(pendientes.formularioIds) ? pendientes.formularioIds : [],
+    };
   } catch (error) {
     console.error('❌ Error al leer notificaciones pendientes:', error);
     return { imagenesIds: [], formularioIds: [] };

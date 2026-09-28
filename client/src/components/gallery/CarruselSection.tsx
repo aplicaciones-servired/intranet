@@ -13,7 +13,9 @@ export function CarruselSection({ label, items, onOpen }: Props) {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  if (!items.length) return null;
+  // El early return va DESPUÉS de todos los hooks (requisito de React);
+  // si items es vacío los hooks corren igual y el componente no se renderiza.
+  const isEmpty = items.length === 0;
 
   const checkScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -38,6 +40,8 @@ export function CarruselSection({ label, items, onOpen }: Props) {
   const scroll = (dir: "left" | "right") => {
     scrollRef.current?.scrollBy({ left: dir === "right" ? 260 : -260, behavior: "smooth" });
   };
+
+  if (isEmpty) return null;
 
   return (
     <section className="col-span-full">

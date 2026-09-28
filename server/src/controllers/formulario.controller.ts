@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Formulario from "../models/formulario.model";
-import { insertFileToMinio } from "../utils/insertMinio";
+import { deleteFileFromMinio, insertFileToMinio } from "../utils/insertMinio";
 import { handleServerError } from "../utils/errorHandler";
 
 // Obtener todos los formularios
@@ -37,6 +37,16 @@ export const createFormulario = async (req: any, res: Response) => {
       return res.status(400).json({ 
         error: "Título y URL son obligatorios" 
       });
+    }
+
+    if (typeof url !== "string") {
+      return res.status(400).json({ error: "La URL del formulario no es válida" });
+    }
+
+    try {
+      new URL(url);
+    } catch {
+      return res.status(400).json({ error: "La URL del formulario no es válida" });
     }
 
     if (!req.file) {
@@ -85,6 +95,14 @@ export const updateFormulario = async (req: any, res: Response) => {
 
     let imagenUrl = formulario.imagen;
 
+    // Validar URL si se actualiza
+    const urlFinal = typeof url === "string" && url.trim().length > 0 ? url.trim() : formulario.url;
+    try {
+      new URL(urlFinal);
+    } catch {
+      return res.status(400).json({ error: "La URL del formulario no es válida" });
+    }
+
     // Si hay nueva imagen, subirla a MinIO
     if (req.file) {
       imagenUrl = await insertFileToMinio(
@@ -97,7 +115,7 @@ export const updateFormulario = async (req: any, res: Response) => {
     await formulario.update({
       titulo: titulo || formulario.titulo,
       descripcion: descripcion !== undefined ? descripcion : formulario.descripcion,
-      url: url || formulario.url,
+      url: urlFinal,
       imagen: imagenUrl,
       activo: activo !== undefined ? activo : formulario.activo,
     });
@@ -120,6 +138,15 @@ export const deleteFormulario = async (req: Request, res: Response) => {
 
     if (!formulario) {
       return res.status(404).json({ error: "Formulario no encontrado" });
+    }
+
+    // Eliminar la imagen de MinIO (best-effort)
+    if (formulario.imagen) {
+      try {
+        await deleteFileFromMinio(formulario.imagen);
+      } catch (error: any) {
+        console.warn("⚠️ No se pudo eliminar la imagen de MinIO:", error?.message || error);
+      }
     }
 
     await formulario.destroy();

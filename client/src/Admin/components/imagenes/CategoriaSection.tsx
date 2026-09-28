@@ -73,7 +73,7 @@ export function CategoriaSection({
             <Button
               size="sm"
               variant="surface"
-              colorScheme="dark"
+              colorPalette="gray"
               color={"white"}
               bg={"green.600"}
               _hover={{ bg: "green.700" }}
@@ -86,7 +86,7 @@ export function CategoriaSection({
               {todasSeleccionadas ? "Quitar selección" : "Seleccionar todas"}
             </Button>
             <Badge
-              colorScheme="cyan"
+              colorPalette="cyan"
               fontSize="sm"
               px={3}
               py={1}
@@ -127,7 +127,7 @@ export function CategoriaSection({
               <Button
                 onClick={() => setMostrarTodas(!mostrarTodas)}
                 variant="outline"
-                colorScheme="blue"
+                colorPalette="blue"
                 size="md"
               >
                 {mostrarTodas ? (

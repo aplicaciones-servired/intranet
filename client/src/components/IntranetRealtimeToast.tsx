@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { API_URL } from "../utils/const";
 import {
   clickNotificacion,
@@ -89,17 +89,21 @@ export default function IntranetRealtimeToast() {
   const [openCenter, setOpenCenter] = useState(false);
   const [items, setItems] = useState<NotificacionItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
   const lastEventIdRef = useRef<string | null>(null);
   const clientIdRef = useRef<string>("anon");
   const readIdsRef = useRef<Set<number>>(new Set());
-
-  const unreadCount = useMemo(() => items.filter((item) => !item.leida).length, [items]);
+  const itemsRef = useRef<NotificacionItem[]>([]);
+  itemsRef.current = items;
 
   const markReadLocal = (id: number) => {
     if (!Number.isFinite(id) || id <= 0) return;
+    const actual = itemsRef.current.find((item) => item.id === id);
+    if (actual?.leida) return;
     readIdsRef.current.add(id);
     saveReadIdsToStorage(readIdsRef.current);
     setItems((prev) => prev.map((item) => (item.id === id ? { ...item, leida: true } : item)));
+    setUnreadCount((count) => Math.max(count - 1, 0));
   };
 
   const refreshNotificaciones = async () => {
@@ -112,6 +116,7 @@ export default function IntranetRealtimeToast() {
         return item;
       });
       setItems(hydrated);
+      setUnreadCount(data.unreadCount);
     } catch (error) {
       console.error("Error cargando centro de notificaciones:", error);
     } finally {
@@ -147,6 +152,10 @@ export default function IntranetRealtimeToast() {
   const handleRecordarLuego = async (id: number) => {
     try {
       await recordarNotificacion(id, clientIdRef.current, 30);
+      const actual = itemsRef.current.find((item) => item.id === id);
+      if (actual && !actual.leida) {
+        setUnreadCount((count) => Math.max(count - 1, 0));
+      }
       setItems((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
       console.error("Error aplicando recordar luego:", error);
@@ -192,6 +201,13 @@ export default function IntranetRealtimeToast() {
         };
 
         setItems((prev) => [newItem, ...prev].slice(0, 120));
+
+        const yaExiste = itemsRef.current.some((item) => item.id === newItem.id);
+        const esNuevaNoLeida = !yaExiste && !readIdsRef.current.has(newItem.id);
+
+        if (esNuevaNoLeida) {
+          setUnreadCount((count) => count + 1);
+        }
 
         if (newItem.id > 0) {
           registrarImpresion(newItem.id).catch(() => null);

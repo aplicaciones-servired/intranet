@@ -43,11 +43,12 @@ export function CategoryBar({ categorias, active, configured, onSelect }: Catego
     el.scrollBy({ left: dir === "right" ? 200 : -200, behavior: "smooth" });
   };
 
-  // Scroll activo al tab seleccionado cuando cambia
+  // CSS.escape evita que valores con comillas/`\` rompan el selector
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const btn = el.querySelector<HTMLButtonElement>(`[data-value="${active}"]`);
+    const valueEscapado = CSS.escape(active);
+    const btn = el.querySelector<HTMLButtonElement>(`[data-value="${valueEscapado}"]`);
     if (btn) btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   }, [active]);
 

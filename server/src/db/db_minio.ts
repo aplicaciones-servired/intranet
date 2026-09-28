@@ -13,11 +13,13 @@ export const minioClient = new Client({
 
 export const BUCKET_NAME = process.env.DB_MINIO_BUCKET || ' ';
 
-// Origen público accesible desde el navegador (puede diferir del endPoint interno Docker)
-// Usar MINIO_PUBLIC_ENDPOINT + MINIO_PUBLIC_PORT si se define; si no, usar MINIO_ENDPOINT + MINIO_PORT
+// Origen público accesible desde el navegador (puede diferir del endPoint interno Docker).
+// Usar MINIO_PUBLIC_ENDPOINT + MINIO_PUBLIC_PORT si se define; si no, usar DB_MINIO_HOST + DB_MINIO_PORT.
+// El scheme respeta DB_MINIO_USE_SSL en lugar de asumir http://.
 const publicHost = process.env.MINIO_PUBLIC_ENDPOINT || process.env.DB_MINIO_HOST;
 const publicPort = process.env.MINIO_PUBLIC_PORT || process.env.DB_MINIO_PORT;
-export const MINIO_PUBLIC_ORIGIN = `http://${publicHost}:${publicPort}`;
+const scheme = process.env.DB_MINIO_USE_SSL === 'true' ? 'https' : 'http';
+export const MINIO_PUBLIC_ORIGIN = `${scheme}://${publicHost}:${publicPort}`;
 
 // Verificar conexión y crear bucket si no existe
 (async () => {

@@ -11,7 +11,7 @@ const userId = (Astro.locals as any).userId ?? null;
     <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
       <span
         class="self-center text-xl text-heading font-semibold whitespace-nowrap"
-        >Intranet Coorporativa</span
+        >Intranet Corporativa</span
       >
     </a>
     <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
@@ -38,7 +38,7 @@ const userId = (Astro.locals as any).userId ?? null;
         aria-controls="navbar-sticky"
         aria-expanded="false"
       >
-        <span class="sr-only">Open main menu</span>
+        <span class="sr-only">Abrir menú principal</span>
         <svg
           class="w-6 h-6"
           aria-hidden="true"
@@ -103,3 +103,20 @@ const userId = (Astro.locals as any).userId ?? null;
     </div>
   </div>
 </nav>
+
+<script>
+  // El atributo data-collapse-toggle es de Flowbite, que no está cargado en este
+  // proyecto; se implementa el toggle manual para que el menú móvil funcione.
+  const botonMenu = document.querySelector(
+    '[data-collapse-toggle="navbar-sticky"]'
+  );
+  const menuMovil = document.getElementById("navbar-sticky");
+  if (botonMenu && menuMovil) {
+    botonMenu.addEventListener("click", () => {
+      const expandido = botonMenu.getAttribute("aria-expanded") === "true";
+      botonMenu.setAttribute("aria-expanded", String(!expandido));
+      menuMovil.classList.toggle("hidden");
+      menuMovil.classList.toggle("flex");
+    });
+  }
+</script>

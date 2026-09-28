@@ -3,13 +3,15 @@ import "../styles/global.css";
 import LoginForm from "../components/LoginForm";
 
 const user = (Astro.locals as any).user;
-const redirectUrl =
-  Astro.url.searchParams.get("redirect_url") ?? "/admin/Home";
 
 // Validar que el redirect sea interno (previene open redirect)
+const rawRedirect = (Astro.url.searchParams.get("redirect_url") ?? "/admin/Home").trim();
 const safeRedirect =
-  redirectUrl.startsWith("/") && !redirectUrl.startsWith("//")
-    ? redirectUrl
+  rawRedirect.startsWith("/") &&
+  !rawRedirect.startsWith("//") &&
+  !rawRedirect.includes("\\") &&
+  !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(rawRedirect)
+    ? rawRedirect
     : "/admin/Home";
 
 // Si ya tiene sesión, redirigir directamente

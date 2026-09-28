@@ -139,7 +139,7 @@ export default function NotificarButton({
                 {enviado ? "¡Notificación enviada!" : "Contenido listo para notificar"}
               </Text>
               <Badge
-                colorScheme={enviado ? "green" : "orange"}
+                colorPalette={enviado ? "green" : "orange"}
                 fontSize="xs"
                 px={2}
                 py={1}

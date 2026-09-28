@@ -1,5 +1,7 @@
-import { BUCKET_NAME, minioClient } from "../db/db_minio";
+import { BUCKET_NAME, MINIO_PUBLIC_ORIGIN, minioClient } from "../db/db_minio";
 import { v4 as uuid4 } from "uuid";
+
+const EXTENSIONES_PERMITIDAS = ["png", "jpg", "jpeg", "gif", "webp", "pdf"];
 
 /**
  * inserta un archivo en MinIO y devuelve la URL del archivo subido
@@ -15,9 +17,18 @@ export async function insertFileToMinio(
   mimetype?: string,
 ): Promise<string> {
   try {
+    // Validar la extensión antes de subir (evita nombres de archivo con rutas o dobles extensiones)
+    const nombreOriginal = String(originalName || "").trim();
+    const extension = nombreOriginal.includes(".")
+      ? (nombreOriginal.split(".").pop() || "bin").toLowerCase()
+      : "bin";
+
+    if (!EXTENSIONES_PERMITIDAS.includes(extension)) {
+      throw new Error(`Extensión de archivo no permitida: .${extension}. Permitidas: ${EXTENSIONES_PERMITIDAS.join(", ")}`);
+    }
+
     // Generar un nombre de archivo único usando UUID
-    const fileExtension = originalName ? originalName.split(".").pop() : "bin";
-    const uniqueFileName = `${uuid4()}.${fileExtension}`;
+    const uniqueFileName = `${uuid4()}.${extension}`;
 
     // Subir el archivo a MinIO
     await minioClient.putObject(
@@ -30,10 +41,9 @@ export async function insertFileToMinio(
       },
     );
 
-    // Devolver la URL del archivo subido
-    const minioEndpoint = process.env.DB_MINIO_HOST; // Obtener el endpoint de MinIO
-    const minioPort = process.env.DB_MINIO_PORT; // Obtener el puerto de MinIO
-    const fileUrl = `http://${minioEndpoint}:${minioPort}/${BUCKET_NAME}/${uniqueFileName}`;
+    // Devolver la URL pública (MINIO_PUBLIC_ORIGIN respeta DB_MINIO_USE_SSL y
+    // MINIO_PUBLIC_ENDPOINT/PORT si están definidos)
+    const fileUrl = `${MINIO_PUBLIC_ORIGIN}/${BUCKET_NAME}/${uniqueFileName}`;
     console.log("archivo insertado en MinIO:", fileUrl);
     return fileUrl;
   } catch (error) {
