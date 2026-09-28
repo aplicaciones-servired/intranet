@@ -187,10 +187,9 @@ export function ImagenesGallery() {
 
   const porCategoria = (cat: string) => imagenesFiltradas.filter((i) => i.categoria === cat);
 
-  // Slider principal: primer espacio tipo slider, con su categoría activa (o lo que el usuario clica)
-  const sliderItems = porCategoria(sliderCat).length
-    ? porCategoria(sliderCat)
-    : imagenes;
+  // Slider principal: primer espacio tipo slider, con su categoría activa (o la que el usuario clica).
+  // Solo muestra imágenes de su propia categoría: jamás imágenes de otros espacios.
+  const sliderItems = porCategoria(sliderCat);
 
   // Sidebar destacada
   const destacadaSpaces = espacios.filter((e) => e.tipo === "destacada");
