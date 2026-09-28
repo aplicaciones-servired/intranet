@@ -190,7 +190,7 @@ async function procesarSubida(subida: SubidaAutomatica): Promise<void> {
             titulo: payload.titulo,
             descripcion: payload.descripcion,
             urlIntranet:
-              process.env.PUBLIC_INTRANET_URL || "https://intranet.grupomultired.com.co",
+              process.env.PUBLIC_INTRANET_URL || "https://intranet.serviredgane.cloud/",
             tipo: "imagen",
             correosDestino,
           }),
@@ -232,7 +232,7 @@ async function procesarSubida(subida: SubidaAutomatica): Promise<void> {
           titulo: payload.titulo,
           descripcion: payload.descripcion,
           urlIntranet:
-            process.env.PUBLIC_INTRANET_URL || "https://intranet.grupomultired.com.co",
+            process.env.PUBLIC_INTRANET_URL || "https://intranet.serviredgane.cloud/",
           tipo: "formulario",
           correosDestino,
         }),
@@ -304,7 +304,7 @@ async function reintentarNotificacionesPendientes(): Promise<void> {
             titulo: primera.titulo || payload.titulo,
             descripcion: primera.descripcion || payload.descripcion,
             urlIntranet:
-              process.env.PUBLIC_INTRANET_URL || "https://intranet.grupomultired.com.co",
+              process.env.PUBLIC_INTRANET_URL || "https://intranet.serviredgane.cloud/",
             tipo: "imagen",
             correosDestino,
           }),
@@ -341,7 +341,7 @@ async function reintentarNotificacionesPendientes(): Promise<void> {
           titulo: primero.titulo || payload.titulo,
           descripcion: primero.descripcion || payload.descripcion,
           urlIntranet:
-            process.env.PUBLIC_INTRANET_URL || "https://intranet.grupomultired.com.co",
+            process.env.PUBLIC_INTRANET_URL || "https://intranet.serviredgane.cloud/",
           tipo: "formulario",
           correosDestino,
         }),

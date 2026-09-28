@@ -214,7 +214,7 @@ export async function enviarResumenDigest(req: Request, res: Response): Promise<
       categoria: "Resumen",
       titulo,
       descripcion,
-      urlIntranet: process.env.PUBLIC_INTRANET_URL || "https://intranet.grupomultired.com.co",
+      urlIntranet: process.env.PUBLIC_INTRANET_URL || "https://intranet.serviredgane.cloud/",
       tipo: "formulario",
     });
 

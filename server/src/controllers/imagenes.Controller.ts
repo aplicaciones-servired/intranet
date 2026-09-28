@@ -79,7 +79,7 @@ export const notificarSubidaController = async (
       (typeof urlIntranet === "string" && urlIntranet.trim().length > 0
         ? urlIntranet.trim()
         : process.env.PUBLIC_INTRANET_URL) ||
-      "https://intranet.grupomultired.com.co";
+      "https://intranet.serviredgane.cloud/";
 
     let baseUrl = normalizarBase(baseIntranetUrl);
 

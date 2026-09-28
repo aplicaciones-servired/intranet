@@ -84,6 +84,22 @@ function construirDescripcion(data: NotificacionRealtime): string {
   return base;
 }
 
+function ajustarUrlDestino(url: string): string {
+  if (typeof window === "undefined") {
+    return url;
+  }
+
+  try {
+    const destino = new URL(url, window.location.origin);
+    if (destino.origin === window.location.origin) {
+      return url;
+    }
+    return `${window.location.origin}${destino.pathname}${destino.search}${destino.hash}`;
+  } catch (_error) {
+    return url;
+  }
+}
+
 export default function IntranetRealtimeToast() {
   const [toast, setToast] = useState<ToastState | null>(null);
   const [openCenter, setOpenCenter] = useState(false);
@@ -96,26 +112,20 @@ export default function IntranetRealtimeToast() {
   const itemsRef = useRef<NotificacionItem[]>([]);
   itemsRef.current = items;
 
-  const markReadLocal = (id: number) => {
+  const quitarLocal = (id: number) => {
     if (!Number.isFinite(id) || id <= 0) return;
     const actual = itemsRef.current.find((item) => item.id === id);
-    if (actual?.leida) return;
     readIdsRef.current.add(id);
     saveReadIdsToStorage(readIdsRef.current);
-    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, leida: true } : item)));
-    setUnreadCount((count) => Math.max(count - 1, 0));
+    setItems((prev) => prev.filter((item) => item.id !== id));
+    setUnreadCount((count) => (actual && !actual.leida ? Math.max(count - 1, 0) : count));
   };
 
   const refreshNotificaciones = async () => {
     try {
       const data = await getNotificaciones(clientIdRef.current, false, 80);
-      const hydrated = (data.items || []).map((item) => {
-        if (readIdsRef.current.has(item.id)) {
-          return { ...item, leida: true };
-        }
-        return item;
-      });
-      setItems(hydrated);
+      const visibles = (data.items || []).filter((item) => !readIdsRef.current.has(item.id));
+      setItems(visibles);
       setUnreadCount(data.unreadCount);
     } catch (error) {
       console.error("Error cargando centro de notificaciones:", error);
@@ -125,7 +135,7 @@ export default function IntranetRealtimeToast() {
   };
 
   const navigateNotificacion = async (item: Pick<NotificacionItem, "id" | "url_destino">) => {
-    markReadLocal(item.id);
+    quitarLocal(item.id);
 
     try {
       await Promise.allSettled([
@@ -136,11 +146,11 @@ export default function IntranetRealtimeToast() {
       // Se continúa la navegación aunque falle el tracking.
     }
 
-    window.location.href = item.url_destino;
+    window.location.href = ajustarUrlDestino(item.url_destino);
   };
 
   const handleMarcarLeida = async (id: number) => {
-    markReadLocal(id);
+    quitarLocal(id);
 
     try {
       await marcarNotificacionLeida(id, clientIdRef.current);
@@ -200,12 +210,11 @@ export default function IntranetRealtimeToast() {
           clickeada: false,
         };
 
-        setItems((prev) => [newItem, ...prev].slice(0, 120));
-
         const yaExiste = itemsRef.current.some((item) => item.id === newItem.id);
         const esNuevaNoLeida = !yaExiste && !readIdsRef.current.has(newItem.id);
 
         if (esNuevaNoLeida) {
+          setItems((prev) => [newItem, ...prev].slice(0, 120));
           setUnreadCount((count) => count + 1);
         }
 
@@ -322,7 +331,7 @@ export default function IntranetRealtimeToast() {
             <div style={{ overflowY: "auto", padding: "8px" }}>
               {loading && <p style={{ margin: "8px", color: "#64748b", fontSize: "13px" }}>Cargando...</p>}
               {!loading && items.length === 0 && (
-                <p style={{ margin: "8px", color: "#64748b", fontSize: "13px" }}>No tienes notificaciones recientes.</p>
+                <p style={{ margin: "8px", color: "#64748b", fontSize: "13px" }}>No tienes notificaciones pendientes.</p>
               )}
 
               {items.map((item) => (
